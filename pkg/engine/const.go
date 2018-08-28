@@ -1,10 +1,12 @@
 package engine
 
 const (
-	// DefaultAgentSubnetTemplate specifies a default agent subnet
-	DefaultAgentSubnetTemplate = "10.%d.0.0/16"
 	// DefaultGeneratorCode specifies the source generator of the cluster template.
 	DefaultGeneratorCode = "oe-engine"
+	// DefaultFirstConsecutiveStaticIP specifies the static IP address on VM # 0
+	DefaultFirstConsecutiveStaticIP = "192.168.255.5"
+	// DefaultMasterSubnet specifies the default subnet
+	DefaultMasterSubnet = "192.168.255.0/24"
 )
 
 const (
@@ -15,11 +17,4 @@ const (
 	resources     = "resources.t"
 	outputs       = "outputs.t"
 	windowsParams = "windowsparams.t"
-
-	agentOutputs              = "agentoutputs.t"
-	agentParams               = "agentparams.t"
-	agentResourcesVMAS        = "agentresourcesvmas.t"
-	agentResourcesVMSS        = "agentresourcesvmss.t"
-	windowsAgentResourcesVMAS = "windowsAgentResourcesVmas.t"
-	windowsAgentResourcesVMSS = "windowsAgentResourcesVmss.t"
 )

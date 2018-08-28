@@ -15,7 +15,7 @@ var (
 	debug bool
 )
 
-// NewRootCmd returns the root command for DCOS-Engine.
+// NewRootCmd returns the root command for OE engine.
 func NewRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   rootName,

@@ -101,16 +101,6 @@ func GetMaxVersion(versions []string, preRelease bool) string {
 	return highest.String()
 }
 
-// GetSupportedVersions get supported version list for a certain orchestrator
-func GetSupportedVersions(orchType string, hasWindows bool) (versions []string, defaultVersion string) {
-	switch orchType {
-	case DCOS:
-		return AllDCOSSupportedVersions, DCOSDefaultVersion
-	default:
-		return nil, ""
-	}
-}
-
 //GetValidPatchVersion gets the current valid patch version for the minor version of the passed in version
 func GetValidPatchVersion(orchType, orchVer string, hasWindows bool) string {
 	if orchVer == "" {

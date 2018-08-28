@@ -91,7 +91,7 @@ func (gc *generateCmd) loadAPIModel(cmd *cobra.Command, args []string) error {
 	}
 
 	if gc.outputDirectory == "" {
-		gc.outputDirectory = path.Join("_output", "test")
+		gc.outputDirectory = path.Join("_output", gc.oe.Properties.MasterProfile.DNSPrefix)
 	}
 	return nil
 }

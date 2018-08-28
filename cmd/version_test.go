@@ -17,14 +17,14 @@ var _ = Describe("the version command", func() {
 		Expect(output.Flags().Lookup("output")).NotTo(BeNil())
 	})
 
-	It("should print a json version of DCOS-Engine", func() {
+	It("should print a json version of OE-Engine", func() {
 		output := getVersion("json")
 
 		expectedOutput, _ := helpers.JSONMarshalIndent(version, "", "  ", false)
 
 		Expect(output).Should(Equal(string(expectedOutput)))
 	})
-	It("should print a humanized version of DCOS-Engine", func() {
+	It("should print a humanized version of OE-Engine", func() {
 		output := getVersion("human")
 
 		expectedOutput := fmt.Sprintf("Version: %s\nGitCommit: %s\nGitTreeState: %s",
@@ -35,7 +35,7 @@ var _ = Describe("the version command", func() {
 		Expect(output).Should(Equal(expectedOutput))
 	})
 
-	It("should print a json version of DCOS-Engine", func() {
+	It("should print a json version of OE-Engine", func() {
 		output := getVersion("json")
 
 		expectedOutput, _ := helpers.JSONMarshalIndent(version, "", "  ", false)

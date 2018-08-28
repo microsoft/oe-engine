@@ -1,11 +1,5 @@
 package api
 
-// the orchestrators supported by vlabs
-const (
-	// DCOS is the string constant for DCOS orchestrator type and defaults to DCOS188
-	DCOS string = "DCOS"
-)
-
 // the OSTypes supported by vlabs
 const (
 	Windows OSType = "Windows"
@@ -15,8 +9,6 @@ const (
 // the LinuxDistros supported by vlabs
 const (
 	Ubuntu Distro = "ubuntu"
-	RHEL   Distro = "rhel"
-	CoreOS Distro = "coreos"
 )
 
 // validation values
@@ -56,6 +48,3 @@ const (
 	// ManagedDisks means that the nodes use managed disks for their os and attached volumes
 	ManagedDisks = "ManagedDisks"
 )
-
-// To identify programmatically generated public agent pools
-const publicAgentPoolSuffix = "-public"

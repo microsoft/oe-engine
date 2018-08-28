@@ -2,7 +2,6 @@ package api
 
 import (
 	neturl "net/url"
-	"strings"
 )
 
 // OpenEnclave complies with the ARM model of
@@ -14,7 +13,7 @@ type OpenEnclave struct {
 
 // Properties represents the ACS cluster definition
 type Properties struct {
-	AgentPoolProfiles  []*AgentPoolProfile `json:"agentPoolProfiles,omitempty"`
+	MasterProfile      *MasterProfile      `json:"masterProfile,omitempty"`
 	LinuxProfile       *LinuxProfile       `json:"linuxProfile,omitempty"`
 	WindowsProfile     *WindowsProfile     `json:"windowsProfile,omitempty"`
 	DiagnosticsProfile *DiagnosticsProfile `json:"diagnosticsProfile,omitempty"`
@@ -68,29 +67,25 @@ type ImageReference struct {
 	ResourceGroup string `json:"resourceGroup,omitempty"`
 }
 
-// AgentPoolProfile represents an agent pool definition
-type AgentPoolProfile struct {
-	Name                         string `json:"name"`
-	Count                        int    `json:"count"`
-	VMSize                       string `json:"vmSize"`
-	OSDiskSizeGB                 int    `json:"osDiskSizeGB,omitempty"`
-	DNSPrefix                    string `json:"dnsPrefix,omitempty"`
-	OSType                       OSType `json:"osType,omitempty"`
-	Ports                        []int  `json:"ports,omitempty"`
-	AvailabilityProfile          string `json:"availabilityProfile"`
-	ScaleSetPriority             string `json:"scaleSetPriority,omitempty"`
-	ScaleSetEvictionPolicy       string `json:"scaleSetEvictionPolicy,omitempty"`
-	StorageProfile               string `json:"storageProfile,omitempty"`
-	DiskSizesGB                  []int  `json:"diskSizesGB,omitempty"`
-	VnetSubnetID                 string `json:"vnetSubnetID,omitempty"`
-	Subnet                       string `json:"subnet"`
-	IPAddressCount               int    `json:"ipAddressCount,omitempty"`
-	Distro                       Distro `json:"distro,omitempty"`
-	AcceleratedNetworkingEnabled bool   `json:"acceleratedNetworkingEnabled,omitempty"`
+// MasterProfile represents the definition of the master cluster
+type MasterProfile struct {
+	Count                    int             `json:"count"`
+	DNSPrefix                string          `json:"dnsPrefix"`
+	SubjectAltNames          []string        `json:"subjectAltNames"`
+	VMSize                   string          `json:"vmSize"`
+	OSDiskSizeGB             int             `json:"osDiskSizeGB,omitempty"`
+	VnetSubnetID             string          `json:"vnetSubnetID,omitempty"`
+	VnetCidr                 string          `json:"vnetCidr,omitempty"`
+	FirstConsecutiveStaticIP string          `json:"firstConsecutiveStaticIP,omitempty"`
+	Subnet                   string          `json:"subnet"`
+	IPAddressCount           int             `json:"ipAddressCount,omitempty"`
+	StorageProfile           string          `json:"storageProfile,omitempty"`
+	HTTPSourceAddressPrefix  string          `json:"HTTPSourceAddressPrefix,omitempty"`
+	Distro                   Distro          `json:"distro,omitempty"`
+	Accessible               bool            `json:"accessible,omitempty"`
+	ImageRef                 *ImageReference `json:"imageReference,omitempty"`
 
-	FQDN             string            `json:"fqdn,omitempty"`
-	CustomNodeLabels map[string]string `json:"customNodeLabels,omitempty"`
-	ImageRef         *ImageReference   `json:"imageReference,omitempty"`
+	FQDN string `json:"fqdn,omitempty"`
 }
 
 // DiagnosticsProfile setting to enable/disable capturing
@@ -144,30 +139,21 @@ type Distro string
 
 // HasWindows returns true if the cluster contains windows
 func (p *Properties) HasWindows() bool {
-	for _, agentPoolProfile := range p.AgentPoolProfiles {
-		if agentPoolProfile.OSType == Windows {
-			return true
-		}
-	}
 	return false
 }
 
 // HasManagedDisks returns true if the cluster contains Managed Disks
 func (p *Properties) HasManagedDisks() bool {
-	for _, agentPoolProfile := range p.AgentPoolProfiles {
-		if agentPoolProfile.StorageProfile == ManagedDisks {
-			return true
-		}
+	if p.MasterProfile != nil && p.MasterProfile.StorageProfile == ManagedDisks {
+		return true
 	}
 	return false
 }
 
 // HasStorageAccountDisks returns true if the cluster contains Storage Account Disks
 func (p *Properties) HasStorageAccountDisks() bool {
-	for _, agentPoolProfile := range p.AgentPoolProfiles {
-		if agentPoolProfile.StorageProfile == StorageAccount {
-			return true
-		}
+	if p.MasterProfile != nil && p.MasterProfile.StorageProfile == StorageAccount {
+		return true
 	}
 	return false
 }
@@ -175,70 +161,25 @@ func (p *Properties) HasStorageAccountDisks() bool {
 // TotalNodes returns the total number of nodes in the cluster configuration
 func (p *Properties) TotalNodes() int {
 	var totalNodes int
-	for _, pool := range p.AgentPoolProfiles {
-		totalNodes = totalNodes + pool.Count
+	if p.MasterProfile != nil {
+		totalNodes = p.MasterProfile.Count
 	}
 	return totalNodes
 }
 
-// HasVirtualMachineScaleSets returns true if the cluster contains Virtual Machine Scale Sets
-func (p *Properties) HasVirtualMachineScaleSets() bool {
-	for _, agentPoolProfile := range p.AgentPoolProfiles {
-		if agentPoolProfile.AvailabilityProfile == VirtualMachineScaleSets {
-			return true
-		}
-	}
-	return false
-}
-
 // IsCustomVNET returns true if the customer brought their own VNET
-func (h *AgentPoolProfile) IsCustomVNET() bool {
-	return len(h.VnetSubnetID) > 0
+func (m *MasterProfile) IsCustomVNET() bool {
+	return len(m.VnetSubnetID) > 0
 }
 
-// IsWindows returns true if the agent pool is windows
-func (h *AgentPoolProfile) IsWindows() bool {
-	return h.OSType == Windows
+// IsManagedDisks returns true if the master specified managed disks
+func (m *MasterProfile) IsManagedDisks() bool {
+	return m.StorageProfile == ManagedDisks
 }
 
-// IsLinux returns true if the agent pool is linux
-func (h *AgentPoolProfile) IsLinux() bool {
-	return h.OSType == Linux
-}
-
-// IsAvailabilitySets returns true if the customer specified disks
-func (h *AgentPoolProfile) IsAvailabilitySets() bool {
-	return h.AvailabilityProfile == AvailabilitySet
-}
-
-// IsVirtualMachineScaleSets returns true if the agent pool availability profile is VMSS
-func (h *AgentPoolProfile) IsVirtualMachineScaleSets() bool {
-	return h.AvailabilityProfile == VirtualMachineScaleSets
-}
-
-// IsLowPriorityScaleSet returns true if the VMSS is Low Priority
-func (h *AgentPoolProfile) IsLowPriorityScaleSet() bool {
-	return h.AvailabilityProfile == VirtualMachineScaleSets && h.ScaleSetPriority == ScaleSetPriorityLow
-}
-
-// IsManagedDisks returns true if the customer specified disks
-func (h *AgentPoolProfile) IsManagedDisks() bool {
-	return h.StorageProfile == ManagedDisks
-}
-
-// IsStorageAccount returns true if the customer specified storage account
-func (h *AgentPoolProfile) IsStorageAccount() bool {
-	return h.StorageProfile == StorageAccount
-}
-
-// HasDisks returns true if the customer specified disks
-func (h *AgentPoolProfile) HasDisks() bool {
-	return len(h.DiskSizesGB) > 0
-}
-
-// IsAcceleratedNetworkingEnabled returns true if the customer enabled Accelerated Networking
-func (h *AgentPoolProfile) IsAcceleratedNetworkingEnabled() bool {
-	return h.AcceleratedNetworkingEnabled
+// IsStorageAccount returns true if the master specified storage account
+func (m *MasterProfile) IsStorageAccount() bool {
+	return m.StorageProfile == StorageAccount
 }
 
 // HasSecrets returns true if the customer specified secrets to install
@@ -270,15 +211,6 @@ func (l *LinuxProfile) HasSearchDomain() bool {
 func (l *LinuxProfile) HasCustomNodesDNS() bool {
 	if l.CustomNodesDNS != nil {
 		if l.CustomNodesDNS.DNSServer != "" {
-			return true
-		}
-	}
-	return false
-}
-
-func isNSeriesSKU(p *Properties) bool {
-	for _, profile := range p.AgentPoolProfiles {
-		if strings.Contains(profile.VMSize, "Standard_N") {
 			return true
 		}
 	}

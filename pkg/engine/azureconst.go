@@ -7,11 +7,11 @@ var AzureLocations = []string{
 	"eastus",
 }
 
-// GetAgentAllowedSizes returns the agent allowed sizes
-func GetAgentAllowedSizes() string {
+// GetAllowedVMSizes returns the agent allowed sizes
+func GetAllowedVMSizes() string {
 	return `      "allowedValues": [
-        "Standard_DC2",
-        "Standard_DC4",
+        "Standard_DC2s",
+        "Standard_DC4s",
         "Standard_B1s"
         ],
         `

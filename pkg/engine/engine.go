@@ -21,7 +21,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-var templateFiles = []string{baseFile, params, vars, resources, outputs, agentOutputs, agentParams, windowsParams, agentResourcesVMAS, agentResourcesVMSS, agentVars, windowsAgentResourcesVMAS, windowsAgentResourcesVMSS}
+var templateFiles = []string{baseFile, params, vars, resources, outputs, windowsParams}
 
 var keyvaultSecretPathRe *regexp.Regexp
 
@@ -35,9 +35,9 @@ func GenerateClusterID(properties *api.Properties) string {
 	// the name suffix uniquely identifies the cluster and is generated off a hash
 	// from the master dns name
 	h := fnv.New64a()
-
-	h.Write([]byte(properties.AgentPoolProfiles[0].Name))
-
+	if properties.MasterProfile != nil {
+		h.Write([]byte(properties.MasterProfile.DNSPrefix))
+	}
 	rand.Seed(int64(h.Sum64()))
 	return fmt.Sprintf("%08d", rand.Uint32())[:uniqueNameSuffixSize]
 }
@@ -103,77 +103,23 @@ func getStorageAccountType(sizeName string) (string, error) {
 	return "Standard_LRS", nil
 }
 
-func isCustomVNET(a []*api.AgentPoolProfile) bool {
-	if a != nil {
-		for _, agentPoolProfile := range a {
-			if !agentPoolProfile.IsCustomVNET() {
-				return false
-			}
-		}
-		return true
-	}
-	return false
-}
-
 func getVNETAddressPrefixes(properties *api.Properties) string {
-	visitedSubnets := make(map[string]bool)
 	var buf bytes.Buffer
 	buf.WriteString(`"[variables('masterSubnet')]"`)
-
-	for _, profile := range properties.AgentPoolProfiles {
-		if _, ok := visitedSubnets[profile.Subnet]; !ok {
-			buf.WriteString(fmt.Sprintf(",\n            \"[variables('%sSubnet')]\"", profile.Name))
-		}
-	}
 	return buf.String()
 }
 
 func getVNETSubnetDependencies(properties *api.Properties) string {
-	agentString := `        "[concat('Microsoft.Network/networkSecurityGroups/', variables('%sNSGName'))]"`
-	var buf bytes.Buffer
-	for index, agentProfile := range properties.AgentPoolProfiles {
-		if index > 0 {
-			buf.WriteString(",\n")
-		}
-		buf.WriteString(fmt.Sprintf(agentString, agentProfile.Name))
-	}
-	return buf.String()
+	return ""
 }
 
 func getVNETSubnets(properties *api.Properties, addNSG bool) string {
-	masterString := `{
+	return `{
             "name": "[variables('masterSubnetName')]",
             "properties": {
               "addressPrefix": "[variables('masterSubnet')]"
             }
           }`
-	agentString := `          {
-            "name": "[variables('%sSubnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('%sSubnet')]"
-            }
-          }`
-	agentStringNSG := `          {
-            "name": "[variables('%sSubnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('%sSubnet')]",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('%sNSGName'))]"
-              }
-            }
-          }`
-	var buf bytes.Buffer
-	buf.WriteString(masterString)
-	for _, agentProfile := range properties.AgentPoolProfiles {
-		buf.WriteString(",\n")
-		if addNSG {
-			buf.WriteString(fmt.Sprintf(agentStringNSG, agentProfile.Name, agentProfile.Name, agentProfile.Name))
-		} else {
-			buf.WriteString(fmt.Sprintf(agentString, agentProfile.Name, agentProfile.Name))
-		}
-
-	}
-	return buf.String()
 }
 
 func getLBRule(name string, port int) string {
@@ -252,40 +198,6 @@ func getSecurityRule(port int, portIndex int) string {
           }`, port, port, port, BaseLBPriority+portIndex)
 }
 
-func getDataDisks(a *api.AgentPoolProfile) string {
-	if !a.HasDisks() {
-		return ""
-	}
-	var buf bytes.Buffer
-	buf.WriteString("\"dataDisks\": [\n")
-	dataDisks := `            {
-              "createOption": "Empty",
-              "diskSizeGB": "%d",
-              "lun": %d,
-              "name": "[concat(variables('%sVMNamePrefix'), copyIndex(),'-datadisk%d')]",
-              "vhd": {
-                "uri": "[concat('http://',variables('storageAccountPrefixes')[mod(add(add(div(copyIndex(),variables('maxVMsPerStorageAccount')),variables('%sStorageAccountOffset')),variables('dataStorageAccountPrefixSeed')),variables('storageAccountPrefixesCount'))],variables('storageAccountPrefixes')[div(add(add(div(copyIndex(),variables('maxVMsPerStorageAccount')),variables('%sStorageAccountOffset')),variables('dataStorageAccountPrefixSeed')),variables('storageAccountPrefixesCount'))],variables('%sDataAccountName'),'.blob.core.windows.net/vhds/',variables('%sVMNamePrefix'),copyIndex(), '--datadisk%d.vhd')]"
-              }
-            }`
-	managedDataDisks := `            {
-              "diskSizeGB": "%d",
-              "lun": %d,
-              "createOption": "Empty"
-            }`
-	for i, diskSize := range a.DiskSizesGB {
-		if i > 0 {
-			buf.WriteString(",\n")
-		}
-		if a.StorageProfile == api.StorageAccount {
-			buf.WriteString(fmt.Sprintf(dataDisks, diskSize, i, a.Name, i, a.Name, a.Name, a.Name, a.Name, i))
-		} else if a.StorageProfile == api.ManagedDisks {
-			buf.WriteString(fmt.Sprintf(managedDataDisks, diskSize, i))
-		}
-	}
-	buf.WriteString("\n          ],")
-	return buf.String()
-}
-
 func getSecurityRules(ports []int) string {
 	var buf bytes.Buffer
 	for index, port := range ports {
@@ -352,24 +264,7 @@ func getBase64CustomScriptFromStr(str string) string {
 	return base64.StdEncoding.EncodeToString(gzipB.Bytes())
 }
 
-// GetDCOSBootstrapConfig returns DCOS bootstrap config
-func GetDCOSBootstrapConfig(cs *api.OpenEnclave) string {
-
-	return ""
-}
-
-// GetDCOSWindowsBootstrapConfig returns DCOS Windows bootstrap config
-func GetDCOSWindowsBootstrapConfig(cs *api.OpenEnclave) string {
-
-	return ""
-}
-
-func getDCOSBootstrapConfig(cs *api.OpenEnclave) string {
-	config := GetDCOSBootstrapConfig(cs)
-	return strings.Replace(strings.Replace(config, "\r\n", "\n", -1), "\n", "\n\n    ", -1)
-}
-
-func getDCOSProvisionScript(script string) string {
+func getProvisionScript(script string) string {
 	// add the provision script
 	bp, err := Asset(script)
 	if err != nil {
@@ -384,8 +279,8 @@ func getDCOSProvisionScript(script string) string {
 	return strings.Replace(strings.Replace(provisionScript, "\r\n", "\n", -1), "\n", "\n\n    ", -1)
 }
 
-// getSingleLineForTemplate returns the file as a single line for embedding in an arm template
-func getSingleLineDCOSCustomData(orchestratorType, yamlFilename string, masterCount int, replaceMap map[string]string) string {
+// getSingleLineCustomData returns the file as a single line for embedding in an arm template
+func getSingleLineCustomData(yamlFilename string, masterCount int, replaceMap map[string]string) string {
 	b, err := Asset(yamlFilename)
 	if err != nil {
 		panic(fmt.Sprintf("BUG getting yaml custom data file: %s", err.Error()))
@@ -415,33 +310,7 @@ func getSingleLineDCOSCustomData(orchestratorType, yamlFilename string, masterCo
 	}
 	yamlStr = rVariable.ReplaceAllString(yamlStr, "',variables('$1'),'")
 
-	// replace the internal values
-	//publicIPStr := getDCOSCustomDataPublicIPStr(orchestratorType, masterCount)
-	//yamlStr = strings.Replace(yamlStr, "DCOSCUSTOMDATAPUBLICIPSTR", publicIPStr, -1)
-
 	return yamlStr
-}
-
-func buildYamlFileWithWriteFiles(files []string) string {
-	clusterYamlFile := `#cloud-config
-
-write_files:
-%s
-`
-	writeFileBlock := ` -  encoding: gzip
-    content: !!binary |
-        %s
-    path: /opt/azure/containers/%s
-    permissions: "0744"
-`
-
-	filelines := ""
-	for _, file := range files {
-		b64GzipString := getBase64CustomScript(file)
-		fileNoPath := strings.TrimPrefix(file, "swarm/")
-		filelines = filelines + fmt.Sprintf(writeFileBlock, b64GzipString, fileNoPath)
-	}
-	return fmt.Sprintf(clusterYamlFile, filelines)
 }
 
 // getLinkedTemplateTextForURL returns the string data from
@@ -450,7 +319,7 @@ write_files:
 // It returns an error if the extension cannot be found
 // or loaded.  getLinkedTemplateTextForURL provides the ability
 // to pass a root extensions url for testing
-func getLinkedTemplateTextForURL(rootURL, orchestrator, extensionName, version, query string) (string, error) {
+func getLinkedTemplateTextForURL1(rootURL, orchestrator, extensionName, version, query string) (string, error) {
 	supportsExtension, err := orchestratorSupportsExtension(rootURL, orchestrator, extensionName, version, query)
 	if !supportsExtension {
 		return "", fmt.Errorf("Extension not supported for orchestrator. Error: %s", err)

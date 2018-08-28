@@ -22,51 +22,39 @@ var (
 
 // setPropertiesDefaults for the container Properties, returns true if certs are generated
 func setPropertiesDefaults(oe *api.OpenEnclave, isUpgrade bool) {
-	setAgentNetworkDefaults(oe.Properties)
+	setMasterNetworkDefaults(oe.Properties, isUpgrade)
 	setStorageDefaults(oe.Properties)
 }
 
-// SetAgentNetworkDefaults for agents
-func setAgentNetworkDefaults(a *api.Properties) {
-	// configure the subnets if not in custom VNET
-	//TODO if !a.MasterProfile.IsCustomVNET() {
-	subnetCounter := 0
-	for _, profile := range a.AgentPoolProfiles {
-		profile.Subnet = fmt.Sprintf(DefaultAgentSubnetTemplate, subnetCounter)
-		subnetCounter++
+// SetMasterNetworkDefaults for masters
+func setMasterNetworkDefaults(a *api.Properties, isUpgrade bool) {
+	if a.MasterProfile == nil {
+		return
 	}
-	//}
 
-	for _, profile := range a.AgentPoolProfiles {
-		// set default OSType to Linux
-		if profile.OSType == "" {
-			profile.OSType = api.Linux
+	if !a.MasterProfile.IsCustomVNET() {
+		a.MasterProfile.Subnet = DefaultMasterSubnet
+		// FirstConsecutiveStaticIP is not reset if it is upgrade and some value already exists
+		if !isUpgrade || len(a.MasterProfile.FirstConsecutiveStaticIP) == 0 {
+			a.MasterProfile.FirstConsecutiveStaticIP = DefaultFirstConsecutiveStaticIP
 		}
-		// set default Distro to Ubuntu
-		if profile.Distro == "" {
-			profile.Distro = api.Ubuntu
-		}
+	}
 
-		// Set the default number of IP addresses allocated for agents.
-		if profile.IPAddressCount == 0 {
-			// Allocate one IP address for the node.
-			profile.IPAddressCount = 1
-		}
+	// Set the default number of IP addresses allocated for masters.
+	if a.MasterProfile.IPAddressCount == 0 {
+		// Allocate one IP address for the node.
+		a.MasterProfile.IPAddressCount = 1
+	}
+
+	if a.MasterProfile.HTTPSourceAddressPrefix == "" {
+		a.MasterProfile.HTTPSourceAddressPrefix = "*"
 	}
 }
 
 // setStorageDefaults for agents
 func setStorageDefaults(a *api.Properties) {
-	for _, profile := range a.AgentPoolProfiles {
-		if len(profile.StorageProfile) == 0 {
-			profile.StorageProfile = api.StorageAccount
-		}
-		if len(profile.AvailabilityProfile) == 0 {
-			profile.AvailabilityProfile = api.VirtualMachineScaleSets
-		}
-		if len(profile.ScaleSetEvictionPolicy) == 0 && profile.ScaleSetPriority == api.ScaleSetPriorityLow {
-			profile.ScaleSetEvictionPolicy = api.ScaleSetEvictionPolicyDelete
-		}
+	if a.MasterProfile != nil && len(a.MasterProfile.StorageProfile) == 0 {
+		a.MasterProfile.StorageProfile = api.ManagedDisks
 	}
 }
 

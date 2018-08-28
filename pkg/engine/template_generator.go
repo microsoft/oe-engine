@@ -133,11 +133,9 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"GetVNETSubnets": func(addNSG bool) string {
 			return getVNETSubnets(cs.Properties, addNSG)
 		},
-		"GetDataDisks": func(profile *api.AgentPoolProfile) string {
-			return getDataDisks(profile)
-		},
-		"GetAgentAllowedSizes": func() string {
-			return GetAgentAllowedSizes()
+
+		"GetAllowedVMSizes": func() string {
+			return GetAllowedVMSizes()
 		},
 		"GetSizeMap": func() string {
 			return GetSizeMap()
@@ -145,44 +143,17 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"Base64": func(s string) string {
 			return base64.StdEncoding.EncodeToString([]byte(s))
 		},
+		"WriteLinkedTemplatesForExtensions": func() string {
+			return ""
+		},
 		"GetLocation": func() string {
 			return cs.Location
-		},
-		"GetAgentCustomData": func(profile *api.AgentPoolProfile) string {
-			return ""
-		},
-		"GetWindowsAgentCustomData": func(profile *api.AgentPoolProfile) string {
-			return ""
 		},
 		"WrapAsVariable": func(s string) string {
 			return fmt.Sprintf("',variables('%s'),'", s)
 		},
 		"WrapAsVerbatim": func(s string) string {
 			return fmt.Sprintf("',%s,'", s)
-		},
-		"AnyAgentUsesAvailabilitySets": func() bool {
-			for _, agentProfile := range cs.Properties.AgentPoolProfiles {
-				if agentProfile.IsAvailabilitySets() {
-					return true
-				}
-			}
-			return false
-		},
-		"AnyAgentUsesVirtualMachineScaleSets": func() bool {
-			for _, agentProfile := range cs.Properties.AgentPoolProfiles {
-				if agentProfile.IsVirtualMachineScaleSets() {
-					return true
-				}
-			}
-			return false
-		},
-		"HasLinuxAgents": func() bool {
-			for _, agentProfile := range cs.Properties.AgentPoolProfiles {
-				if agentProfile.IsLinux() {
-					return true
-				}
-			}
-			return false
 		},
 		"HasLinuxSecrets": func() bool {
 			return cs.Properties.LinuxProfile.HasSecrets()
@@ -199,9 +170,14 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"HasWindowsCustomImage": func() bool {
 			return cs.Properties.WindowsProfile.HasCustomImage()
 		},
-		"UseAgentCustomImage": func(profile *api.AgentPoolProfile) bool {
-			imageRef := profile.ImageRef
-			return imageRef != nil && len(imageRef.Name) > 0 && len(imageRef.ResourceGroup) > 0
+		"GetMasterCustomData": func() string {
+			return ""
+			/*str := getSingleLineCustomData(
+				"",
+				cs.Properties.MasterProfile.Count,
+				map[string]string{})
+
+			return fmt.Sprintf("\"customData\": \"[base64(concat('#cloud-config\\n\\n', '%s'))]\",", str)*/
 		},
 		// inspired by http://stackoverflow.com/questions/18276173/calling-a-template-with-several-pipeline-parameters/18276968#18276968
 		"dict": func(values ...interface{}) (map[string]interface{}, error) {
@@ -227,9 +203,6 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		},
 		"subtract": func(a, b int) int {
 			return a - b
-		},
-		"IsCustomVNET": func() bool {
-			return isCustomVNET(cs.Properties.AgentPoolProfiles)
 		},
 	}
 }
