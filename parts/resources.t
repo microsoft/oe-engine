@@ -213,11 +213,7 @@
       "type": "Microsoft.Network/networkInterfaces"
     },
     {
-{{if .MasterProfile.IsManagedDisks}}
-      "apiVersion": "[variables('apiVersionStorageManagedDisks')]",
-{{else}}
       "apiVersion": "[variables('apiVersionDefault')]",
-{{end}}
       "copy": {
         "count": "[variables('masterCount')]",
         "name": "vmLoopNode"

@@ -1,7 +1,7 @@
     "adminUsername": "[parameters('linuxAdminUsername')]",
     "targetEnvironment": "[parameters('targetEnvironment')]",
     "maxVMsPerPool": 100,
-    "apiVersionDefault": "2018-04-01",
+    "apiVersionDefault": "2018-06-01",
     "singleQuote": "'",
     "doubleSingleQuote": "''",
 {{if .LinuxProfile.HasSecrets}}
@@ -54,9 +54,6 @@
     {{GetSizeMap}},
 {{else}}
     "storageAccountPrefixes": [],
-{{end}}
-{{if .HasManagedDisks}}
-    "apiVersionStorageManagedDisks": "2016-04-30-preview",
 {{end}}
 {{if .MasterProfile.IsStorageAccount}}
     "masterStorageAccountName": "[concat(variables('storageAccountBaseName'), 'mstr0')]",
