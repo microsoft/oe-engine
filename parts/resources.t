@@ -1,16 +1,4 @@
-{{if .MasterProfile.IsManagedDisks}}
-    {
-      "apiVersion": "[variables('apiVersionStorageManagedDisks')]",
-      "location": "[variables('location')]",
-      "name": "[variables('masterAvailabilitySet')]",
-      "properties": {
-        "platformFaultDomainCount": 2,
-        "platformUpdateDomainCount": 3,
-        "managed": "true"
-      },
-      "type": "Microsoft.Compute/availabilitySets"
-    },
-{{else if .MasterProfile.IsStorageAccount}}
+{{if .MasterProfile.IsStorageAccount}}
     {
       "apiVersion": "[variables('apiVersionStorage')]",
       "dependsOn": [
@@ -22,13 +10,6 @@
         "accountType": "[variables('vmSizesMap')[variables('masterVMSize')].storageAccountType]"
       },
       "type": "Microsoft.Storage/storageAccounts"
-    },
-    {
-      "apiVersion": "[variables('apiVersionDefault')]",
-      "location": "[variables('location')]",
-      "name": "[variables('masterAvailabilitySet')]",
-      "properties": {},
-      "type": "Microsoft.Compute/availabilitySets"
     },
 {{end}}
     {
@@ -243,7 +224,6 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', variables('masterVMNamePrefix'), 'nic-', copyIndex())]",
-        "[concat('Microsoft.Compute/availabilitySets/',variables('masterAvailabilitySet'))]",
 {{if .MasterProfile.IsStorageAccount}}
         "[variables('masterStorageAccountName')]",
 {{end}}
@@ -256,9 +236,6 @@
       "location": "[variables('location')]",
       "name": "[concat(variables('masterVMNamePrefix'), copyIndex())]",
       "properties": {
-        "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('masterAvailabilitySet'))]"
-        },
         "hardwareProfile": {
           "vmSize": "[variables('masterVMSize')]"
         },
@@ -312,22 +289,4 @@
         }
       },
       "type": "Microsoft.Compute/virtualMachines"
-    },
-    {
-      "apiVersion": "[variables('apiVersionDefault')]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('masterVMNamePrefix'), sub(variables('masterCount'), 1))]"
-      ],
-      "location": "[variables('location')]",
-      "name": "[concat(variables('masterVMNamePrefix'), sub(variables('masterCount'), 1), '/waitforleader')]",
-      "properties": {
-        "autoUpgradeMinorVersion": true,
-        "publisher": "Microsoft.OSTCExtensions",
-        "settings": {
-          "commandToExecute": "/bin/bash -c 'echo Done'"
-        },
-        "type": "CustomScriptForLinux",
-        "typeHandlerVersion": "1.4"
-      },
-      "type": "Microsoft.Compute/virtualMachines/extensions"
-    }{{WriteLinkedTemplatesForExtensions}}
+    }
