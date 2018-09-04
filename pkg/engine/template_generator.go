@@ -133,7 +133,16 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"GetVNETSubnets": func(addNSG bool) string {
 			return getVNETSubnets(cs.Properties, addNSG)
 		},
-
+		"GetCustomData": func() string {
+			script := getProvisionScript(provisionScript, map[string]string{"PACKAGE_BASE_URL": cs.PackageBaseURL})
+			str := getSingleLineCustomData(
+				customdata,
+				cs.Properties.MasterProfile.Count,
+				map[string]string{
+					"PROVISION_SOURCE_STR": getProvisionScript(provisionSource, nil),
+					"PROVISION_STR":        script})
+			return fmt.Sprintf("\"customData\": \"[base64(concat('#cloud-config\\n\\n', '%s'))]\",", str)
+		},
 		"GetAllowedVMSizes": func() string {
 			return GetAllowedVMSizes()
 		},
@@ -169,15 +178,6 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		},
 		"HasWindowsCustomImage": func() bool {
 			return cs.Properties.WindowsProfile.HasCustomImage()
-		},
-		"GetMasterCustomData": func() string {
-			return ""
-			/*str := getSingleLineCustomData(
-				"",
-				cs.Properties.MasterProfile.Count,
-				map[string]string{})
-
-			return fmt.Sprintf("\"customData\": \"[base64(concat('#cloud-config\\n\\n', '%s'))]\",", str)*/
 		},
 		// inspired by http://stackoverflow.com/questions/18276173/calling-a-template-with-several-pipeline-parameters/18276968#18276968
 		"dict": func(values ...interface{}) (map[string]interface{}, error) {

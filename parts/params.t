@@ -69,21 +69,21 @@
       "type": "string"
     },
     "osImageOffer": {
-      "defaultValue": "UbuntuServer",
+      "defaultValue": "azureconfidentialcompute",
       "metadata": {
         "description": "Linux OS image type."
       },
       "type": "string"
     },
     "osImagePublisher": {
-      "defaultValue": "Canonical",
+      "defaultValue": "microsoft-azure-compute",
       "metadata": {
         "description": "OS image publisher."
       },
       "type": "string"
     },
     "osImageSKU": {
-      "defaultValue": "18.04-LTS",
+      "defaultValue": "acc-ubuntu-16",
       "metadata": {
         "description": "OS image SKU."
       },

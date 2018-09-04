@@ -9,21 +9,18 @@ import (
 	"github.com/Microsoft/oe-engine/pkg/api"
 )
 
-var (
-
-	//DefaultUbuntuImageConfig is the default Linux distribution.
-	DefaultUbuntuImageConfig = AzureOSImageConfig{
-		ImageOffer:     "UbuntuServer",
-		ImageSku:       "18.04-LTS",
-		ImagePublisher: "Canonical",
-		ImageVersion:   "latest",
-	}
-)
-
 // setPropertiesDefaults for the container Properties, returns true if certs are generated
 func setPropertiesDefaults(oe *api.OpenEnclave, isUpgrade bool) {
+	if len(oe.PackageBaseURL) == 0 {
+		oe.PackageBaseURL = "https://oedownload.blob.core.windows.net/binaries"
+	}
 	setMasterNetworkDefaults(oe.Properties, isUpgrade)
 	setStorageDefaults(oe.Properties)
+	if oe.Properties.MasterProfile == nil {
+		oe.Properties.MasterProfile = &api.MasterProfile{}
+	}
+	// currently supporing a single VM
+	oe.Properties.MasterProfile.Count = 1
 }
 
 // SetMasterNetworkDefaults for masters

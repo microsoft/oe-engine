@@ -231,6 +231,11 @@
       },
       "location": "[variables('location')]",
       "name": "[concat(variables('masterVMNamePrefix'), copyIndex())]",
+      "plan": {
+          "name": "[parameters('osImageSKU')]",
+          "publisher": "[variables('osImagePublisher')]",
+          "product": "[variables('osImageOffer')]"
+        },
       "properties": {
         "hardwareProfile": {
           "vmSize": "[variables('masterVMSize')]"
@@ -245,7 +250,7 @@
         "osProfile": {
           "adminUsername": "[variables('adminUsername')]",
           "computername": "[concat(variables('masterVMNamePrefix'), copyIndex())]",
-          {{GetMasterCustomData}}
+          {{GetCustomData}}
           "linuxConfiguration": {
             "disablePasswordAuthentication": "true",
             "ssh": {

@@ -21,7 +21,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-var templateFiles = []string{baseFile, params, vars, resources, outputs, windowsParams}
+var templateFiles = []string{baseFile, params, vars, resources, outputs, windowsParams, customdata, provisionScript, provisionSource}
 
 var keyvaultSecretPathRe *regexp.Regexp
 
@@ -264,7 +264,7 @@ func getBase64CustomScriptFromStr(str string) string {
 	return base64.StdEncoding.EncodeToString(gzipB.Bytes())
 }
 
-func getProvisionScript(script string) string {
+func getProvisionScript(script string, replaceMap map[string]string) string {
 	// add the provision script
 	bp, err := Asset(script)
 	if err != nil {
@@ -276,6 +276,9 @@ func getProvisionScript(script string) string {
 		panic(fmt.Sprintf("BUG: %s may not contain character '", script))
 	}
 
+	for k, v := range replaceMap {
+		provisionScript = strings.Replace(provisionScript, k, v, -1)
+	}
 	return strings.Replace(strings.Replace(provisionScript, "\r\n", "\n", -1), "\n", "\n\n    ", -1)
 }
 

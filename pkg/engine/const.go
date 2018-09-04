@@ -12,9 +12,12 @@ const (
 const (
 	baseFile      = "accbase.t"
 	vars          = "vars.t"
-	agentVars     = "agentvars.t"
 	params        = "params.t"
 	resources     = "resources.t"
 	outputs       = "outputs.t"
 	windowsParams = "windowsparams.t"
+	customdata    = "customdata.t"
+
+	provisionScript = "provision.sh"
+	provisionSource = "provisionsource.sh"
 )
