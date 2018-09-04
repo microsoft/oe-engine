@@ -1,0 +1,32 @@
+package: github.com/Microsoft/oe-engine
+import:
+- package: github.com/sirupsen/logrus
+  version: v1.0.3
+- package: github.com/mattn/go-colorable
+  version: v0.0.9
+- package: github.com/ghodss/yaml
+  version: v1.0.0
+- package: github.com/mitchellh/go-homedir
+  version: b8bc1bf767474819792c23f32d8286a45736f1c6
+- package: github.com/satori/go.uuid
+  version: 5bf94b69c6b68ee1b541973bb8e1144db23a194b
+- package: github.com/satori/uuid
+  version: 5bf94b69c6b68ee1b541973bb8e1144db23a194b
+- package: github.com/spf13/cobra
+  version: 4cdb38c072b86bf795d2c81de50784d9fdd6eb77
+- package: github.com/spf13/pflag
+  version: v1.0.0
+- package: github.com/leonelquinteros/gotext
+  version: 1fc8dec04d161fc0b4007e808a48620c537b6a6e
+- package: gopkg.in/go-playground/validator.v9
+  version: v9.4.0
+  subpackages:
+  - locales
+- package: golang.org/x/crypto
+  version: 81e90905daefcd6fd217b62423c0908922eadb30
+  subpackages:
+  - ssh
+- package: github.com/blang/semver
+  version: v3.5.1
+- package: github.com/Jeffail/gabs
+  version: 1.0
