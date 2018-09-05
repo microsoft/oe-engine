@@ -34,30 +34,7 @@ if [ $? -ne 0  ]; then
 fi
 
 # Install public packages:
-
-# Needed for Open Enclave build and scripts
-PACKAGES="clang-format cmake gcc g++ make libcurl3"
-
-# Needed for using oedbg
-PACKAGES="$PACKAGES gdb"
-
-# Needed for 3rdparty/libunwind
-PACKAGES="$PACKAGES autoconf libtool"
-
-# Needed to generate documentation during make
-PACKAGES="$PACKAGES doxygen graphviz"
-
-# Needed for cmake/get_c_compiler_dir.sh
-PACKAGES="$PACKAGES gawk"
-
-# Needed for dox2md document generation
-PACKAGES="$PACKAGES libexpat1-dev"
-
-# Needed for oesign
-PACKAGES="$PACKAGES openssl"
-
-# Needed for oehost
-PACKAGES="$PACKAGES libssl-dev"
+PACKAGES="make gcc g++ libmbedtls10 libssl-dev dh-exec libcurl3"
 
 retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
 
