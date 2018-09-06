@@ -105,7 +105,7 @@ func getStorageAccountType(sizeName string) (string, error) {
 
 func getVNETAddressPrefixes(properties *api.Properties) string {
 	var buf bytes.Buffer
-	buf.WriteString(`"[variables('masterSubnet')]"`)
+	buf.WriteString(`"[variables('subnet')]"`)
 	return buf.String()
 }
 
@@ -115,9 +115,9 @@ func getVNETSubnetDependencies(properties *api.Properties) string {
 
 func getVNETSubnets(properties *api.Properties, addNSG bool) string {
 	return `{
-            "name": "[variables('masterSubnetName')]",
+            "name": "[variables('subnetName')]",
             "properties": {
-              "addressPrefix": "[variables('masterSubnet')]"
+              "addressPrefix": "[variables('subnet')]"
             }
           }`
 }
@@ -283,7 +283,7 @@ func getProvisionScript(script string, replaceMap map[string]string) string {
 }
 
 // getSingleLineCustomData returns the file as a single line for embedding in an arm template
-func getSingleLineCustomData(yamlFilename string, masterCount int, replaceMap map[string]string) string {
+func getSingleLineCustomData(yamlFilename string, replaceMap map[string]string) string {
 	b, err := Asset(yamlFilename)
 	if err != nil {
 		panic(fmt.Sprintf("BUG getting yaml custom data file: %s", err.Error()))

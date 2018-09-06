@@ -13,18 +13,18 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 	addValue(parametersMap, "location", location)
 
 	//addValue(parametersMap, "fqdnEndpointSuffix", cloudSpecConfig.EndpointConfig.ResourceManagerVMDNSSuffix)
-	addValue(parametersMap, "linuxAdminUsername", properties.LinuxProfile.AdminUsername)
+	addValue(parametersMap, "adminUsername", properties.LinuxProfile.AdminUsername)
 
-	addValue(parametersMap, "masterEndpointDNSNamePrefix", properties.MasterProfile.DNSPrefix)
+	addValue(parametersMap, "dnsNamePrefix", properties.MasterProfile.DNSPrefix)
 
 	if properties.MasterProfile != nil {
 		if properties.MasterProfile.IsCustomVNET() {
-			addValue(parametersMap, "masterVnetSubnetID", properties.MasterProfile.VnetSubnetID)
+			addValue(parametersMap, "vnetSubnetID", properties.MasterProfile.VnetSubnetID)
 		} else {
-			addValue(parametersMap, "masterSubnet", properties.MasterProfile.Subnet)
+			addValue(parametersMap, "subnet", properties.MasterProfile.Subnet)
 		}
-		addValue(parametersMap, "firstConsecutiveStaticIP", properties.MasterProfile.FirstConsecutiveStaticIP)
-		addValue(parametersMap, "masterVMSize", properties.MasterProfile.VMSize)
+		addValue(parametersMap, "staticIP", properties.MasterProfile.StaticIP)
+		addValue(parametersMap, "vmSize", properties.MasterProfile.VMSize)
 	}
 	addValue(parametersMap, "sshRSAPublicKey", properties.LinuxProfile.SSH.PublicKeys[0].KeyData)
 

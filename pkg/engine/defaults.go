@@ -12,15 +12,13 @@ import (
 // setPropertiesDefaults for the container Properties, returns true if certs are generated
 func setPropertiesDefaults(oe *api.OpenEnclave, isUpgrade bool) {
 	if len(oe.PackageBaseURL) == 0 {
-		oe.PackageBaseURL = "https://oedownload.blob.core.windows.net/binaries"
+		oe.PackageBaseURL = DefaultPackageBaseURL
 	}
 	setMasterNetworkDefaults(oe.Properties, isUpgrade)
 	setStorageDefaults(oe.Properties)
 	if oe.Properties.MasterProfile == nil {
 		oe.Properties.MasterProfile = &api.MasterProfile{}
 	}
-	// currently supporing a single VM
-	oe.Properties.MasterProfile.Count = 1
 }
 
 // SetMasterNetworkDefaults for masters
@@ -30,10 +28,10 @@ func setMasterNetworkDefaults(a *api.Properties, isUpgrade bool) {
 	}
 
 	if !a.MasterProfile.IsCustomVNET() {
-		a.MasterProfile.Subnet = DefaultMasterSubnet
-		// FirstConsecutiveStaticIP is not reset if it is upgrade and some value already exists
-		if !isUpgrade || len(a.MasterProfile.FirstConsecutiveStaticIP) == 0 {
-			a.MasterProfile.FirstConsecutiveStaticIP = DefaultFirstConsecutiveStaticIP
+		a.MasterProfile.Subnet = DefaultSubnet
+		// StaticIP is not reset if it is upgrade and some value already exists
+		if !isUpgrade || len(a.MasterProfile.StaticIP) == 0 {
+			a.MasterProfile.StaticIP = DefaultStaticIP
 		}
 	}
 

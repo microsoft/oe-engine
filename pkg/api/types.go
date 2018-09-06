@@ -70,21 +70,19 @@ type ImageReference struct {
 
 // MasterProfile represents the definition of the master cluster
 type MasterProfile struct {
-	Count                    int             `json:"count"`
-	DNSPrefix                string          `json:"dnsPrefix"`
-	SubjectAltNames          []string        `json:"subjectAltNames"`
-	VMSize                   string          `json:"vmSize"`
-	OSDiskSizeGB             int             `json:"osDiskSizeGB,omitempty"`
-	VnetSubnetID             string          `json:"vnetSubnetID,omitempty"`
-	VnetCidr                 string          `json:"vnetCidr,omitempty"`
-	FirstConsecutiveStaticIP string          `json:"firstConsecutiveStaticIP,omitempty"`
-	Subnet                   string          `json:"subnet"`
-	IPAddressCount           int             `json:"ipAddressCount,omitempty"`
-	StorageProfile           string          `json:"storageProfile,omitempty"`
-	HTTPSourceAddressPrefix  string          `json:"HTTPSourceAddressPrefix,omitempty"`
-	Distro                   Distro          `json:"distro,omitempty"`
-	Accessible               bool            `json:"accessible,omitempty"`
-	ImageRef                 *ImageReference `json:"imageReference,omitempty"`
+	DNSPrefix               string          `json:"dnsPrefix"`
+	VMSize                  string          `json:"vmSize"`
+	OSDiskSizeGB            int             `json:"osDiskSizeGB,omitempty"`
+	VnetSubnetID            string          `json:"vnetSubnetID,omitempty"`
+	VnetCidr                string          `json:"vnetCidr,omitempty"`
+	StaticIP                string          `json:"staticIP,omitempty"`
+	Subnet                  string          `json:"subnet"`
+	IPAddressCount          int             `json:"ipAddressCount,omitempty"`
+	StorageProfile          string          `json:"storageProfile,omitempty"`
+	HTTPSourceAddressPrefix string          `json:"HTTPSourceAddressPrefix,omitempty"`
+	Distro                  Distro          `json:"distro,omitempty"`
+	Accessible              bool            `json:"accessible,omitempty"`
+	ImageRef                *ImageReference `json:"imageReference,omitempty"`
 
 	FQDN string `json:"fqdn,omitempty"`
 }
@@ -157,15 +155,6 @@ func (p *Properties) HasStorageAccountDisks() bool {
 		return true
 	}
 	return false
-}
-
-// TotalNodes returns the total number of nodes in the cluster configuration
-func (p *Properties) TotalNodes() int {
-	var totalNodes int
-	if p.MasterProfile != nil {
-		totalNodes = p.MasterProfile.Count
-	}
-	return totalNodes
 }
 
 // IsCustomVNET returns true if the customer brought their own VNET
