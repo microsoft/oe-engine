@@ -1,4 +1,4 @@
-    "adminUsername": "[parameters('linuxAdminUsername')]",
+    "adminUsername": "[parameters('adminUsername')]",
     "targetEnvironment": "[parameters('targetEnvironment')]",
     "maxVMsPerPool": 100,
     "apiVersionDefault": "2018-06-01",
@@ -29,8 +29,7 @@
     "windowsAdminUsername": "[parameters('windowsAdminUsername')]",
     "windowsAdminPassword": "[parameters('windowsAdminPassword')]",
 {{end}}
-    "masterCount": {{.MasterProfile.Count}},
-    "masterEndpointDNSNamePrefix": "[tolower(parameters('masterEndpointDNSNamePrefix'))]",
+    "dnsNamePrefix": "[tolower(parameters('dnsNamePrefix'))]",
     "masterHttpSourceAddressPrefix": "{{.MasterProfile.HTTPSourceAddressPrefix}}",
     "masterLbBackendPoolName": "[concat('acc-pool-', variables('nameSuffix'))]",
     "masterLbID": "[resourceId('Microsoft.Network/loadBalancers',variables('masterLbName'))]",
@@ -39,10 +38,10 @@
     "masterLbName": "[concat('acc-lb-', variables('nameSuffix'))]",
     "masterNSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('masterNSGName'))]",
     "masterNSGName": "[concat('acc-nsg-', variables('nameSuffix'))]",
-    "masterPublicIPAddressName": "[concat('acc-ip-', variables('masterEndpointDNSNamePrefix'), '-', variables('nameSuffix'))]",
+    "masterPublicIPAddressName": "[concat('acc-ip-', variables('dnsNamePrefix'), '-', variables('nameSuffix'))]",
     "apiVersionStorage": "2015-06-15",
 
-    "storageAccountBaseName": "[uniqueString(concat(variables('masterEndpointDNSNamePrefix'),variables('location')))]",
+    "storageAccountBaseName": "[uniqueString(concat(variables('dnsNamePrefix'),variables('location')))]",
     "masterStorageAccountExhibitorName": "[concat(variables('storageAccountBaseName'), 'exhb0')]",
     "storageAccountType": "Standard_LRS",
 {{if .HasStorageAccountDisks}}
@@ -59,17 +58,15 @@
     "masterStorageAccountName": "[concat(variables('storageAccountBaseName'), 'mstr0')]",
 {{end}}
 {{if .MasterProfile.IsCustomVNET}}
-    "masterVnetSubnetID": "[parameters('masterVnetSubnetID')]",
+    "vnetSubnetID": "[parameters('vnetSubnetID')]",
 {{else}}
-    "masterSubnet": "[parameters('masterSubnet')]",
-    "masterSubnetName": "[concat('accSubnet')]",
+    "subnet": "[parameters('subnet')]",
+    "subnetName": "accSubnet",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-    "masterVnetSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('masterSubnetName'))]",
+    "vnetSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "virtualNetworkName": "[concat('acc-vnet-', variables('nameSuffix'))]",
 {{end}}
-    "masterFirstAddrOctets": "[split(parameters('firstConsecutiveStaticIP'),'.')]",
-    "masterFirstAddrOctet4": "[variables('masterFirstAddrOctets')[3]]",
-    "masterFirstAddrPrefix": "[concat(variables('masterFirstAddrOctets')[0],'.',variables('masterFirstAddrOctets')[1],'.',variables('masterFirstAddrOctets')[2],'.')]",
+    "staticIP": "[(parameters('staticIP')]",
     "masterVMNamePrefix": "[concat('acc-', variables('nameSuffix'), '-')]",
     "masterVMNic": [
       "[concat(variables('masterVMNamePrefix'), 'nic-0')]",
@@ -80,7 +77,7 @@
       "[concat(variables('masterVMNamePrefix'), 'nic-5')]",
       "[concat(variables('masterVMNamePrefix'), 'nic-6')]"
     ],
-    "masterVMSize": "[parameters('masterVMSize')]",
+    "vmSize": "[parameters('vmSize')]",
     "nameSuffix": "[parameters('nameSuffix')]",
     "osImageOffer": "[parameters('osImageOffer')]",
     "osImagePublisher": "[parameters('osImagePublisher')]",

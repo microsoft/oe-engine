@@ -1,40 +1,40 @@
-    "linuxAdminUsername": {
+    "adminUsername": {
       "metadata": {
-        "description": "User name for the Linux Virtual Machines (SSH or Password)."
+        "description": "User name for the Virtual Machines (SSH or Password)."
       },
       "type": "string"
     },
-    "masterEndpointDNSNamePrefix": {
+    "dnsNamePrefix": {
       "metadata": {
-        "description": "Sets the Domain name label for the master IP Address.  The concatenation of the domain name label and the regional DNS zone make up the fully qualified domain name associated with the public IP address."
+        "description": "Sets the Domain name label for the IP Address.  The concatenation of the domain name label and the regional DNS zone make up the fully qualified domain name associated with the public IP address."
       },
       "type": "string"
     },
   {{if .MasterProfile.IsCustomVNET}}
-    "masterVnetSubnetID": {
+    "vnetSubnetID": {
       "metadata": {
-        "description": "Sets the vnet subnet of the master."
+        "description": "Sets the vnet subnet of the VM."
       },
       "type": "string"
     },
   {{else}}
-    "masterSubnet": {
+    "subnet": {
       "defaultValue": "{{.MasterProfile.Subnet}}",
       "metadata": {
-        "description": "Sets the subnet of the master node(s)."
+        "description": "Sets the subnet of the VM."
       },
       "type": "string"
     },
   {{end}}
 
-    "firstConsecutiveStaticIP": {
-      "defaultValue": "{{.MasterProfile.FirstConsecutiveStaticIP}}",
+    "staticIP": {
+      "defaultValue": "{{.MasterProfile.StaticIP}}",
       "metadata": {
-        "description": "Sets the static IP of the first master"
+        "description": "Sets the static IP of the VM"
       },
       "type": "string"
     },
-    "masterVMSize": {
+    "vmSize": {
       {{GetAllowedVMSizes}}
       "metadata": {
         "description": "The size of the Virtual Machine."

@@ -7,7 +7,7 @@
       "location": "[variables('location')]",
       "name": "[variables('masterStorageAccountName')]",
       "properties": {
-        "accountType": "[variables('vmSizesMap')[variables('masterVMSize')].storageAccountType]"
+        "accountType": "[variables('vmSizesMap')[variables('vmSize')].storageAccountType]"
       },
       "type": "Microsoft.Storage/storageAccounts"
     },
@@ -51,7 +51,7 @@
       "name": "[variables('masterPublicIPAddressName')]",
       "properties": {
         "dnsSettings": {
-          "domainNameLabel": "[variables('masterEndpointDNSNamePrefix')]"
+          "domainNameLabel": "[variables('dnsNamePrefix')]"
         },
         "publicIPAllocationMethod": "Dynamic"
       },
@@ -123,22 +123,18 @@
     },
     {
       "apiVersion": "[variables('apiVersionDefault')]",
-      "copy": {
-        "count": "[variables('masterCount')]",
-        "name": "masterLbLoopNode"
-      },
       "dependsOn": [
         "[variables('masterLbID')]"
       ],
       "location": "[variables('location')]",
-      "name": "[concat(variables('masterLbName'), '/', 'SSH-', variables('masterVMNamePrefix'), copyIndex())]",
+      "name": "[concat(variables('masterLbName'), '/', 'SSH-', variables('masterVMNamePrefix')]",
       "properties": {
         "backendPort": 22,
         "enableFloatingIP": false,
         "frontendIPConfiguration": {
           "id": "[variables('masterLbIPConfigID')]"
         },
-        "frontendPort": "[copyIndex(2200)]",
+        "frontendPort": "22",
         "protocol": "tcp"
       },
       "type": "Microsoft.Network/loadBalancers/inboundNatRules"
@@ -169,20 +165,16 @@
     },
     {
       "apiVersion": "[variables('apiVersionDefault')]",
-      "copy": {
-        "count": "[variables('masterCount')]",
-        "name": "nicLoopNode"
-      },
       "dependsOn": [
         "[variables('masterNSGID')]",
 {{if not .MasterProfile.IsCustomVNET}}
         "[variables('vnetID')]",
 {{end}}
         "[variables('masterLbID')]",
-        "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',variables('masterVMNamePrefix'),copyIndex())]"
+        "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',variables('masterVMNamePrefix'))]"
       ],
       "location": "[variables('location')]",
-      "name": "[concat(variables('masterVMNamePrefix'), 'nic-', copyIndex())]",
+      "name": "[concat(variables('masterVMNamePrefix'), 'nic')]",
       "properties": {
         "ipConfigurations": [
           {
@@ -195,13 +187,13 @@
               ],
               "loadBalancerInboundNatRules": [
                 {
-                  "id": "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',variables('masterVMNamePrefix'),copyIndex())]"
+                  "id": "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',variables('masterVMNamePrefix'))]"
                 }
               ],
-              "privateIPAddress": "[concat(variables('masterFirstAddrPrefix'), copyIndex(int(variables('masterFirstAddrOctet4'))))]",
+              "privateIPAddress": "[variables('staticIP')]",
               "privateIPAllocationMethod": "Static",
               "subnet": {
-                "id": "[variables('masterVnetSubnetID')]"
+                "id": "[variables('vnetSubnetID')]"
               }
             }
           }
@@ -214,12 +206,8 @@
     },
     {
       "apiVersion": "[variables('apiVersionDefault')]",
-      "copy": {
-        "count": "[variables('masterCount')]",
-        "name": "vmLoopNode"
-      },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('masterVMNamePrefix'), 'nic-', copyIndex())]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('masterVMNamePrefix'), 'nic')]",
 {{if .MasterProfile.IsStorageAccount}}
         "[variables('masterStorageAccountName')]",
 {{end}}
@@ -227,10 +215,10 @@
       ],
       "tags":
       {
-        "creationSource" : "[concat('oe-engine-', variables('masterVMNamePrefix'), copyIndex())]"
+        "creationSource" : "[concat('oe-engine-', variables('masterVMNamePrefix'))]"
       },
       "location": "[variables('location')]",
-      "name": "[concat(variables('masterVMNamePrefix'), copyIndex())]",
+      "name": "[concat(variables('masterVMNamePrefix'))]",
       "plan": {
           "name": "[parameters('osImageSKU')]",
           "publisher": "[variables('osImagePublisher')]",
@@ -238,18 +226,18 @@
         },
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[variables('masterVMSize')]"
+          "vmSize": "[variables('vmSize')]"
         },
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('masterVMNamePrefix'), 'nic-', copyIndex()))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('masterVMNamePrefix'), 'nic'))]"
             }
           ]
         },
         "osProfile": {
           "adminUsername": "[variables('adminUsername')]",
-          "computername": "[concat(variables('masterVMNamePrefix'), copyIndex())]",
+          "computername": "[concat(variables('masterVMNamePrefix'))]",
           {{GetCustomData}}
           "linuxConfiguration": {
             "disablePasswordAuthentication": "true",
@@ -278,9 +266,9 @@
             "caching": "ReadWrite"
             ,"createOption": "FromImage"
 {{if .MasterProfile.IsStorageAccount}}
-            ,"name": "[concat(variables('masterVMNamePrefix'), copyIndex(),'-osdisk')]"
+            ,"name": "[concat(variables('masterVMNamePrefix'),'-osdisk')]"
             ,"vhd": {
-              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/',variables('masterStorageAccountName')),variables('apiVersionStorage')).primaryEndpoints.blob,'vhds/',variables('masterVMNamePrefix'),copyIndex(),'-osdisk.vhd')]"
+              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/',variables('masterStorageAccountName')),variables('apiVersionStorage')).primaryEndpoints.blob,'vhds/',variables('masterVMNamePrefix'),'-osdisk.vhd')]"
             }
 {{end}}
 {{if ne .MasterProfile.OSDiskSizeGB 0}}

@@ -137,7 +137,6 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 			script := getProvisionScript(provisionScript, map[string]string{"PACKAGE_BASE_URL": cs.PackageBaseURL})
 			str := getSingleLineCustomData(
 				customdata,
-				cs.Properties.MasterProfile.Count,
 				map[string]string{
 					"PROVISION_SOURCE_STR": getProvisionScript(provisionSource, nil),
 					"PROVISION_STR":        script})

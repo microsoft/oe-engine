@@ -283,7 +283,7 @@ func getProvisionScript(script string, replaceMap map[string]string) string {
 }
 
 // getSingleLineCustomData returns the file as a single line for embedding in an arm template
-func getSingleLineCustomData(yamlFilename string, masterCount int, replaceMap map[string]string) string {
+func getSingleLineCustomData(yamlFilename string, replaceMap map[string]string) string {
 	b, err := Asset(yamlFilename)
 	if err != nil {
 		panic(fmt.Sprintf("BUG getting yaml custom data file: %s", err.Error()))
