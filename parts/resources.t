@@ -1,29 +1,3 @@
-{{if .MasterProfile.IsStorageAccount}}
-    {
-      "apiVersion": "[variables('apiVersionStorage')]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('masterPublicIPAddressName'))]"
-      ],
-      "location": "[variables('location')]",
-      "name": "[variables('masterStorageAccountName')]",
-      "properties": {
-        "accountType": "[variables('vmSizesMap')[variables('vmSize')].storageAccountType]"
-      },
-      "type": "Microsoft.Storage/storageAccounts"
-    },
-{{end}}
-    {
-      "apiVersion": "[variables('apiVersionStorage')]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('masterPublicIPAddressName'))]"
-      ],
-      "location": "[variables('location')]",
-      "name": "[variables('masterStorageAccountExhibitorName')]",
-      "properties": {
-        "accountType": "Standard_LRS"
-      },
-      "type": "Microsoft.Storage/storageAccounts"
-    },
 {{if not .MasterProfile.IsCustomVNET}}
     {
       "apiVersion": "[variables('apiVersionDefault')]",
@@ -207,11 +181,7 @@
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('vmName'), '-nic')]",
-{{if .MasterProfile.IsStorageAccount}}
-        "[variables('masterStorageAccountName')]",
-{{end}}
-        "[variables('masterStorageAccountExhibitorName')]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('vmName'), '-nic')]"
       ],
       "tags":
       {
@@ -219,11 +189,7 @@
       },
       "location": "[variables('location')]",
       "name": "[variables('vmName')]",
-      "plan": {
-          "name": "[parameters('osImageSKU')]",
-          "publisher": "[variables('osImagePublisher')]",
-          "product": "[variables('osImageOffer')]"
-        },
+      {{GetVMPlan .MasterProfile.OSImageName}}
       "properties": {
         "hardwareProfile": {
           "vmSize": "[variables('vmSize')]"
@@ -256,24 +222,16 @@
           {{end}}
         },
         "storageProfile": {
-          "imageReference": {
-            "offer": "[variables('osImageOffer')]",
-            "publisher": "[variables('osImagePublisher')]",
-            "sku": "[variables('osImageSKU')]",
-            "version": "[variables('osImageVersion')]"
-          },
+          "imageReference": "[variables('imageReference')[parameters('osImageName')]]",
           "osDisk": {
-            "caching": "ReadWrite"
-            ,"createOption": "FromImage"
-{{if .MasterProfile.IsStorageAccount}}
-            ,"name": "[concat(variables('vmName'),'-osdisk')]"
-            ,"vhd": {
-              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/',variables('masterStorageAccountName')),variables('apiVersionStorage')).primaryEndpoints.blob,'vhds/',variables('vmName'),'-osdisk.vhd')]"
-            }
-{{end}}
+            "caching": "ReadWrite",
+            "createOption": "FromImage",
 {{if ne .MasterProfile.OSDiskSizeGB 0}}
-            ,"diskSizeGB": {{.MasterProfile.OSDiskSizeGB}}
+            "diskSizeGB": {{.MasterProfile.OSDiskSizeGB}},
 {{end}}
+            "managedDisk": {
+              "storageAccountType": "[parameters('storageAccountType')]"
+            }
           }
         }
       },

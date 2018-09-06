@@ -14,11 +14,13 @@ func setPropertiesDefaults(oe *api.OpenEnclave, isUpgrade bool) {
 	if len(oe.PackageBaseURL) == 0 {
 		oe.PackageBaseURL = DefaultPackageBaseURL
 	}
-	setMasterNetworkDefaults(oe.Properties, isUpgrade)
-	setStorageDefaults(oe.Properties)
 	if oe.Properties.MasterProfile == nil {
 		oe.Properties.MasterProfile = &api.MasterProfile{}
 	}
+	if len(oe.Properties.MasterProfile.OSImageName) == 0 {
+		oe.Properties.MasterProfile.OSImageName = api.OsImageDefault
+	}
+	setMasterNetworkDefaults(oe.Properties, isUpgrade)
 }
 
 // SetMasterNetworkDefaults for masters
@@ -35,21 +37,8 @@ func setMasterNetworkDefaults(a *api.Properties, isUpgrade bool) {
 		}
 	}
 
-	// Set the default number of IP addresses allocated for masters.
-	if a.MasterProfile.IPAddressCount == 0 {
-		// Allocate one IP address for the node.
-		a.MasterProfile.IPAddressCount = 1
-	}
-
 	if a.MasterProfile.HTTPSourceAddressPrefix == "" {
 		a.MasterProfile.HTTPSourceAddressPrefix = "*"
-	}
-}
-
-// setStorageDefaults for agents
-func setStorageDefaults(a *api.Properties) {
-	if a.MasterProfile != nil && len(a.MasterProfile.StorageProfile) == 0 {
-		a.MasterProfile.StorageProfile = api.ManagedDisks
 	}
 }
 

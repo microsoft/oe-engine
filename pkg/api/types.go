@@ -27,7 +27,6 @@ type LinuxProfile struct {
 		PublicKeys []PublicKey `json:"publicKeys"`
 	} `json:"ssh"`
 	Secrets            []KeyVaultSecrets   `json:"secrets,omitempty"`
-	Distro             Distro              `json:"distro,omitempty"`
 	ScriptRootURL      string              `json:"scriptroot,omitempty"`
 	CustomSearchDomain *CustomSearchDomain `json:"customSearchDomain,omitempty"`
 	CustomNodesDNS     *CustomNodesDNS     `json:"CustomNodesDNS,omitempty"`
@@ -62,27 +61,18 @@ type WindowsProfile struct {
 	Secrets               []KeyVaultSecrets `json:"secrets,omitempty"`
 }
 
-// ImageReference represents a reference to an Image resource in Azure.
-type ImageReference struct {
-	Name          string `json:"name,omitempty"`
-	ResourceGroup string `json:"resourceGroup,omitempty"`
-}
-
 // MasterProfile represents the definition of the master cluster
 type MasterProfile struct {
-	DNSPrefix               string          `json:"dnsPrefix"`
-	VMSize                  string          `json:"vmSize"`
-	OSDiskSizeGB            int             `json:"osDiskSizeGB,omitempty"`
-	VnetSubnetID            string          `json:"vnetSubnetID,omitempty"`
-	VnetCidr                string          `json:"vnetCidr,omitempty"`
-	StaticIP                string          `json:"staticIP,omitempty"`
-	Subnet                  string          `json:"subnet"`
-	IPAddressCount          int             `json:"ipAddressCount,omitempty"`
-	StorageProfile          string          `json:"storageProfile,omitempty"`
-	HTTPSourceAddressPrefix string          `json:"HTTPSourceAddressPrefix,omitempty"`
-	Distro                  Distro          `json:"distro,omitempty"`
-	Accessible              bool            `json:"accessible,omitempty"`
-	ImageRef                *ImageReference `json:"imageReference,omitempty"`
+	OSImageName             string `json:"osImageName"`
+	DNSPrefix               string `json:"dnsPrefix"`
+	VMSize                  string `json:"vmSize"`
+	OSDiskSizeGB            int    `json:"osDiskSizeGB,omitempty"`
+	VnetSubnetID            string `json:"vnetSubnetID,omitempty"`
+	VnetCidr                string `json:"vnetCidr,omitempty"`
+	StaticIP                string `json:"staticIP,omitempty"`
+	Subnet                  string `json:"subnet"`
+	HTTPSourceAddressPrefix string `json:"HTTPSourceAddressPrefix,omitempty"`
+	Accessible              bool   `json:"accessible,omitempty"`
 
 	FQDN string `json:"fqdn,omitempty"`
 }
@@ -133,43 +123,14 @@ type KeyVaultCertificate struct {
 // OSType represents OS types of agents
 type OSType string
 
-// Distro represents Linux distro to use for Linux VMs
-type Distro string
-
 // HasWindows returns true if the cluster contains windows
 func (p *Properties) HasWindows() bool {
-	return false
-}
-
-// HasManagedDisks returns true if the cluster contains Managed Disks
-func (p *Properties) HasManagedDisks() bool {
-	if p.MasterProfile != nil && p.MasterProfile.StorageProfile == ManagedDisks {
-		return true
-	}
-	return false
-}
-
-// HasStorageAccountDisks returns true if the cluster contains Storage Account Disks
-func (p *Properties) HasStorageAccountDisks() bool {
-	if p.MasterProfile != nil && p.MasterProfile.StorageProfile == StorageAccount {
-		return true
-	}
 	return false
 }
 
 // IsCustomVNET returns true if the customer brought their own VNET
 func (m *MasterProfile) IsCustomVNET() bool {
 	return len(m.VnetSubnetID) > 0
-}
-
-// IsManagedDisks returns true if the master specified managed disks
-func (m *MasterProfile) IsManagedDisks() bool {
-	return m.StorageProfile == ManagedDisks
-}
-
-// IsStorageAccount returns true if the master specified storage account
-func (m *MasterProfile) IsStorageAccount() bool {
-	return m.StorageProfile == StorageAccount
 }
 
 // HasSecrets returns true if the customer specified secrets to install
