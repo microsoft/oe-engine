@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/blang/semver"
 )
@@ -99,81 +98,6 @@ func GetMaxVersion(versions []string, preRelease bool) string {
 
 	}
 	return highest.String()
-}
-
-//GetValidPatchVersion gets the current valid patch version for the minor version of the passed in version
-func GetValidPatchVersion(orchType, orchVer string, hasWindows bool) string {
-	if orchVer == "" {
-		return RationalizeReleaseAndVersion(
-			orchType,
-			"",
-			"",
-			hasWindows)
-	}
-
-	// check if the current version is valid, this allows us to have multiple supported patch versions in the future if we need it
-	version := RationalizeReleaseAndVersion(
-		orchType,
-		"",
-		orchVer,
-		hasWindows)
-
-	if version == "" {
-		sv, err := semver.Make(orchVer)
-		if err != nil {
-			return ""
-		}
-		sr := fmt.Sprintf("%d.%d", sv.Major, sv.Minor)
-
-		version = RationalizeReleaseAndVersion(
-			orchType,
-			sr,
-			"",
-			hasWindows)
-	}
-	return version
-}
-
-// RationalizeReleaseAndVersion return a version when it can be rationalized from the input, otherwise ""
-func RationalizeReleaseAndVersion(orchType, orchRel, orchVer string, hasWindows bool) (version string) {
-	// ignore "v" prefix in orchestrator version and release: "v1.8.0" is equivalent to "1.8.0", "v1.9" is equivalent to "1.9"
-	orchVer = strings.TrimPrefix(orchVer, "v")
-	orchRel = strings.TrimPrefix(orchRel, "v")
-	supportedVersions, defaultVersion := GetSupportedVersions(orchType, hasWindows)
-	if supportedVersions == nil {
-		return ""
-	}
-
-	if orchRel == "" && orchVer == "" {
-		return defaultVersion
-	}
-
-	if orchVer == "" {
-		// Try to get latest version matching the release
-		version = GetLatestPatchVersion(orchRel, supportedVersions)
-		return version
-	} else if orchRel == "" {
-		// Try to get version the same with orchVer
-		version = ""
-		for _, ver := range supportedVersions {
-			if ver == orchVer {
-				version = ver
-				break
-			}
-		}
-		return version
-	}
-	// Try to get latest version matching the release
-	version = ""
-	for _, ver := range supportedVersions {
-		sv, _ := semver.Make(ver)
-		sr := fmt.Sprintf("%d.%d", sv.Major, sv.Minor)
-		if sr == orchRel && ver == orchVer {
-			version = ver
-			break
-		}
-	}
-	return version
 }
 
 // GetLatestPatchVersion gets the most recent patch version from a list of semver versions given a major.minor string

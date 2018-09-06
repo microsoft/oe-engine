@@ -32,20 +32,18 @@ func (a *Apiloader) DeserializeOpenEnclave(contents []byte, validate, isUpdate b
 	return oe, err
 }
 
-// LoadOpenEnclave loads an ACS Cluster API Model, validates it, and returns the unversioned representation
+// LoadOpenEnclave loads and validates an OE API Model
 func (a *Apiloader) LoadOpenEnclave(contents []byte, validate, isUpdate bool) (*OpenEnclave, error) {
 	oe := &OpenEnclave{}
-
 	if e := json.Unmarshal(contents, oe); e != nil {
 		return nil, e
 	}
-
 	if e := checkJSONKeys(contents, reflect.TypeOf(*oe)); e != nil {
 		return nil, e
 	}
-	/*if e := OpenEnclave.Properties.Validate(isUpdate); validate && e != nil {
+	if e := oe.Properties.Validate(isUpdate); validate && e != nil {
 		return nil, e
-	}*/
+	}
 	return oe, nil
 }
 

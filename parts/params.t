@@ -54,46 +54,22 @@
       "type": "string"
     },
     "osImageName": {
-      "defaultValue": "",
+      {{GetOSImageNames}}
       "metadata": {
-        "description": "Name of a Linux OS image. Needs to be used in conjuction with osImageResourceGroup."
+        "description": "OS image name"
       },
       "type": "string"
     },
-    "osImageResourceGroup": {
-      "defaultValue": "",
+    "storageAccountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Premium_LRS"
+      ],
       "metadata": {
-        "description": "Resource group of a Linux OS image. Needs to be used in conjuction with osImageName."
-      },
-      "type": "string"
-    },
-    "osImageOffer": {
-      "defaultValue": "azureconfidentialcompute",
-      "metadata": {
-        "description": "Linux OS image type."
-      },
-      "type": "string"
-    },
-    "osImagePublisher": {
-      "defaultValue": "microsoft-azure-compute",
-      "metadata": {
-        "description": "OS image publisher."
-      },
-      "type": "string"
-    },
-    "osImageSKU": {
-      "defaultValue": "acc-ubuntu-16",
-      "metadata": {
-        "description": "OS image SKU."
-      },
-      "type": "string"
-    },
-    "osImageVersion": {
-      "defaultValue": "latest",
-      "metadata": {
-        "description": "OS image version."
-      },
-      "type": "string"
+        "description": "Type of managed disk to create"
+      }
     },
     "fqdnEndpointSuffix":{
       "defaultValue": "cloudapp.azure.com",
