@@ -127,7 +127,7 @@
         "[variables('masterLbID')]"
       ],
       "location": "[variables('location')]",
-      "name": "[concat(variables('masterLbName'), '/', 'SSH-', variables('masterVMNamePrefix')]",
+      "name": "[concat(variables('masterLbName'), '/', 'SSH-', variables('vmName'))]",
       "properties": {
         "backendPort": 22,
         "enableFloatingIP": false,
@@ -171,10 +171,10 @@
         "[variables('vnetID')]",
 {{end}}
         "[variables('masterLbID')]",
-        "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',variables('masterVMNamePrefix'))]"
+        "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',variables('vmName'))]"
       ],
       "location": "[variables('location')]",
-      "name": "[concat(variables('masterVMNamePrefix'), 'nic')]",
+      "name": "[concat(variables('vmName'), '-nic')]",
       "properties": {
         "ipConfigurations": [
           {
@@ -187,7 +187,7 @@
               ],
               "loadBalancerInboundNatRules": [
                 {
-                  "id": "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',variables('masterVMNamePrefix'))]"
+                  "id": "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',variables('vmName'))]"
                 }
               ],
               "privateIPAddress": "[variables('staticIP')]",
@@ -207,7 +207,7 @@
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('masterVMNamePrefix'), 'nic')]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('vmName'), '-nic')]",
 {{if .MasterProfile.IsStorageAccount}}
         "[variables('masterStorageAccountName')]",
 {{end}}
@@ -215,10 +215,10 @@
       ],
       "tags":
       {
-        "creationSource" : "[concat('oe-engine-', variables('masterVMNamePrefix'))]"
+        "creationSource" : "[concat('oe-engine-', variables('vmName'))]"
       },
       "location": "[variables('location')]",
-      "name": "[concat(variables('masterVMNamePrefix'))]",
+      "name": "[variables('vmName')]",
       "plan": {
           "name": "[parameters('osImageSKU')]",
           "publisher": "[variables('osImagePublisher')]",
@@ -231,13 +231,13 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('masterVMNamePrefix'), 'nic'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmName'), '-nic'))]"
             }
           ]
         },
         "osProfile": {
           "adminUsername": "[variables('adminUsername')]",
-          "computername": "[concat(variables('masterVMNamePrefix'))]",
+          "computername": "[variables('vmName')]",
           {{GetCustomData}}
           "linuxConfiguration": {
             "disablePasswordAuthentication": "true",
@@ -266,9 +266,9 @@
             "caching": "ReadWrite"
             ,"createOption": "FromImage"
 {{if .MasterProfile.IsStorageAccount}}
-            ,"name": "[concat(variables('masterVMNamePrefix'),'-osdisk')]"
+            ,"name": "[concat(variables('vmName'),'-osdisk')]"
             ,"vhd": {
-              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/',variables('masterStorageAccountName')),variables('apiVersionStorage')).primaryEndpoints.blob,'vhds/',variables('masterVMNamePrefix'),'-osdisk.vhd')]"
+              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/',variables('masterStorageAccountName')),variables('apiVersionStorage')).primaryEndpoints.blob,'vhds/',variables('vmName'),'-osdisk.vhd')]"
             }
 {{end}}
 {{if ne .MasterProfile.OSDiskSizeGB 0}}

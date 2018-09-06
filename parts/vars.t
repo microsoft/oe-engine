@@ -66,17 +66,8 @@
     "vnetSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "virtualNetworkName": "[concat('acc-vnet-', variables('nameSuffix'))]",
 {{end}}
-    "staticIP": "[(parameters('staticIP')]",
-    "masterVMNamePrefix": "[concat('acc-', variables('nameSuffix'), '-')]",
-    "masterVMNic": [
-      "[concat(variables('masterVMNamePrefix'), 'nic-0')]",
-      "[concat(variables('masterVMNamePrefix'), 'nic-1')]",
-      "[concat(variables('masterVMNamePrefix'), 'nic-2')]",
-      "[concat(variables('masterVMNamePrefix'), 'nic-3')]",
-      "[concat(variables('masterVMNamePrefix'), 'nic-4')]",
-      "[concat(variables('masterVMNamePrefix'), 'nic-5')]",
-      "[concat(variables('masterVMNamePrefix'), 'nic-6')]"
-    ],
+    "staticIP": "[parameters('staticIP')]",
+    "vmName": "[concat('acc-', variables('nameSuffix'))]",
     "vmSize": "[parameters('vmSize')]",
     "nameSuffix": "[parameters('nameSuffix')]",
     "osImageOffer": "[parameters('osImageOffer')]",
@@ -90,7 +81,7 @@
          "[parameters('location')]"
     ],
     "location": "[variables('locations')[mod(add(2,length(parameters('location'))),add(1,length(parameters('location'))))]]",
-    "masterSshInboundNatRuleIdPrefix": "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',variables('masterVMNamePrefix'))]",
+    "masterSshInboundNatRuleIdPrefix": "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',variables('vmName'))]",
     "masterLbInboundNatRules": [
             [
                 {

@@ -105,7 +105,7 @@ func getStorageAccountType(sizeName string) (string, error) {
 
 func getVNETAddressPrefixes(properties *api.Properties) string {
 	var buf bytes.Buffer
-	buf.WriteString(`"[variables('masterSubnet')]"`)
+	buf.WriteString(`"[variables('subnet')]"`)
 	return buf.String()
 }
 
@@ -115,9 +115,9 @@ func getVNETSubnetDependencies(properties *api.Properties) string {
 
 func getVNETSubnets(properties *api.Properties, addNSG bool) string {
 	return `{
-            "name": "[variables('masterSubnetName')]",
+            "name": "[variables('subnetName')]",
             "properties": {
-              "addressPrefix": "[variables('masterSubnet')]"
+              "addressPrefix": "[variables('subnet')]"
             }
           }`
 }

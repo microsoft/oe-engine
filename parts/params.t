@@ -26,7 +26,6 @@
       "type": "string"
     },
   {{end}}
-
     "staticIP": {
       "defaultValue": "{{.MasterProfile.StaticIP}}",
       "metadata": {
