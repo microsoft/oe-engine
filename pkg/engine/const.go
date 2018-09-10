@@ -20,6 +20,7 @@ const (
 	windowsParams = "windowsparams.t"
 	customdata    = "customdata.t"
 
-	provisionScript = "provision.sh"
-	provisionSource = "provisionsource.sh"
+	utilsScript      = "utils.sh"
+	provisionScript  = "provision.sh"
+	validationScript = "validate.sh"
 )
