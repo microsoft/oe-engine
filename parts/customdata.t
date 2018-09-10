@@ -14,11 +14,15 @@ mounts:
 runcmd:
 - /opt/azure/acc/provision.sh
 write_files:
-- content: 'PROVISION_SOURCE_STR'
-  path: /opt/azure/acc/provision_source.sh
+- content: 'UTILS_STR'
+  path: /opt/azure/acc/utils.sh
   permissions: "0744"
   owner: "root"
 - content: 'PROVISION_STR'
   path: /opt/azure/acc/provision.sh
+  permissions: "0744"
+  owner: "root"
+- content: 'VALIDATION_STR'
+  path: /opt/azure/acc/validate.sh
   permissions: "0744"
   owner: "root"

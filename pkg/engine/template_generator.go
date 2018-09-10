@@ -138,8 +138,10 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 			str := getSingleLineCustomData(
 				customdata,
 				map[string]string{
-					"PROVISION_SOURCE_STR": getProvisionScript(provisionSource, nil),
-					"PROVISION_STR":        script})
+					"UTILS_STR":      getProvisionScript(utilsScript, nil),
+					"PROVISION_STR":  script,
+					"VALIDATION_STR": getProvisionScript(validationScript, nil),
+				})
 			return fmt.Sprintf("\"customData\": \"[base64(concat('#cloud-config\\n\\n', '%s'))]\",", str)
 		},
 		"GetAllowedVMSizes": func() string {
