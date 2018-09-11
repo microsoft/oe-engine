@@ -29,8 +29,11 @@ trap "rm -rf \"${tempdir}\"" EXIT
 cp -r /opt/openenclave/share/openenclave/samples/ $tempdir
 
 # build and run helloworld
-cd $tempdir/samples/helloworld
-make
-make run
+for sample in helloworld remote_attestation; do
+  echo "verifying $sample"
+  cd $tempdir/samples/$sample
+  make
+  make run
+done
 
 echo "open-enclave validation succedded"
