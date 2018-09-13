@@ -61,15 +61,11 @@
       "type": "string"
     },
     "storageAccountType": {
-      "type": "string",
-      "defaultValue": "Standard_LRS",
-      "allowedValues": [
-        "Standard_LRS",
-        "Premium_LRS"
-      ],
+      {{GetStorageAccountTypes}}
       "metadata": {
         "description": "Type of managed disk to create"
-      }
+      },
+      "type": "string"
     },
     "fqdnEndpointSuffix":{
       "defaultValue": "cloudapp.azure.com",
@@ -86,7 +82,8 @@
       "type": "string"
     },
     "location": {
-      "defaultValue": "{{GetLocation}}",
+      "defaultValue": "[resourceGroup().location]",
+      {{GetAllowedLocations}}
       "metadata": {
         "description": "Sets the location for all resources in the cluster"
       },

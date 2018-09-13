@@ -10,7 +10,12 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 	parametersMap := paramsMap{}
 
 	// Common Parameters
-	addValue(parametersMap, "location", location)
+	if len(cs.Location) > 0 {
+		addValue(parametersMap, "location", location)
+	}
+	if len(properties.MasterProfile.StorageType) > 0 {
+		addValue(parametersMap, "storageAccountType", properties.MasterProfile.StorageType)
+	}
 
 	addValue(parametersMap, "adminUsername", properties.LinuxProfile.AdminUsername)
 

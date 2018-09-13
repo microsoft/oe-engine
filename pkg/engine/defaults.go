@@ -12,7 +12,7 @@ import (
 // setPropertiesDefaults for the container Properties, returns true if certs are generated
 func setPropertiesDefaults(oe *api.OpenEnclave, isUpgrade bool) {
 	if len(oe.PackageBaseURL) == 0 {
-		oe.PackageBaseURL = DefaultPackageBaseURL
+		oe.PackageBaseURL = api.DefaultPackageBaseURL
 	}
 	if oe.Properties.MasterProfile == nil {
 		oe.Properties.MasterProfile = &api.MasterProfile{}
@@ -30,10 +30,10 @@ func setMasterNetworkDefaults(a *api.Properties, isUpgrade bool) {
 	}
 
 	if !a.MasterProfile.IsCustomVNET() {
-		a.MasterProfile.Subnet = DefaultSubnet
+		a.MasterProfile.Subnet = api.DefaultSubnet
 		// StaticIP is not reset if it is upgrade and some value already exists
 		if !isUpgrade || len(a.MasterProfile.StaticIP) == 0 {
-			a.MasterProfile.StaticIP = DefaultStaticIP
+			a.MasterProfile.StaticIP = api.DefaultStaticIP
 		}
 	}
 

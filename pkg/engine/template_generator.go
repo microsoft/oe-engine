@@ -145,16 +145,19 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 			return fmt.Sprintf("\"customData\": \"[base64(concat('#cloud-config\\n\\n', '%s'))]\",", str)
 		},
 		"GetAllowedVMSizes": func() string {
-			return GetAllowedVMSizes()
+			return api.GetAllowedVMSizes()
+		},
+		"GetStorageAccountTypes": func() string {
+			return api.GetStorageAccountTypes()
 		},
 		"GetOSImageNames": func() string {
-			return GetOSImageNames()
+			return api.GetOSImageNames()
 		},
 		"GetOSImageReferences": func() string {
-			return GetOSImageReferences()
+			return api.GetOSImageReferences()
 		},
 		"GetVMPlan": func(s string) string {
-			return GetVMPlan(s)
+			return api.GetVMPlan(s)
 		},
 		"Base64": func(s string) string {
 			return base64.StdEncoding.EncodeToString([]byte(s))
@@ -162,8 +165,8 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"WriteLinkedTemplatesForExtensions": func() string {
 			return ""
 		},
-		"GetLocation": func() string {
-			return cs.Location
+		"GetAllowedLocations": func() string {
+			return api.GetAllowedLocations()
 		},
 		"WrapAsVariable": func(s string) string {
 			return fmt.Sprintf("',variables('%s'),'", s)

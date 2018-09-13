@@ -64,6 +64,7 @@ type WindowsProfile struct {
 // MasterProfile represents the definition of the master cluster
 type MasterProfile struct {
 	OSImageName             string `json:"osImageName"`
+	StorageType             string `json:"storageAccountType"`
 	DNSPrefix               string `json:"dnsPrefix"`
 	VMSize                  string `json:"vmSize"`
 	OSDiskSizeGB            int    `json:"osDiskSizeGB,omitempty"`

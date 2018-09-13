@@ -1,6 +1,7 @@
 package api
 
 import (
+	"strings"
 	"fmt"
 	"net"
 	"net/url"
@@ -72,6 +73,18 @@ func (a *Properties) validateMasterProfile() error {
 	if len(m.OSImageName) > 0 {
 		if _, ok := OsImageMap[m.OSImageName]; !ok {
 			return fmt.Errorf("OS image '%s' is not supported", m.OSImageName)
+		}
+	}
+	if len(m.StorageType) > 0 {
+		found := false
+		for _, t := range AllowedStorageAccountTypes {
+			if t == m.StorageType {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return fmt.Errorf("Storage account type '%s' is not included in supported [%s]", m.StorageType, strings.Join(AllowedStorageAccountTypes, ","))
 		}
 	}
 	if len(m.DNSPrefix) > 0 {
