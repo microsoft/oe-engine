@@ -1,11 +1,11 @@
 package api
 
 import (
-	"strings"
 	"fmt"
 	"net"
 	"net/url"
 	"regexp"
+	"strings"
 
 	"github.com/Microsoft/oe-engine/pkg/api/common"
 	validator "gopkg.in/go-playground/validator.v9"
@@ -85,11 +85,6 @@ func (a *Properties) validateMasterProfile() error {
 		}
 		if !found {
 			return fmt.Errorf("Storage account type '%s' is not included in supported [%s]", m.StorageType, strings.Join(AllowedStorageAccountTypes, ","))
-		}
-	}
-	if len(m.DNSPrefix) > 0 {
-		if err := validateDNSName(m.DNSPrefix); err != nil {
-			return err
 		}
 	}
 	return nil
@@ -190,18 +185,6 @@ func validatePoolName(poolName string) error {
 	submatches := re.FindStringSubmatch(poolName)
 	if len(submatches) != 2 {
 		return fmt.Errorf("pool name '%s' is invalid. A pool name must start with a lowercase letter, have max length of 12, and only have characters a-z0-9", poolName)
-	}
-	return nil
-}
-
-func validateDNSName(dnsName string) error {
-	dnsNameRegex := `^([A-Za-z][A-Za-z0-9-]{1,43}[A-Za-z0-9])$`
-	re, err := regexp.Compile(dnsNameRegex)
-	if err != nil {
-		return err
-	}
-	if !re.MatchString(dnsName) {
-		return fmt.Errorf("DNS name '%s' is invalid. The DNS name must contain between 3 and 45 characters.  The name can contain only letters, numbers, and hyphens.  The name must start with a letter and must end with a letter or a number (length was %d)", dnsName, len(dnsName))
 	}
 	return nil
 }

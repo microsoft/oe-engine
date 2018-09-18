@@ -17,6 +17,9 @@ func setPropertiesDefaults(oe *api.OpenEnclave, isUpgrade bool) {
 	if oe.Properties.MasterProfile == nil {
 		oe.Properties.MasterProfile = &api.MasterProfile{}
 	}
+	if len(oe.Properties.MasterProfile.VMName) == 0 {
+		oe.Properties.MasterProfile.VMName = api.DefaultVMName
+	}
 	if len(oe.Properties.MasterProfile.OSImageName) == 0 {
 		oe.Properties.MasterProfile.OSImageName = api.OsImageDefault
 	}

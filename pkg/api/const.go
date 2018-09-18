@@ -13,6 +13,8 @@ const (
 )
 
 const (
+	// DefaultVMName is default VM name
+	DefaultVMName = "accVM"
 	// DefaultGeneratorCode specifies the source generator of the cluster template.
 	DefaultGeneratorCode = "oe-engine"
 	// DefaultStaticIP specifies default static IP address

@@ -1,12 +1,27 @@
-    "adminUsername": {
+    "location": {
+      "defaultValue": "[resourceGroup().location]",
+      {{GetAllowedLocations}}
       "metadata": {
-        "description": "User name for the Virtual Machines (SSH or Password)."
+        "description": "Sets the location for all resources in the cluster"
       },
       "type": "string"
     },
-    "dnsNamePrefix": {
+    "vmName": {
       "metadata": {
-        "description": "Sets the Domain name label for the IP Address.  The concatenation of the domain name label and the regional DNS zone make up the fully qualified domain name associated with the public IP address."
+        "description": "The name of the Virtual Machine."
+      },
+      "type": "string"
+    },
+    "vmSize": {
+      {{GetAllowedVMSizes}}
+      "metadata": {
+        "description": "The size of the Virtual Machine."
+      },
+      "type": "string"
+    },
+    "adminUsername": {
+      "metadata": {
+        "description": "User name for the Virtual Machines (SSH or Password)."
       },
       "type": "string"
     },
@@ -33,23 +48,9 @@
       },
       "type": "string"
     },
-    "vmSize": {
-      {{GetAllowedVMSizes}}
-      "metadata": {
-        "description": "The size of the Virtual Machine."
-      },
-      "type": "string"
-    },
     "sshRSAPublicKey": {
       "metadata": {
         "description": "SSH public key used for auth to all Linux machines.  Not Required.  If not set, you must provide a password key."
-      },
-      "type": "string"
-    },
-    "nameSuffix": {
-      "defaultValue": "{{GetUniqueNameSuffix}}",
-      "metadata": {
-        "description": "A string hash of the master DNS name to uniquely identify the cluster."
       },
       "type": "string"
     },
@@ -64,28 +65,6 @@
       {{GetStorageAccountTypes}}
       "metadata": {
         "description": "Type of managed disk to create"
-      },
-      "type": "string"
-    },
-    "fqdnEndpointSuffix":{
-      "defaultValue": "cloudapp.azure.com",
-      "metadata": {
-        "description": "Endpoint of FQDN."
-      },
-      "type": "string"
-    },
-    "targetEnvironment": {
-      "defaultValue": "AzurePublicCloud",
-      "metadata": {
-        "description": "The azure deploy environment. Currently support: AzurePublicCloud, AzureChinaCloud"
-      },
-      "type": "string"
-    },
-    "location": {
-      "defaultValue": "[resourceGroup().location]",
-      {{GetAllowedLocations}}
-      "metadata": {
-        "description": "Sets the location for all resources in the cluster"
       },
       "type": "string"
     }

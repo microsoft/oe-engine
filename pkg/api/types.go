@@ -63,9 +63,9 @@ type WindowsProfile struct {
 
 // MasterProfile represents the definition of the master cluster
 type MasterProfile struct {
+	VMName                  string `json:"vmName"`
 	OSImageName             string `json:"osImageName"`
 	StorageType             string `json:"storageAccountType"`
-	DNSPrefix               string `json:"dnsPrefix"`
 	VMSize                  string `json:"vmSize"`
 	OSDiskSizeGB            int    `json:"osDiskSizeGB,omitempty"`
 	VnetSubnetID            string `json:"vnetSubnetID,omitempty"`
@@ -74,8 +74,6 @@ type MasterProfile struct {
 	Subnet                  string `json:"subnet"`
 	HTTPSourceAddressPrefix string `json:"HTTPSourceAddressPrefix,omitempty"`
 	Accessible              bool   `json:"accessible,omitempty"`
-
-	FQDN string `json:"fqdn,omitempty"`
 }
 
 // DiagnosticsProfile setting to enable/disable capturing

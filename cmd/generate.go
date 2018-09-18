@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 
 	"github.com/Microsoft/oe-engine/pkg/api"
 	"github.com/Microsoft/oe-engine/pkg/engine"
@@ -91,7 +90,7 @@ func (gc *generateCmd) loadAPIModel(cmd *cobra.Command, args []string) error {
 	}
 
 	if gc.outputDirectory == "" {
-		gc.outputDirectory = path.Join("_output", gc.oe.Properties.MasterProfile.DNSPrefix)
+		gc.outputDirectory = "_output"
 	}
 	return nil
 }

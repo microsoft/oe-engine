@@ -124,9 +124,6 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"GetSecurityRules": func(ports []int) string {
 			return getSecurityRules(ports)
 		},
-		"GetUniqueNameSuffix": func() string {
-			return GenerateClusterID(cs.Properties)
-		},
 		"GetVNETAddressPrefixes": func() string {
 			return getVNETAddressPrefixes(cs.Properties)
 		},

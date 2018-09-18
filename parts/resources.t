@@ -24,9 +24,6 @@
       "location": "[variables('location')]",
       "name": "[variables('masterPublicIPAddressName')]",
       "properties": {
-        "dnsSettings": {
-          "domainNameLabel": "[variables('dnsNamePrefix')]"
-        },
         "publicIPAllocationMethod": "Dynamic"
       },
       "type": "Microsoft.Network/publicIPAddresses"
@@ -101,7 +98,7 @@
         "[variables('masterLbID')]"
       ],
       "location": "[variables('location')]",
-      "name": "[concat(variables('masterLbName'), '/', 'SSH-', variables('vmName'))]",
+      "name": "[concat(variables('masterLbName'), '/', 'SSH-', parameters('vmName'))]",
       "properties": {
         "backendPort": 22,
         "enableFloatingIP": false,
@@ -145,10 +142,10 @@
         "[variables('vnetID')]",
 {{end}}
         "[variables('masterLbID')]",
-        "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',variables('vmName'))]"
+        "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',parameters('vmName'))]"
       ],
       "location": "[variables('location')]",
-      "name": "[concat(variables('vmName'), '-nic')]",
+      "name": "[concat(parameters('vmName'), '-nic')]",
       "properties": {
         "ipConfigurations": [
           {
@@ -161,7 +158,7 @@
               ],
               "loadBalancerInboundNatRules": [
                 {
-                  "id": "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',variables('vmName'))]"
+                  "id": "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',parameters('vmName'))]"
                 }
               ],
               "privateIPAddress": "[variables('staticIP')]",
@@ -181,29 +178,29 @@
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('vmName'), '-nic')]"
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('vmName'), '-nic')]"
       ],
       "tags":
       {
-        "creationSource" : "[concat('oe-engine-', variables('vmName'))]"
+        "creationSource" : "[concat('oe-engine-', parameters('vmName'))]"
       },
       "location": "[variables('location')]",
-      "name": "[variables('vmName')]",
+      "name": "[parameters('vmName')]",
       {{GetVMPlan .MasterProfile.OSImageName}}
       "properties": {
         "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
+          "vmSize": "[parameters('vmSize')]"
         },
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmName'), '-nic'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('vmName'), '-nic'))]"
             }
           ]
         },
         "osProfile": {
           "adminUsername": "[variables('adminUsername')]",
-          "computername": "[variables('vmName')]",
+          "computername": "[parameters('vmName')]",
           {{GetCustomData}}
           "linuxConfiguration": {
             "disablePasswordAuthentication": "true",
@@ -240,10 +237,10 @@
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "dependsOn": [
-        "[variables('vmName')]"
+        "[parameters('vmName')]"
       ],
       "location": "[variables('location')]",
-      "name": "[concat(variables('vmName'), '/validate')]",
+      "name": "[concat(parameters('vmName'), '/validate')]",
       "properties": {
         "autoUpgradeMinorVersion": true,
         "publisher": "Microsoft.OSTCExtensions",

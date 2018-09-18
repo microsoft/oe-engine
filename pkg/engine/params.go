@@ -19,14 +19,13 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 
 	addValue(parametersMap, "adminUsername", properties.LinuxProfile.AdminUsername)
 
-	addValue(parametersMap, "dnsNamePrefix", properties.MasterProfile.DNSPrefix)
-
 	if properties.MasterProfile.IsCustomVNET() {
 		addValue(parametersMap, "vnetSubnetID", properties.MasterProfile.VnetSubnetID)
 	} else {
 		addValue(parametersMap, "subnet", properties.MasterProfile.Subnet)
 	}
 	addValue(parametersMap, "staticIP", properties.MasterProfile.StaticIP)
+	addValue(parametersMap, "vmName", properties.MasterProfile.VMName)
 	addValue(parametersMap, "vmSize", properties.MasterProfile.VMSize)
 	addValue(parametersMap, "osImageName", properties.MasterProfile.OSImageName)
 

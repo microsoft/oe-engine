@@ -6,9 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"hash/fnv"
 	"io/ioutil"
-	"math/rand"
 	"net"
 	"net/http"
 	"regexp"
@@ -27,19 +25,6 @@ var keyvaultSecretPathRe *regexp.Regexp
 
 func init() {
 	keyvaultSecretPathRe = regexp.MustCompile(`^(/subscriptions/\S+/resourceGroups/\S+/providers/Microsoft.KeyVault/vaults/\S+)/secrets/([^/\s]+)(/(\S+))?$`)
-}
-
-// GenerateClusterID creates a unique 8 string cluster ID
-func GenerateClusterID(properties *api.Properties) string {
-	uniqueNameSuffixSize := 8
-	// the name suffix uniquely identifies the cluster and is generated off a hash
-	// from the master dns name
-	h := fnv.New64a()
-	if properties.MasterProfile != nil {
-		h.Write([]byte(properties.MasterProfile.DNSPrefix))
-	}
-	rand.Seed(int64(h.Sum64()))
-	return fmt.Sprintf("%08d", rand.Uint32())[:uniqueNameSuffixSize]
 }
 
 func generateIPList(count int, firstAddr string) []string {
