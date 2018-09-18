@@ -19,7 +19,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-var templateFiles = []string{baseFile, params, vars, resources, outputs, windowsParams, customdata, utilsScript, provisionScript, validationScript}
+var templateFiles = []string{baseFile, params, vars, resources, outputs, customdata, utilsScript, provisionScript, validationScript}
 
 var keyvaultSecretPathRe *regexp.Regexp
 

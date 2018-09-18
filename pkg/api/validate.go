@@ -39,6 +39,9 @@ func (a *Properties) Validate(isUpdate bool) error {
 	if a.LinuxProfile != nil && a.WindowsProfile != nil {
 		return fmt.Errorf("Linux and Windows profiles are mutually exclusive")
 	}
+	if a.LinuxProfile == nil && a.WindowsProfile == nil {
+		return fmt.Errorf("Must specify either Linux or Windows profile")
+	}
 	if e := a.validateMasterProfile(); e != nil {
 		return e
 	}
@@ -94,8 +97,11 @@ func (a *Properties) validateLinuxProfile() error {
 	if a.LinuxProfile == nil {
 		return nil
 	}
-	if e := validate.Var(a.LinuxProfile.SSH.PublicKeys[0].KeyData, "required"); e != nil {
-		return fmt.Errorf("KeyData in LinuxProfile.SSH.PublicKeys cannot be empty string")
+	if len(a.LinuxProfile.AdminPassword) > 0 && len(a.LinuxProfile.SSH.PublicKeys[0].KeyData) > 0 {
+		return fmt.Errorf("AdminPassword and SSH public key are mutually exclusive")
+	}
+	if len(a.LinuxProfile.AdminPassword) == 0 && len(a.LinuxProfile.SSH.PublicKeys[0].KeyData) == 0 {
+		return fmt.Errorf("Must specify either AdminPassword or SSH public key")
 	}
 	return validateKeyVaultSecrets(a.LinuxProfile.Secrets, false)
 }

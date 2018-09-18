@@ -26,7 +26,7 @@ const (
 	// DefaultPackageBaseURL specifies default package base URL
 	DefaultPackageBaseURL = "https://oedownload.blob.core.windows.net/binaries"
 	// DefaultOSDiskSizeGB specifies default OS disk size
-	DefaultOSDiskSizeGB = 30
+	DefaultOSDiskSizeGB = 60
 )
 
 // OSImage represents Azure OS Image

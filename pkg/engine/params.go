@@ -33,7 +33,17 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 	addValue(parametersMap, "diskSizeGB", strconv.Itoa(properties.MasterProfile.OSDiskSizeGB))
 
 	if properties.LinuxProfile != nil {
-		addValue(parametersMap, "sshRSAPublicKey", properties.LinuxProfile.SSH.PublicKeys[0].KeyData)
+		if len(properties.LinuxProfile.AdminPassword) > 0 {
+			addValue(parametersMap, "authenticationType", "password")
+			addValue(parametersMap, "adminPasswordOrKey", properties.LinuxProfile.AdminPassword)
+		} else {
+			addValue(parametersMap, "authenticationType", "sshPublicKey")
+			addValue(parametersMap, "adminPasswordOrKey", properties.LinuxProfile.SSH.PublicKeys[0].KeyData)
+		}
+	}
+	if properties.WindowsProfile != nil {
+		addValue(parametersMap, "authenticationType", "password")
+		addValue(parametersMap, "adminPasswordOrKey", properties.WindowsProfile.AdminPassword)
 	}
 
 	return parametersMap, nil

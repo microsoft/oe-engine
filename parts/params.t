@@ -25,6 +25,23 @@
       },
       "type": "string"
     },
+    "authenticationType": {
+      "type": "string",
+      "defaultValue": "password",
+      "allowedValues": [
+        "password",
+        "sshPublicKey"
+      ],
+      "metadata": {
+        "description": "Type of authentication to use on the virtual machine."
+      }
+    },
+    "adminPasswordOrKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password or ssh key value."
+      }
+    },
   {{if .MasterProfile.IsCustomVNET}}
     "vnetSubnetID": {
       "metadata": {
@@ -45,12 +62,6 @@
       "defaultValue": "{{.MasterProfile.StaticIP}}",
       "metadata": {
         "description": "Sets the static IP of the VM"
-      },
-      "type": "string"
-    },
-    "sshRSAPublicKey": {
-      "metadata": {
-        "description": "SSH public key used for auth to all Linux machines.  Not Required.  If not set, you must provide a password key."
       },
       "type": "string"
     },

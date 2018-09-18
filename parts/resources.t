@@ -199,20 +199,13 @@
           ]
         },
         "osProfile": {
-          "adminUsername": "[variables('adminUsername')]",
           "computername": "[parameters('vmName')]",
+          "adminUsername": "[variables('adminUsername')]",
+          "adminPassword": "[parameters('adminPasswordOrKey')]",
+          "adminPassword": "[if(equals(parameters('authenticationType'), 'password'), parameters('adminPasswordOrKey'), '')]",
           {{GetCustomData}}
-          "linuxConfiguration": {
-            "disablePasswordAuthentication": "true",
-            "ssh": {
-                "publicKeys": [
-                    {
-                        "keyData": "[variables('sshRSAPublicKey')]",
-                        "path": "[variables('sshKeyPath')]"
-                    }
-                ]
-            }
-          }
+          "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
+          "windowsConfiguration": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsConfiguration'), json('null'))]"
           {{if .LinuxProfile.HasSecrets}}
           ,
           "secrets": "[variables('linuxProfileSecrets')]"

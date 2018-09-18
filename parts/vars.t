@@ -24,10 +24,6 @@
         {{end}}
       ],
 {{end}}
-{{if .HasWindows}}
-    "windowsAdminUsername": "[parameters('windowsAdminUsername')]",
-    "windowsAdminPassword": "[parameters('windowsAdminPassword')]",
-{{end}}
     "masterHttpSourceAddressPrefix": "{{.MasterProfile.HTTPSourceAddressPrefix}}",
     "masterLbBackendPoolName": "acc-pool",
     "masterLbID": "[resourceId('Microsoft.Network/loadBalancers',variables('masterLbName'))]",
@@ -48,6 +44,18 @@
 {{end}}
     "staticIP": "[parameters('staticIP')]",
     {{GetOSImageReferences}}
-    "sshKeyPath": "[concat('/home/', variables('adminUsername'), '/.ssh/authorized_keys')]",
-    "sshRSAPublicKey": "[parameters('sshRSAPublicKey')]",
-    "location": "[parameters('location')]"
+    "location": "[parameters('location')]",
+    "linuxConfiguration": {
+      "disablePasswordAuthentication": "true",
+      "ssh": {
+        "publicKeys": [
+          {
+            "keyData": "[parameters('adminPasswordOrKey')]",
+            "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]"
+          }
+        ]
+      }
+    },
+    "windowsConfiguration": {
+      "provisionVmAgent": "true"
+    }

@@ -1,13 +1,12 @@
 package engine
 
 const (
-	baseFile      = "accbase.t"
-	vars          = "vars.t"
-	params        = "params.t"
-	resources     = "resources.t"
-	outputs       = "outputs.t"
-	windowsParams = "windowsparams.t"
-	customdata    = "customdata.t"
+	baseFile   = "accbase.t"
+	vars       = "vars.t"
+	params     = "params.t"
+	resources  = "resources.t"
+	outputs    = "outputs.t"
+	customdata = "customdata.t"
 
 	utilsScript      = "utils.sh"
 	provisionScript  = "provision.sh"
