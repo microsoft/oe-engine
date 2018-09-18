@@ -22,9 +22,11 @@ const (
 	// DefaultSubnet specifies default subnet
 	DefaultSubnet = "10.0.0.0/24"
 	// DefaultStorageAccountType specifies default storage account type
-	DefaultStorageAccountType = "Standard_LRS"
+	DefaultStorageAccountType = "Premium_LRS"
 	// DefaultPackageBaseURL specifies default package base URL
 	DefaultPackageBaseURL = "https://oedownload.blob.core.windows.net/binaries"
+	// DefaultOSDiskSizeGB specifies default OS disk size
+	DefaultOSDiskSizeGB = 30
 )
 
 // OSImage represents Azure OS Image
@@ -68,9 +70,9 @@ var AllowedVMSizes = []string{
 
 // AllowedStorageAccountTypes provides supported storage account types
 var AllowedStorageAccountTypes = []string{
-	"Standard_LRS",
 	"Premium_LRS",
-	"Standard_RAGRS",
+	"StandardSSD_LRS",
+	"Standard_LRS",
 }
 
 func getAllowedValues(vals []string) string {

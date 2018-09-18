@@ -23,6 +23,9 @@ func setPropertiesDefaults(oe *api.OpenEnclave, isUpgrade bool) {
 	if len(oe.Properties.MasterProfile.OSImageName) == 0 {
 		oe.Properties.MasterProfile.OSImageName = api.OsImageDefault
 	}
+	if oe.Properties.MasterProfile.OSDiskSizeGB == 0 {
+		oe.Properties.MasterProfile.OSDiskSizeGB = api.DefaultOSDiskSizeGB
+	}
 	setMasterNetworkDefaults(oe.Properties, isUpgrade)
 }
 

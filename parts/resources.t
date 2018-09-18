@@ -223,9 +223,7 @@
           "osDisk": {
             "caching": "ReadWrite",
             "createOption": "FromImage",
-{{if ne .MasterProfile.OSDiskSizeGB 0}}
-            "diskSizeGB": {{.MasterProfile.OSDiskSizeGB}},
-{{end}}
+            "diskSizeGB": "[parameters('diskSizeGB')]",
             "managedDisk": {
               "storageAccountType": "[parameters('storageAccountType')]"
             }

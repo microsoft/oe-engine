@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"strconv"
+
 	"github.com/Microsoft/oe-engine/pkg/api"
 )
 
@@ -28,6 +30,7 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 	addValue(parametersMap, "vmName", properties.MasterProfile.VMName)
 	addValue(parametersMap, "vmSize", properties.MasterProfile.VMSize)
 	addValue(parametersMap, "osImageName", properties.MasterProfile.OSImageName)
+	addValue(parametersMap, "diskSizeGB", strconv.Itoa(properties.MasterProfile.OSDiskSizeGB))
 
 	if properties.LinuxProfile != nil {
 		addValue(parametersMap, "sshRSAPublicKey", properties.LinuxProfile.SSH.PublicKeys[0].KeyData)

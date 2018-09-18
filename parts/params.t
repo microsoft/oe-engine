@@ -61,6 +61,12 @@
       },
       "type": "string"
     },
+    "diskSizeGB": {
+      "metadata": {
+        "description": "OS disk size in GB"
+      },
+      "type": "string"
+    },
     "storageAccountType": {
       {{GetStorageAccountTypes}}
       "metadata": {
