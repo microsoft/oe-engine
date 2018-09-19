@@ -201,9 +201,8 @@
         "osProfile": {
           "computername": "[parameters('vmName')]",
           "adminUsername": "[variables('adminUsername')]",
-          "adminPassword": "[parameters('adminPasswordOrKey')]",
           "adminPassword": "[if(equals(parameters('authenticationType'), 'password'), parameters('adminPasswordOrKey'), '')]",
-          {{GetCustomData}}
+          "customData": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), json('null'), {{GetCustomData}})]",
           "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
           "windowsConfiguration": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsConfiguration'), json('null'))]"
           {{if .LinuxProfile.HasSecrets}}

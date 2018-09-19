@@ -139,7 +139,7 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 					"PROVISION_STR":  script,
 					"VALIDATION_STR": getProvisionScript(validationScript, nil),
 				})
-			return fmt.Sprintf("\"customData\": \"[base64(concat('#cloud-config\\n\\n', '%s'))]\",", str)
+			return fmt.Sprintf("base64(concat('#cloud-config\\n\\n', '%s'))", str)
 		},
 		"GetAllowedVMSizes": func() string {
 			return api.GetAllowedVMSizes()
