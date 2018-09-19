@@ -123,9 +123,14 @@ type KeyVaultCertificate struct {
 // OSType represents OS types of agents
 type OSType string
 
-// HasWindows returns true if the cluster contains windows
-func (p *Properties) HasWindows() bool {
-	return false
+// IsWindows returns true for Windows VM
+func (p *Properties) IsWindows() bool {
+	return p.WindowsProfile != nil
+}
+
+// IsLinux returns true for Linux VM
+func (p *Properties) IsLinux() bool {
+	return p.LinuxProfile != nil
 }
 
 // IsCustomVNET returns true if the customer brought their own VNET

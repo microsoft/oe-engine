@@ -4,7 +4,7 @@
       "dependsOn": [
           {{GetVNETSubnetDependencies}}
       ],
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "name": "[variables('virtualNetworkName')]",
       "properties": {
         "addressSpace": {
@@ -21,7 +21,7 @@
 {{end}}
     {
       "apiVersion": "[variables('apiVersionDefault')]",
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "name": "[variables('masterPublicIPAddressName')]",
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
@@ -33,7 +33,7 @@
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('masterPublicIPAddressName'))]"
       ],
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "name": "[variables('masterLbName')]",
       "properties": {
         "backendAddressPools": [
@@ -97,7 +97,7 @@
       "dependsOn": [
         "[variables('masterLbID')]"
       ],
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "name": "[concat(variables('masterLbName'), '/', 'SSH-', parameters('vmName'))]",
       "properties": {
         "backendPort": 22,
@@ -112,7 +112,7 @@
     },
     {
       "apiVersion": "[variables('apiVersionDefault')]",
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "name": "[variables('masterNSGName')]",
       "properties": {
         "securityRules": [
@@ -144,7 +144,7 @@
         "[variables('masterLbID')]",
         "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',parameters('vmName'))]"
       ],
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "name": "[concat(parameters('vmName'), '-nic')]",
       "properties": {
         "ipConfigurations": [
@@ -184,7 +184,7 @@
       {
         "creationSource" : "[concat('oe-engine-', parameters('vmName'))]"
       },
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "name": "[parameters('vmName')]",
       {{GetVMPlan .MasterProfile.OSImageName}}
       "properties": {
@@ -205,10 +205,10 @@
           "customData": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), json('null'), {{GetCustomData}})]",
           "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
           "windowsConfiguration": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsConfiguration'), json('null'))]"
-          {{if .LinuxProfile.HasSecrets}}
+          {{if .IsLinux}}{{if .LinuxProfile.HasSecrets}}
           ,
           "secrets": "[variables('linuxProfileSecrets')]"
-          {{end}}
+          {{end}}{{end}}
         },
         "storageProfile": {
           "imageReference": "[variables('imageReference')[parameters('osImageName')]]",
@@ -229,13 +229,13 @@
       "dependsOn": [
         "[parameters('vmName')]"
       ],
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "name": "[concat(parameters('vmName'), '/validate')]",
       "properties": {
         "autoUpgradeMinorVersion": true,
         "publisher": "Microsoft.OSTCExtensions",
         "settings": {
-          "commandToExecute": "/bin/bash -c \"secs=600; SECONDS=0; while (( SECONDS < secs )); do if [ -e /opt/azure/acc/completed ]; then /opt/azure/acc/validate.sh; exit $? ; fi; echo waiting for validation; sleep 20; done; echo validation timeout; exit 1;\""
+          "commandToExecute": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsExtensionCommand'), variables('linuxExtensionCommand'))]"
         },
         "type": "CustomScriptForLinux",
         "typeHandlerVersion": "1.4"

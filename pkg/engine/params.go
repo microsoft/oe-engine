@@ -19,8 +19,6 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 		addValue(parametersMap, "storageAccountType", properties.MasterProfile.StorageType)
 	}
 
-	addValue(parametersMap, "adminUsername", properties.LinuxProfile.AdminUsername)
-
 	if properties.MasterProfile.IsCustomVNET() {
 		addValue(parametersMap, "vnetSubnetID", properties.MasterProfile.VnetSubnetID)
 	} else {
@@ -33,6 +31,7 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 	addValue(parametersMap, "diskSizeGB", strconv.Itoa(properties.MasterProfile.OSDiskSizeGB))
 
 	if properties.LinuxProfile != nil {
+		addValue(parametersMap, "adminUsername", properties.LinuxProfile.AdminUsername)
 		if len(properties.LinuxProfile.AdminPassword) > 0 {
 			addValue(parametersMap, "authenticationType", "password")
 			addValue(parametersMap, "adminPasswordOrKey", properties.LinuxProfile.AdminPassword)
@@ -42,6 +41,7 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 		}
 	}
 	if properties.WindowsProfile != nil {
+		addValue(parametersMap, "adminUsername", properties.WindowsProfile.AdminUsername)
 		addValue(parametersMap, "authenticationType", "password")
 		addValue(parametersMap, "adminPasswordOrKey", properties.WindowsProfile.AdminPassword)
 	}

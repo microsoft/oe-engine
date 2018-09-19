@@ -3,7 +3,7 @@
     "apiVersionDefault": "2018-06-01",
     "singleQuote": "'",
     "doubleSingleQuote": "''",
-{{if .LinuxProfile.HasSecrets}}
+{{if .IsLinux}}{{if .LinuxProfile.HasSecrets}}
     "linuxProfileSecrets" :
       [
           {{range  $vIndex, $vault := .LinuxProfile.Secrets}}
@@ -23,7 +23,7 @@
               }
         {{end}}
       ],
-{{end}}
+{{end}}{{end}}
     "masterHttpSourceAddressPrefix": "{{.MasterProfile.HTTPSourceAddressPrefix}}",
     "masterLbBackendPoolName": "acc-pool",
     "masterLbID": "[resourceId('Microsoft.Network/loadBalancers',variables('masterLbName'))]",
@@ -44,7 +44,6 @@
 {{end}}
     "staticIP": "[parameters('staticIP')]",
     {{GetOSImageReferences}}
-    "location": "[parameters('location')]",
     "linuxConfiguration": {
       "disablePasswordAuthentication": "true",
       "ssh": {
@@ -58,4 +57,6 @@
     },
     "windowsConfiguration": {
       "provisionVmAgent": "true"
-    }
+    },
+    "linuxExtensionCommand": "/bin/bash -c \"secs=600; SECONDS=0; while (( SECONDS < secs )); do if [ -e /opt/azure/acc/completed ]; then /opt/azure/acc/validate.sh; exit $? ; fi; echo waiting for validation; sleep 20; done; echo validation timeout; exit 1;\"",
+    "windowsExtensionCommand": "exit 0"

@@ -172,19 +172,19 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 			return fmt.Sprintf("',%s,'", s)
 		},
 		"HasLinuxSecrets": func() bool {
-			return cs.Properties.LinuxProfile.HasSecrets()
+			return cs.Properties.LinuxProfile != nil && cs.Properties.LinuxProfile.HasSecrets()
 		},
 		"HasCustomSearchDomain": func() bool {
-			return cs.Properties.LinuxProfile.HasSearchDomain()
+			return cs.Properties.LinuxProfile != nil && cs.Properties.LinuxProfile.HasSearchDomain()
 		},
 		"HasCustomNodesDNS": func() bool {
-			return cs.Properties.LinuxProfile.HasCustomNodesDNS()
+			return cs.Properties.LinuxProfile != nil && cs.Properties.LinuxProfile.HasCustomNodesDNS()
 		},
 		"HasWindowsSecrets": func() bool {
-			return cs.Properties.WindowsProfile.HasSecrets()
+			return cs.Properties.WindowsProfile != nil && cs.Properties.WindowsProfile.HasSecrets()
 		},
 		"HasWindowsCustomImage": func() bool {
-			return cs.Properties.WindowsProfile.HasCustomImage()
+			return cs.Properties.WindowsProfile != nil && cs.Properties.WindowsProfile.HasCustomImage()
 		},
 		// inspired by http://stackoverflow.com/questions/18276173/calling-a-template-with-several-pipeline-parameters/18276968#18276968
 		"dict": func(values ...interface{}) (map[string]interface{}, error) {
