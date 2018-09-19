@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	OsUbuntu1604  = "UbuntuServer_16.04"
+	// OsUbuntu1604 image
+	OsUbuntu1604 = "UbuntuServer_16.04"
+	// OsWindows2016 image
 	OsWindows2016 = "WindowsServer_2016"
-
-	OsImageDefault = OsUbuntu1604
 )
 
 const (
@@ -25,8 +25,10 @@ const (
 	DefaultStorageAccountType = "Premium_LRS"
 	// DefaultPackageBaseURL specifies default package base URL
 	DefaultPackageBaseURL = "https://oedownload.blob.core.windows.net/binaries"
-	// DefaultOSDiskSizeGB specifies default OS disk size
-	DefaultOSDiskSizeGB = 60
+	// DefaultLinuxImage specifies default Linux OS image
+	DefaultLinuxImage = OsUbuntu1604
+	// DefaultWindowsImage specifies default Linux OS image
+	DefaultWindowsImage = OsWindows2016
 )
 
 // OSImage represents Azure OS Image
@@ -49,9 +51,9 @@ var OsImageMap = map[string]OSImage{
 	},
 	OsWindows2016: {
 		Publisher: "MicrosoftWindowsServer",
-		Offer:     "WindowsServer",
+		Offer:     "WindowsServer-preview",
 		SKU:       "2016-Datacenter",
-		Version:   "latest",
+		Version:   "2016.127.20180917",
 		IsWindows: true,
 	},
 }
@@ -90,7 +92,7 @@ func getDefaultValue(def string) string {
 }
 
 func getAllowedDefaultValues(vals []string, def string) string {
-	return getAllowedValues(vals) + getDefaultValue(def)
+	return getAllowedValues(vals) + "    " + getDefaultValue(def)
 }
 
 // GetAllowedLocations returns allowed locations
@@ -114,39 +116,44 @@ func GetOSImageNames() string {
 	for name := range OsImageMap {
 		osNames = append(osNames, name)
 	}
-	return getAllowedDefaultValues(osNames, OsImageDefault)
+	return getAllowedValues(osNames)
 }
 
 // GetOSImageReferences returns image references
 func GetOSImageReferences() string {
 	osRefs := []string{}
-	osRefFormat := `"%s": {
-            "publisher": "%s",
-            "offer": "%s",
-            "sku": "%s",
-            "version": "%s"
-          }`
+	osRefFormat := `  "%s": {
+        "publisher": "%s",
+        "offer": "%s",
+        "sku": "%s",
+        "version": "%s"
+      }`
 	for osname, img := range OsImageMap {
 		osRefs = append(osRefs, fmt.Sprintf(osRefFormat, osname, img.Publisher, img.Offer, img.SKU, img.Version))
 	}
 
 	strFormat := `"imageReference": {
     %s
-  },
+  }
   `
 	return fmt.Sprintf(strFormat, strings.Join(osRefs, ",\n    "))
 }
 
-// GetVMPlan returns VM plan
-func GetVMPlan(osImageName string) string {
-	img, ok := OsImageMap[osImageName]
-	if !ok {
-		return ""
+// GetVMPlans returns VM plans
+func GetVMPlans() string {
+	vmPlans := []string{}
+	vmPlanFormat := `  "%s": {
+        "name": "%s",
+        "publisher": "%s",
+        "product": "%s"
+      }`
+	for osname, img := range OsImageMap {
+		vmPlans = append(vmPlans, fmt.Sprintf(vmPlanFormat, osname, img.SKU, img.Publisher, img.Offer))
 	}
-	strFormat := `"plan": {
-  "name": "%s",
-  "publisher": "%s",
-  "product": "%s"
-},`
-	return fmt.Sprintf(strFormat, img.SKU, img.Publisher, img.Offer)
+
+	strFormat := `"plans": {
+    %s
+  }
+  `
+	return fmt.Sprintf(strFormat, strings.Join(vmPlans, ",\n    "))
 }

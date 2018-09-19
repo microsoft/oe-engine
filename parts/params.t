@@ -73,6 +73,7 @@
       "type": "string"
     },
     "diskSizeGB": {
+      "defaultValue": "",
       "metadata": {
         "description": "OS disk size in GB"
       },

@@ -22,7 +22,7 @@
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "location": "[parameters('location')]",
-      "name": "[variables('masterPublicIPAddressName')]",
+      "name": "[variables('publicIPAddressName')]",
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
       },
@@ -30,119 +30,20 @@
     },
     {
       "apiVersion": "[variables('apiVersionDefault')]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('masterPublicIPAddressName'))]"
-      ],
       "location": "[parameters('location')]",
-      "name": "[variables('masterLbName')]",
+      "name": "[variables('nsgName')]",
       "properties": {
-        "backendAddressPools": [
-          {
-            "name": "[variables('masterLbBackendPoolName')]"
-          }
-        ],
-        "frontendIPConfigurations": [
-          {
-            "name": "[variables('masterLbIPConfigName')]",
-            "properties": {
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('masterPublicIPAddressName'))]"
-              }
-            }
-          }
-        ]
-{{if .MasterProfile.Accessible}}
-        ,"loadBalancingRules": [
-	        {
-            "name": "LBRule443",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[variables('masterLbIPConfigID')]"
-              },
-              "frontendPort": 443,
-              "backendPort": 443,
-              "enableFloatingIP": false,
-              "idleTimeoutInMinutes": 4,
-              "protocol": "Tcp",
-              "loadDistribution": "Default",
-              "backendAddressPool": {
-                "id": "[concat(variables('masterLbID'), '/backendAddressPools/', variables('masterLbBackendPoolName'))]"
-              }
-            }
-          },
-          {
-            "name": "LBRule80",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[variables('masterLbIPConfigID')]"
-              },
-              "frontendPort": 80,
-              "backendPort": 80,
-              "enableFloatingIP": false,
-              "idleTimeoutInMinutes": 4,
-              "protocol": "Tcp",
-              "loadDistribution": "Default",
-              "backendAddressPool": {
-                "id": "[concat(variables('masterLbID'), '/backendAddressPools/', variables('masterLbBackendPoolName'))]"
-              }
-            }
-          }
-        ]
-{{end}}
-      },
-      "type": "Microsoft.Network/loadBalancers"
-    },
-    {
-      "apiVersion": "[variables('apiVersionDefault')]",
-      "dependsOn": [
-        "[variables('masterLbID')]"
-      ],
-      "location": "[parameters('location')]",
-      "name": "[concat(variables('masterLbName'), '/', 'SSH-', parameters('vmName'))]",
-      "properties": {
-        "backendPort": 22,
-        "enableFloatingIP": false,
-        "frontendIPConfiguration": {
-          "id": "[variables('masterLbIPConfigID')]"
-        },
-        "frontendPort": "22",
-        "protocol": "tcp"
-      },
-      "type": "Microsoft.Network/loadBalancers/inboundNatRules"
-    },
-    {
-      "apiVersion": "[variables('apiVersionDefault')]",
-      "location": "[parameters('location')]",
-      "name": "[variables('masterNSGName')]",
-      "properties": {
-        "securityRules": [
-          {
-              "properties": {
-                  "priority": 200,
-                  "access": "Allow",
-                  "direction": "Inbound",
-                  "destinationPortRange": "22",
-                  "sourcePortRange": "*",
-                  "destinationAddressPrefix": "*",
-                  "protocol": "Tcp",
-                  "description": "Allow SSH",
-                  "sourceAddressPrefix": "*"
-              },
-              "name": "ssh"
-          }
-        ]
+        "securityRules": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsSecurityRules'), variables('linuxSecurityRules'))]"
       },
       "type": "Microsoft.Network/networkSecurityGroups"
     },
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "dependsOn": [
-        "[variables('masterNSGID')]",
 {{if not .MasterProfile.IsCustomVNET}}
         "[variables('vnetID')]",
 {{end}}
-        "[variables('masterLbID')]",
-        "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',parameters('vmName'))]"
+        "[variables('nsgID')]"
       ],
       "location": "[parameters('location')]",
       "name": "[concat(parameters('vmName'), '-nic')]",
@@ -151,26 +52,19 @@
           {
             "name": "ipConfigNode",
             "properties": {
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[concat(variables('masterLbID'), '/backendAddressPools/', variables('masterLbBackendPoolName'))]"
-                }
-              ],
-              "loadBalancerInboundNatRules": [
-                {
-                  "id": "[concat(variables('masterLbID'),'/inboundNatRules/SSH-',parameters('vmName'))]"
-                }
-              ],
               "privateIPAddress": "[variables('staticIP')]",
               "privateIPAllocationMethod": "Static",
               "subnet": {
                 "id": "[variables('vnetSubnetID')]"
+              },
+              "publicIpAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
               }
             }
           }
         ]
         ,"networkSecurityGroup": {
-          "id": "[variables('masterNSGID')]"
+          "id": "[variables('nsgID')]"
         }
       },
       "type": "Microsoft.Network/networkInterfaces"
@@ -186,7 +80,7 @@
       },
       "location": "[parameters('location')]",
       "name": "[parameters('vmName')]",
-      {{GetVMPlan .MasterProfile.OSImageName}}
+      "plan": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), json('null'), variables('plan'))]",
       "properties": {
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
@@ -215,7 +109,7 @@
           "osDisk": {
             "caching": "ReadWrite",
             "createOption": "FromImage",
-            "diskSizeGB": "[parameters('diskSizeGB')]",
+            "diskSizeGB": "[if(equals(parameters('diskSizeGB'), ''), json('null'), parameters('diskSizeGB'))]",
             "managedDisk": {
               "storageAccountType": "[parameters('storageAccountType')]"
             }
@@ -231,14 +125,6 @@
       ],
       "location": "[parameters('location')]",
       "name": "[concat(parameters('vmName'), '/validate')]",
-      "properties": {
-        "autoUpgradeMinorVersion": true,
-        "publisher": "Microsoft.OSTCExtensions",
-        "settings": {
-          "commandToExecute": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsExtensionCommand'), variables('linuxExtensionCommand'))]"
-        },
-        "type": "CustomScriptForLinux",
-        "typeHandlerVersion": "1.4"
-      },
+      "properties": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsExtensionProperties'), variables('linuxExtensionProperties'))]",
       "type": "Microsoft.Compute/virtualMachines/extensions"
     }{{WriteLinkedTemplatesForExtensions}}

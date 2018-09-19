@@ -21,10 +21,12 @@ func setPropertiesDefaults(oe *api.OpenEnclave, isUpgrade bool) {
 		oe.Properties.MasterProfile.VMName = api.DefaultVMName
 	}
 	if len(oe.Properties.MasterProfile.OSImageName) == 0 {
-		oe.Properties.MasterProfile.OSImageName = api.OsImageDefault
-	}
-	if oe.Properties.MasterProfile.OSDiskSizeGB == 0 {
-		oe.Properties.MasterProfile.OSDiskSizeGB = api.DefaultOSDiskSizeGB
+		if oe.Properties.LinuxProfile != nil {
+			oe.Properties.MasterProfile.OSImageName = api.DefaultLinuxImage
+		}
+		if oe.Properties.WindowsProfile != nil {
+			oe.Properties.MasterProfile.OSImageName = api.DefaultWindowsImage
+		}
 	}
 	setMasterNetworkDefaults(oe.Properties, isUpgrade)
 }

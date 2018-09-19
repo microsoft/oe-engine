@@ -153,8 +153,8 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"GetOSImageReferences": func() string {
 			return api.GetOSImageReferences()
 		},
-		"GetVMPlan": func(s string) string {
-			return api.GetVMPlan(s)
+		"GetVMPlans": func() string {
+			return api.GetVMPlans()
 		},
 		"Base64": func(s string) string {
 			return base64.StdEncoding.EncodeToString([]byte(s))

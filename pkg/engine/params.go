@@ -28,8 +28,9 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 	addValue(parametersMap, "vmName", properties.MasterProfile.VMName)
 	addValue(parametersMap, "vmSize", properties.MasterProfile.VMSize)
 	addValue(parametersMap, "osImageName", properties.MasterProfile.OSImageName)
-	addValue(parametersMap, "diskSizeGB", strconv.Itoa(properties.MasterProfile.OSDiskSizeGB))
-
+	if properties.MasterProfile.OSDiskSizeGB > 0 {
+		addValue(parametersMap, "diskSizeGB", strconv.Itoa(properties.MasterProfile.OSDiskSizeGB))
+	}
 	if properties.LinuxProfile != nil {
 		addValue(parametersMap, "adminUsername", properties.LinuxProfile.AdminUsername)
 		if len(properties.LinuxProfile.AdminPassword) > 0 {
