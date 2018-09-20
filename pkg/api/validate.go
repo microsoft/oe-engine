@@ -50,6 +50,9 @@ func (a *Properties) Validate(isUpdate bool) error {
 	if e := a.validateWindowsProfile(); e != nil {
 		return e
 	}
+	if e := a.validateDiagnosticsProfile(); e != nil {
+		return e
+	}
 	return nil
 }
 
@@ -103,6 +106,16 @@ func (a *Properties) validateWindowsProfile() error {
 	}
 	if e := validate.Var(a.WindowsProfile.AdminPassword, "required"); e != nil {
 		return fmt.Errorf("WindowsProfile.AdminPassword cannot be empty string")
+	}
+	return nil
+}
+
+func (a *Properties) validateDiagnosticsProfile() error {
+	if a.DiagnosticsProfile == nil || !a.DiagnosticsProfile.Enabled {
+		return nil
+	}
+	if len(a.DiagnosticsProfile.StorageAccountName) == 0 {
+		return fmt.Errorf("DiagnosticsProfile.StorageAccountName cannot be empty string")
 	}
 	return nil
 }

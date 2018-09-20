@@ -56,36 +56,3 @@ func Test_IP4BroadcastAddress(t *testing.T) {
 		}
 	}
 }
-
-func Test_GetVNETSubnetIDComponents(t *testing.T) {
-	scenarios := []vnetSubnetIDTest{
-		{
-			vnetSubnetID:   "/subscriptions/SUB_ID/resourceGroups/RG_NAME/providers/Microsoft.Network/virtualNetworks/VNET_NAME/subnets/SUBNET_NAME",
-			expectedSubID:  "SUB_ID",
-			expectedRG:     "RG_NAME",
-			expectedVnet:   "VNET_NAME",
-			expectedSubnet: "SUBNET_NAME",
-		},
-		{
-			vnetSubnetID:   "/providers/Microsoft.Network/virtualNetworks/VNET_NAME/subnets/SUBNET_NAME",
-			expectedSubID:  "",
-			expectedRG:     "",
-			expectedVnet:   "",
-			expectedSubnet: "",
-		},
-		{
-			vnetSubnetID:   "badVnetSubnetID",
-			expectedSubID:  "",
-			expectedRG:     "",
-			expectedVnet:   "",
-			expectedSubnet: "",
-		},
-	}
-
-	for _, scenario := range scenarios {
-		subID, rg, vnet, subnet, _ := GetVNETSubnetIDComponents(scenario.vnetSubnetID)
-		if subID != scenario.expectedSubID || rg != scenario.expectedRG || vnet != scenario.expectedVnet || subnet != scenario.expectedSubnet {
-			t.Errorf("expected subID %s, rg %s, vnet %s and subnet %s but instead got subID %s, rg %s, vnet %s and subnet %s", scenario.expectedSubID, scenario.expectedRG, scenario.expectedVnet, scenario.expectedSubnet, subID, rg, vnet, subnet)
-		}
-	}
-}

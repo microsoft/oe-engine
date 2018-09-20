@@ -1,4 +1,15 @@
     {
+      "condition": "[equals(parameters('diagnosticsStorageAccountNewOrExisting'), 'new')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "[variables('apiVersionStorage')]",
+      "name": "[parameters('diagnosticsStorageAccountName')]",
+      "location": "[parameters('location')]",
+      "kind": "[parameters('diagnosticsStorageAccountKind')]",
+      "sku": {
+        "name": "[parameters('diagnosticsStorageAccountType')]"
+      }
+    },
+    {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
       "apiVersion": "[variables('apiVersionDefault')]",
       "location": "[parameters('location')]",
@@ -113,7 +124,8 @@
               "storageAccountType": "[parameters('osDiskType')]"
             }
           }
-        }
+        },
+        "diagnosticsProfile": "[if(equals(parameters('bootDiagnostics'), 'enable'), variables('diagnosticsProfile'), json('null'))]"
       },
       "type": "Microsoft.Compute/virtualMachines"
     },

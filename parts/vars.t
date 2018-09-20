@@ -1,6 +1,7 @@
     "adminUsername": "[parameters('adminUsername')]",
     "maxVMsPerPool": 100,
     "apiVersionDefault": "2018-06-01",
+    "apiVersionStorage": "2018-02-01",
     "singleQuote": "'",
     "doubleSingleQuote": "''",
 {{if .IsLinux}}{{if .LinuxProfile.HasSecrets}}
@@ -94,4 +95,10 @@
         },
         "name": "rdp"
       }
-    ]
+    ],
+    "diagnosticsProfile": {
+      "bootDiagnostics": {
+        "enabled": true,
+        "storageUri": "[concat('https://', parameters('diagnosticsStorageAccountName'), '.blob.core.windows.net/')]"
+      }
+    }

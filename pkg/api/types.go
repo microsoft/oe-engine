@@ -1,9 +1,5 @@
 package api
 
-import (
-	neturl "net/url"
-)
-
 // OpenEnclave complies with the ARM model of
 // resource definition in a JSON template.
 type OpenEnclave struct {
@@ -75,24 +71,12 @@ type MasterProfile struct {
 	SubnetAddress     string `json:"subnetAddress,omitempty"`
 }
 
-// DiagnosticsProfile setting to enable/disable capturing
-// diagnostics for VMs hosting container cluster.
-type DiagnosticsProfile struct {
-	VMDiagnostics *VMDiagnostics `json:"vmDiagnostics"`
-}
-
-// VMDiagnostics contains settings to on/off boot diagnostics collection
+// DiagnosticsProfile contains settings to on/off boot diagnostics collection
 // in RD Host
-type VMDiagnostics struct {
-	Enabled bool `json:"enabled"`
-
-	// Specifies storage account Uri where Boot Diagnostics (CRP &
-	// VMSS BootDiagostics) and VM Diagnostics logs (using Linux
-	// Diagnostics Extension) will be stored. Uri will be of standard
-	// blob domain. i.e. https://storageaccount.blob.core.windows.net/
-	// This field is readonly as ACS RP will create a storage account
-	// for the customer.
-	StorageURL *neturl.URL `json:"storageUrl"`
+type DiagnosticsProfile struct {
+	Enabled             bool   `json:"enabled"`
+	StorageAccountName  string `json:"storageAccountName"`
+	IsNewStorageAccount bool   `json:"isNewStorageAccount"`
 }
 
 // KeyVaultSecrets specifies certificates to install on the pool

@@ -50,7 +50,7 @@
         "existing"
       ],
       "metadata": {
-        "description": "Determines whether or not a new virtual network should be provisioned.  Existing virtual networks must have been provisioned in US East. //unless you really need it for the preview, I would just create a new vnet - so the location mismatch doesn't cause problems"
+        "description": "Determines whether or not a new virtual network should be provisioned"
       }
     },
     "vnetName": {
@@ -110,6 +110,55 @@
         "description": "Type of managed disk to create"
       },
       "type": "string"
+    },
+    "bootDiagnostics": {
+      "type": "string",
+      "defaultValue": "enable",
+      "allowedValues": [
+        "enable",
+        "disable"
+      ],
+      "metadata": {
+        "description": "Type of authentication to use on the virtual machine."
+      }
+    },
+    "diagnosticsStorageAccountNewOrExisting": {
+      "type": "string",
+      "defaultValue": "existing",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "description": "Determines whether or not a new storage account should be provisioned."
+      }
+    },
+    "diagnosticsStorageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the storage account for diagnostics data."
+      }
+    },
+    "diagnosticsStorageAccountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS"
+      ],
+      "metadata": {
+        "description": "Type of storage account."
+      }
+    },
+    "diagnosticsStorageAccountKind": {
+      "type": "string",
+      "defaultValue": "StorageV2",
+      "allowedValues": [
+        "Storage",
+        "StorageV2"
+      ],
+      "metadata": {
+        "description": "Type of storage account."
+      }
     }
 {{if .IsLinux}}{{if .LinuxProfile.HasSecrets}}
   {{range  $vIndex, $vault := .LinuxProfile.Secrets}}
