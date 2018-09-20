@@ -34,7 +34,7 @@
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "location": "[parameters('location')]",
-      "name": "[variables('publicIPAddressName')]",
+      "name": "[parameters('publicIPAddressName')]",
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
       },
@@ -43,16 +43,16 @@
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "location": "[parameters('location')]",
-      "name": "[variables('nsgName')]",
+      "name": "[parameters('nsgName')]",
       "properties": {
-        "securityRules": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsSecurityRules'), variables('linuxSecurityRules'))]"
+        "securityRules": "[if(equals(parameters('publicInboundPorts'), 'enable'), variables('securityRules'), json('null'))]"
       },
       "type": "Microsoft.Network/networkSecurityGroups"
     },
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "dependsOn": [
-        "[variables('publicIPAddressName')]",
+        "[parameters('publicIPAddressName')]",
         "[parameters('vnetName')]",
         "[variables('nsgID')]"
       ],
@@ -68,7 +68,7 @@
                 "id": "[variables('vnetSubnetID')]"
               },
               "publicIpAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIPAddressName'))]"
               }
             }
           }

@@ -25,9 +25,7 @@
         {{end}}
       ],
 {{end}}{{end}}
-    "nsgName": "acc-nsg",
-    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
-    "publicIPAddressName": "acc-ip",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('nsgName'))]",
     "vnetSubnetID": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('vnetName'), parameters('subnetName'))]",
     {{GetOSImageReferences}},
     {{GetVMPlans}},
@@ -96,6 +94,7 @@
         "name": "rdp"
       }
     ],
+    "securityRules": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsSecurityRules'), variables('linuxSecurityRules'))]",
     "diagnosticsProfile": {
       "bootDiagnostics": {
         "enabled": true,

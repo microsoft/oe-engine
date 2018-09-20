@@ -15,6 +15,7 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 	addValue(parametersMap, "vmName", properties.MasterProfile.VMName)
 	addValue(parametersMap, "vmSize", properties.MasterProfile.VMSize)
 	addValue(parametersMap, "osImageName", properties.MasterProfile.OSImageName)
+	addValue(parametersMap, "publicInboundPorts", "enable")
 
 	if len(properties.MasterProfile.OSDiskType) > 0 {
 		addValue(parametersMap, "osDiskType", properties.MasterProfile.OSDiskType)

@@ -90,6 +90,31 @@
         "description": "Sets the subnet of the VM."
       }
     },
+    "nsgName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('vmName'), '-nsg')]",
+      "metadata": {
+        "description": "Name of the Network Security Group."
+      }
+    },
+    "publicInboundPorts": {
+      "type": "string",
+      "defaultValue": "disable",
+      "allowedValues": [
+        "enable",
+        "disable"
+      ],
+      "metadata": {
+        "description": "Determines whether inbound SSH/RDP connection is enabled in NSG"
+      }
+    },
+    "publicIPAddressName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('vmName'), '-ip')]",
+      "metadata": {
+        "description": "Name of the Public IP Address."
+      }
+    },
     "osImageName": {
       {{GetOSImageNames}}
       "metadata": {
@@ -135,6 +160,7 @@
     },
     "diagnosticsStorageAccountName": {
       "type": "string",
+      "defaultValue": "none",
       "metadata": {
         "description": "Name of the storage account for diagnostics data."
       }
