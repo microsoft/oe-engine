@@ -13,8 +13,8 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 	if len(cs.Location) > 0 {
 		addValue(parametersMap, "location", location)
 	}
-	if len(properties.MasterProfile.StorageType) > 0 {
-		addValue(parametersMap, "storageAccountType", properties.MasterProfile.StorageType)
+	if len(properties.MasterProfile.OSDiskType) > 0 {
+		addValue(parametersMap, "osDiskType", properties.MasterProfile.OSDiskType)
 	}
 
 	if properties.MasterProfile.IsCustomVNET() {

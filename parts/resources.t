@@ -110,7 +110,7 @@
             "createOption": "FromImage",
             "diskSizeGB": "[if(equals(parameters('diskSizeGB'), ''), json('null'), parameters('diskSizeGB'))]",
             "managedDisk": {
-              "storageAccountType": "[parameters('storageAccountType')]"
+              "storageAccountType": "[parameters('osDiskType')]"
             }
           }
         }

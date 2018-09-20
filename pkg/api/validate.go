@@ -69,16 +69,16 @@ func (a *Properties) validateMasterProfile() error {
 			return fmt.Errorf("OS image '%s' is not supported", m.OSImageName)
 		}
 	}
-	if len(m.StorageType) > 0 {
+	if len(m.OSDiskType) > 0 {
 		found := false
-		for _, t := range AllowedStorageAccountTypes {
-			if t == m.StorageType {
+		for _, t := range AllowedOsDiskTypes {
+			if t == m.OSDiskType {
 				found = true
 				break
 			}
 		}
 		if !found {
-			return fmt.Errorf("Storage account type '%s' is not included in supported [%s]", m.StorageType, strings.Join(AllowedStorageAccountTypes, ","))
+			return fmt.Errorf("OS disk type '%s' is not included in supported [%s]", m.OSDiskType, strings.Join(AllowedOsDiskTypes, ","))
 		}
 	}
 	return nil

@@ -21,8 +21,8 @@ const (
 	DefaultVnet = "10.0.0.0/16"
 	// DefaultSubnet specifies default subnet
 	DefaultSubnet = "10.0.0.0/24"
-	// DefaultStorageAccountType specifies default storage account type
-	DefaultStorageAccountType = "Premium_LRS"
+	// DefaultOsDiskType specifies default OS disk type
+	DefaultOsDiskType = "Premium_LRS"
 	// DefaultPackageBaseURL specifies default package base URL
 	DefaultPackageBaseURL = "https://oedownload.blob.core.windows.net/binaries"
 	// DefaultLinuxImage specifies default Linux OS image
@@ -70,8 +70,8 @@ var AllowedVMSizes = []string{
 	"Standard_DC4s",
 }
 
-// AllowedStorageAccountTypes provides supported storage account types
-var AllowedStorageAccountTypes = []string{
+// AllowedOsDiskTypes provides supported OS disk types
+var AllowedOsDiskTypes = []string{
 	"Premium_LRS",
 	"StandardSSD_LRS",
 	"Standard_LRS",
@@ -105,9 +105,9 @@ func GetAllowedVMSizes() string {
 	return getAllowedValues(AllowedVMSizes)
 }
 
-// GetStorageAccountTypes returns allowed and default storage account types
-func GetStorageAccountTypes() string {
-	return getAllowedDefaultValues(AllowedStorageAccountTypes, DefaultStorageAccountType)
+// GetOsDiskTypes returns allowed and default OS disk types
+func GetOsDiskTypes() string {
+	return getAllowedDefaultValues(AllowedOsDiskTypes, DefaultOsDiskType)
 }
 
 // GetOSImageNames returns allowed and default OS image name

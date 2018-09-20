@@ -66,7 +66,7 @@ type WindowsProfile struct {
 type MasterProfile struct {
 	VMName            string `json:"vmName"`
 	OSImageName       string `json:"osImageName"`
-	StorageType       string `json:"storageAccountType"`
+	OSDiskType        string `json:"osDiskType"`
 	VMSize            string `json:"vmSize"`
 	VnetResourceGroup string `json:"vnetResourceGroup,omitempty"`
 	VnetName          string `json:"vnetName,omitempty"`

@@ -104,8 +104,8 @@
       },
       "type": "string"
     },
-    "storageAccountType": {
-      {{GetStorageAccountTypes}}
+    "osDiskType": {
+      {{GetOsDiskTypes}}
       "metadata": {
         "description": "Type of managed disk to create"
       },
