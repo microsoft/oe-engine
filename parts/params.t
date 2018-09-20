@@ -42,28 +42,53 @@
         "description": "Password or ssh key value."
       }
     },
-  {{if .MasterProfile.IsCustomVNET}}
-    "vnetSubnetID": {
+    "vnetNewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
       "metadata": {
-        "description": "Sets the vnet subnet of the VM."
-      },
-      "type": "string"
+        "description": "Determines whether or not a new virtual network should be provisioned.  Existing virtual networks must have been provisioned in US East. //unless you really need it for the preview, I would just create a new vnet - so the location mismatch doesn't cause problems"
+      }
     },
-  {{else}}
-    "subnet": {
-      "defaultValue": "{{.MasterProfile.Subnet}}",
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "[concat(resourceGroup().name, '-vnet')]",
+      "metadata": {
+        "description": "Name of the virtual network (alphanumeric, hyphen, underscore, period)."
+      },
+      "minLength": 2,
+      "maxLength": 64
+    },
+    "vnetResourceGroupName": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Name of the resource group for the existing virtual network."
+      }
+    },
+    "vnetAddress": {
+      "type": "string",
+      "defaultValue": "{{.MasterProfile.VnetAddress}}",
+      "metadata": {
+        "description": "VNET address space"
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('vmName'), '-subnet')]",
+      "metadata": {
+        "description": "Name of the subnet."
+      }
+    },
+    "subnetAddress": {
+      "type": "string",
+      "defaultValue": "{{.MasterProfile.SubnetAddress}}",
       "metadata": {
         "description": "Sets the subnet of the VM."
-      },
-      "type": "string"
-    },
-  {{end}}
-    "staticIP": {
-      "defaultValue": "{{.MasterProfile.StaticIP}}",
-      "metadata": {
-        "description": "Sets the static IP of the VM"
-      },
-      "type": "string"
+      }
     },
     "osImageName": {
       {{GetOSImageNames}}

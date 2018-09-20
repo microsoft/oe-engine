@@ -38,15 +38,12 @@ func setMasterNetworkDefaults(a *api.Properties, isUpgrade bool) {
 	}
 
 	if !a.MasterProfile.IsCustomVNET() {
-		a.MasterProfile.Subnet = api.DefaultSubnet
-		// StaticIP is not reset if it is upgrade and some value already exists
-		if !isUpgrade || len(a.MasterProfile.StaticIP) == 0 {
-			a.MasterProfile.StaticIP = api.DefaultStaticIP
+		if len(a.MasterProfile.VnetAddress) == 0 {
+			a.MasterProfile.VnetAddress = api.DefaultVnet
 		}
-	}
-
-	if a.MasterProfile.HTTPSourceAddressPrefix == "" {
-		a.MasterProfile.HTTPSourceAddressPrefix = "*"
+		if len(a.MasterProfile.SubnetAddress) == 0 {
+			a.MasterProfile.SubnetAddress = api.DefaultSubnet
+		}
 	}
 }
 

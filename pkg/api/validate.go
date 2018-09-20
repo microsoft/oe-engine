@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"net"
 	"net/url"
 	"regexp"
 	"strings"
@@ -51,9 +50,6 @@ func (a *Properties) Validate(isUpdate bool) error {
 	if e := a.validateWindowsProfile(); e != nil {
 		return e
 	}
-	if e := a.validateVNET(); e != nil {
-		return e
-	}
 	return nil
 }
 
@@ -67,11 +63,6 @@ func (a *Properties) validateMasterProfile() error {
 	m := a.MasterProfile
 	if m == nil {
 		return nil
-	}
-	if len(m.StaticIP) > 0 {
-		if net.ParseIP(m.StaticIP) == nil {
-			return fmt.Errorf("StaticIP '%s' is an invalid IP address", m.StaticIP)
-		}
 	}
 	if len(m.OSImageName) > 0 {
 		if _, ok := OsImageMap[m.OSImageName]; !ok {
@@ -112,30 +103,6 @@ func (a *Properties) validateWindowsProfile() error {
 	}
 	if e := validate.Var(a.WindowsProfile.AdminPassword, "required"); e != nil {
 		return fmt.Errorf("WindowsProfile.AdminPassword cannot be empty string")
-	}
-	return nil
-}
-
-func (a *Properties) validateVNET() error {
-	isCustomVNET := a.MasterProfile.IsCustomVNET()
-
-	if isCustomVNET {
-		_, _, _, _, e := common.GetVNETSubnetIDComponents(a.MasterProfile.VnetSubnetID)
-		if e != nil {
-			return e
-		}
-
-		statisIP := net.ParseIP(a.MasterProfile.StaticIP)
-		if statisIP == nil {
-			return fmt.Errorf("MasterProfile.StaticIP (with VNET Subnet specification) '%s' is an invalid IP address", a.MasterProfile.StaticIP)
-		}
-
-		if a.MasterProfile.VnetCidr != "" {
-			_, _, err := net.ParseCIDR(a.MasterProfile.VnetCidr)
-			if err != nil {
-				return fmt.Errorf("MasterProfile.VnetCidr '%s' contains invalid cidr notation", a.MasterProfile.VnetCidr)
-			}
-		}
 	}
 	return nil
 }

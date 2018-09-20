@@ -17,8 +17,8 @@ const (
 	DefaultVMName = "accVM"
 	// DefaultGeneratorCode specifies the source generator of the cluster template.
 	DefaultGeneratorCode = "oe-engine"
-	// DefaultStaticIP specifies default static IP address
-	DefaultStaticIP = "10.0.0.4"
+	// DefaultVnet specifies default vnet address space
+	DefaultVnet = "10.0.0.0/16"
 	// DefaultSubnet specifies default subnet
 	DefaultSubnet = "10.0.0.0/24"
 	// DefaultStorageAccountType specifies default storage account type

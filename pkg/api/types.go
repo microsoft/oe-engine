@@ -64,17 +64,15 @@ type WindowsProfile struct {
 
 // MasterProfile represents the definition of the master cluster
 type MasterProfile struct {
-	VMName                  string `json:"vmName"`
-	OSImageName             string `json:"osImageName"`
-	StorageType             string `json:"storageAccountType"`
-	VMSize                  string `json:"vmSize"`
-	OSDiskSizeGB            int    `json:"osDiskSizeGB,omitempty"`
-	VnetSubnetID            string `json:"vnetSubnetID,omitempty"`
-	VnetCidr                string `json:"vnetCidr,omitempty"`
-	StaticIP                string `json:"staticIP,omitempty"`
-	Subnet                  string `json:"subnet"`
-	HTTPSourceAddressPrefix string `json:"HTTPSourceAddressPrefix,omitempty"`
-	Accessible              bool   `json:"accessible,omitempty"`
+	VMName            string `json:"vmName"`
+	OSImageName       string `json:"osImageName"`
+	StorageType       string `json:"storageAccountType"`
+	VMSize            string `json:"vmSize"`
+	VnetResourceGroup string `json:"vnetResourceGroup,omitempty"`
+	VnetName          string `json:"vnetName,omitempty"`
+	VnetAddress       string `json:"vnetAddress,omitempty"`
+	SubnetName        string `json:"subnetName,omitempty"`
+	SubnetAddress     string `json:"subnetAddress,omitempty"`
 }
 
 // DiagnosticsProfile setting to enable/disable capturing
@@ -135,7 +133,7 @@ func (p *Properties) IsLinux() bool {
 
 // IsCustomVNET returns true if the customer brought their own VNET
 func (m *MasterProfile) IsCustomVNET() bool {
-	return len(m.VnetSubnetID) > 0
+	return len(m.VnetResourceGroup) > 0 && len(m.VnetName) > 0 && len(m.SubnetName) > 0
 }
 
 // HasSecrets returns true if the customer specified secrets to install

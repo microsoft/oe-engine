@@ -27,16 +27,7 @@
     "nsgName": "acc-nsg",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
     "publicIPAddressName": "acc-ip",
-{{if .MasterProfile.IsCustomVNET}}
-    "vnetSubnetID": "[parameters('vnetSubnetID')]",
-{{else}}
-    "subnet": "[parameters('subnet')]",
-    "subnetName": "accSubnet",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-    "vnetSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-    "virtualNetworkName": "acc-vnet",
-{{end}}
-    "staticIP": "[parameters('staticIP')]",
+    "vnetSubnetID": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('vnetName'), parameters('subnetName'))]",
     {{GetOSImageReferences}},
     {{GetVMPlans}},
     "plan": "[variables('plans')[parameters('osImageName')]]",

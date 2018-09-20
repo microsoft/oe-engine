@@ -112,9 +112,6 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"IsPrivateCluster": func() bool {
 			return false
 		},
-		"GetVNETSubnetDependencies": func() string {
-			return getVNETSubnetDependencies(cs.Properties)
-		},
 		"GetLBRules": func(name string, ports []int) string {
 			return getLBRules(name, ports)
 		},
@@ -123,12 +120,6 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		},
 		"GetSecurityRules": func(ports []int) string {
 			return getSecurityRules(ports)
-		},
-		"GetVNETAddressPrefixes": func() string {
-			return getVNETAddressPrefixes(cs.Properties)
-		},
-		"GetVNETSubnets": func(addNSG bool) string {
-			return getVNETSubnets(cs.Properties, addNSG)
 		},
 		"GetCustomData": func() string {
 			script := getProvisionScript(provisionScript, map[string]string{"PACKAGE_BASE_URL": cs.PackageBaseURL})

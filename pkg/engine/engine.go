@@ -88,25 +88,6 @@ func getStorageAccountType(sizeName string) (string, error) {
 	return "Standard_LRS", nil
 }
 
-func getVNETAddressPrefixes(properties *api.Properties) string {
-	var buf bytes.Buffer
-	buf.WriteString(`"[variables('subnet')]"`)
-	return buf.String()
-}
-
-func getVNETSubnetDependencies(properties *api.Properties) string {
-	return ""
-}
-
-func getVNETSubnets(properties *api.Properties, addNSG bool) string {
-	return `{
-            "name": "[variables('subnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('subnet')]"
-            }
-          }`
-}
-
 func getLBRule(name string, port int) string {
 	return fmt.Sprintf(`	          {
             "name": "LBRule%d",

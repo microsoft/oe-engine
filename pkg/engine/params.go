@@ -1,8 +1,6 @@
 package engine
 
 import (
-	"strconv"
-
 	"github.com/Microsoft/oe-engine/pkg/api"
 )
 
@@ -20,17 +18,18 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 	}
 
 	if properties.MasterProfile.IsCustomVNET() {
-		addValue(parametersMap, "vnetSubnetID", properties.MasterProfile.VnetSubnetID)
+		addValue(parametersMap, "vnetNewOrExisting", "existing")
+		addValue(parametersMap, "vnetResourceGroupName", properties.MasterProfile.VnetResourceGroup)
+		addValue(parametersMap, "vnetName", properties.MasterProfile.VnetName)
+		addValue(parametersMap, "subnetName", properties.MasterProfile.SubnetName)
 	} else {
-		addValue(parametersMap, "subnet", properties.MasterProfile.Subnet)
+		addValue(parametersMap, "vnetNewOrExisting", "new")
+		addValue(parametersMap, "subnetAddress", properties.MasterProfile.SubnetAddress)
 	}
-	addValue(parametersMap, "staticIP", properties.MasterProfile.StaticIP)
 	addValue(parametersMap, "vmName", properties.MasterProfile.VMName)
 	addValue(parametersMap, "vmSize", properties.MasterProfile.VMSize)
 	addValue(parametersMap, "osImageName", properties.MasterProfile.OSImageName)
-	if properties.MasterProfile.OSDiskSizeGB > 0 {
-		addValue(parametersMap, "diskSizeGB", strconv.Itoa(properties.MasterProfile.OSDiskSizeGB))
-	}
+
 	if properties.LinuxProfile != nil {
 		addValue(parametersMap, "adminUsername", properties.LinuxProfile.AdminUsername)
 		if len(properties.LinuxProfile.AdminPassword) > 0 {

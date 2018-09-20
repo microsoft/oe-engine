@@ -1,24 +1,25 @@
-{{if not .MasterProfile.IsCustomVNET}}
     {
+      "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
       "apiVersion": "[variables('apiVersionDefault')]",
-      "dependsOn": [
-          {{GetVNETSubnetDependencies}}
-      ],
       "location": "[parameters('location')]",
-      "name": "[variables('virtualNetworkName')]",
+      "name": "[parameters('vnetName')]",
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
-            {{GetVNETAddressPrefixes}}
+            "[parameters('vnetAddress')]"
           ]
         },
         "subnets": [
-          {{GetVNETSubnets true}}
+          {
+            "name": "[parameters('subnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnetAddress')]"
+            }
+          }
         ]
       },
       "type": "Microsoft.Network/virtualNetworks"
     },
-{{end}}
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "location": "[parameters('location')]",
@@ -40,9 +41,8 @@
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "dependsOn": [
-{{if not .MasterProfile.IsCustomVNET}}
-        "[variables('vnetID')]",
-{{end}}
+        "[variables('publicIPAddressName')]",
+        "[parameters('vnetName')]",
         "[variables('nsgID')]"
       ],
       "location": "[parameters('location')]",
@@ -52,8 +52,7 @@
           {
             "name": "ipConfigNode",
             "properties": {
-              "privateIPAddress": "[variables('staticIP')]",
-              "privateIPAllocationMethod": "Static",
+              "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[variables('vnetSubnetID')]"
               },
