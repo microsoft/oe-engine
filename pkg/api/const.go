@@ -24,7 +24,7 @@ const (
 	// DefaultOsDiskType specifies default OS disk type
 	DefaultOsDiskType = "Premium_LRS"
 	// DefaultPackageBaseURL specifies default package base URL
-	DefaultPackageBaseURL = "https://oedownload.blob.core.windows.net/binaries"
+	DefaultPackageBaseURL = "https://oedownload.blob.core.windows.net/data"
 	// DefaultLinuxImage specifies default Linux OS image
 	DefaultLinuxImage = OsUbuntu1604
 	// DefaultWindowsImage specifies default Linux OS image
