@@ -50,7 +50,7 @@
       "typeHandlerVersion": "1.4",
       "autoUpgradeMinorVersion": true,
       "settings": {
-        "commandToExecute": "/bin/bash -c \"secs=600; SECONDS=0; while (( SECONDS < secs )); do if [ -e /opt/azure/acc/completed ]; then /opt/azure/acc/validate.sh; exit $? ; fi; echo waiting for validation; sleep 20; done; echo validation timeout; exit 1;\""
+        "commandToExecute": "[variables('linuxExtCommand')]"
       }
     },
     "windowsExtensionProperties": {
@@ -100,4 +100,5 @@
         "enabled": true,
         "storageUri": "[concat('https://', parameters('diagnosticsStorageAccountName'), '.blob.core.windows.net/')]"
       }
-    }
+    },
+    "linuxExtCommand": "[if(equals(parameters('oeSDKIncluded'), 'yes'), '/bin/bash -c \"secs=600; SECONDS=0; while (( SECONDS < secs )); do if [ -e /opt/azure/acc/completed ]; then /opt/azure/acc/validate.sh; exit $? ; fi; echo waiting for validation; sleep 20; done; echo validation timeout; exit 1;\"', '/bin/bash -c \"exit 0\"')]"

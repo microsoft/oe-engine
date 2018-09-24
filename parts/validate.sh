@@ -3,14 +3,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-# Install required packages.
-#
-# When using new tools, obtain the corresponding package they come from with
-# dpkg -S <binary-name>
-# and add it to the list.
-#
-#
-
 source /opt/azure/acc/utils.sh
 
 # validate open-enclave package installation

@@ -106,7 +106,7 @@
           "computername": "[parameters('vmName')]",
           "adminUsername": "[variables('adminUsername')]",
           "adminPassword": "[if(equals(parameters('authenticationType'), 'password'), parameters('adminPasswordOrKey'), '')]",
-          "customData": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), json('null'), {{GetCustomData}})]",
+          "customData": "[if(equals(parameters('oeSDKIncluded'), 'no'), json('null'), {{GetCustomData}})]",
           "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
           "windowsConfiguration": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsConfiguration'), json('null'))]"
           {{if .IsLinux}}{{if .LinuxProfile.HasSecrets}}

@@ -136,6 +136,17 @@
       },
       "type": "string"
     },
+    "oeSDKIncluded": {
+      "type": "string",
+      "defaultValue": "yes",
+      "allowedValues": [
+        "yes",
+        "no"
+      ],
+      "metadata": {
+        "description": "Flag to install OE SDK."
+      }
+    },
     "bootDiagnostics": {
       "type": "string",
       "defaultValue": "enable",

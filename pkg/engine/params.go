@@ -47,6 +47,12 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 		addValue(parametersMap, "adminPasswordOrKey", properties.WindowsProfile.AdminPassword)
 	}
 
+	if properties.LinuxProfile != nil && !cs.OeSdkExcluded {
+		addValue(parametersMap, "oeSDKIncluded", "yes")
+	} else {
+		addValue(parametersMap, "oeSDKIncluded", "no")
+	}
+
 	if properties.DiagnosticsProfile != nil && properties.DiagnosticsProfile.Enabled {
 		addValue(parametersMap, "bootDiagnostics", "enable")
 		addValue(parametersMap, "diagnosticsStorageAccountName", properties.DiagnosticsProfile.StorageAccountName)

@@ -4,6 +4,7 @@ package api
 // resource definition in a JSON template.
 type OpenEnclave struct {
 	Location       string      `json:"location"`
+	OeSdkExcluded  bool        `json:"oeSdkExcluded"`
 	PackageBaseURL string      `json:"packageBaseURL"`
 	Properties     *Properties `json:"properties,omitempty"`
 }
