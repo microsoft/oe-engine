@@ -34,7 +34,7 @@
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "location": "[parameters('location')]",
-      "name": "[parameters('publicIPAddressName')]",
+      "name": "[variables('publicIPAddressName')]",
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
       },
@@ -43,7 +43,7 @@
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "location": "[parameters('location')]",
-      "name": "[parameters('nsgName')]",
+      "name": "[variables('nsgName')]",
       "properties": {
         "securityRules": "[if(equals(parameters('publicInboundPorts'), 'enable'), variables('securityRules'), json('null'))]"
       },
@@ -52,7 +52,7 @@
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "dependsOn": [
-        "[parameters('publicIPAddressName')]",
+        "[variables('publicIPAddressName')]",
         "[parameters('vnetName')]",
         "[variables('nsgID')]"
       ],
@@ -68,7 +68,7 @@
                 "id": "[variables('vnetSubnetID')]"
               },
               "publicIpAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIPAddressName'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
               }
             }
           }
@@ -119,7 +119,6 @@
           "osDisk": {
             "caching": "ReadWrite",
             "createOption": "FromImage",
-            "diskSizeGB": "[if(equals(parameters('diskSizeGB'), ''), json('null'), parameters('diskSizeGB'))]",
             "managedDisk": {
               "storageAccountType": "[parameters('osDiskType')]"
             }

@@ -25,7 +25,9 @@
         {{end}}
       ],
 {{end}}{{end}}
-    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('nsgName'))]",
+    "publicIPAddressName": "[concat(parameters('vmName'), '-ip')]",
+    "nsgName": "[concat(parameters('vmName'), '-nsg')]",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
     "vnetSubnetID": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('vnetName'), parameters('subnetName'))]",
     {{GetOSImageReferences}},
     {{GetVMPlans}},

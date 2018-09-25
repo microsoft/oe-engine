@@ -90,13 +90,6 @@
         "description": "Sets the subnet of the VM."
       }
     },
-    "nsgName": {
-      "type": "string",
-      "defaultValue": "[concat(parameters('vmName'), '-nsg')]",
-      "metadata": {
-        "description": "Name of the Network Security Group."
-      }
-    },
     "publicInboundPorts": {
       "type": "string",
       "defaultValue": "disable",
@@ -108,24 +101,10 @@
         "description": "Determines whether inbound SSH/RDP connection is enabled in NSG"
       }
     },
-    "publicIPAddressName": {
-      "type": "string",
-      "defaultValue": "[concat(parameters('vmName'), '-ip')]",
-      "metadata": {
-        "description": "Name of the Public IP Address."
-      }
-    },
     "osImageName": {
       {{GetOSImageNames}}
       "metadata": {
         "description": "OS image name"
-      },
-      "type": "string"
-    },
-    "diskSizeGB": {
-      "defaultValue": "",
-      "metadata": {
-        "description": "OS disk size in GB"
       },
       "type": "string"
     },

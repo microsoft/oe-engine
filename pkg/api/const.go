@@ -51,9 +51,9 @@ var OsImageMap = map[string]OSImage{
 	},
 	OsWindows2016: {
 		Publisher: "MicrosoftWindowsServer",
-		Offer:     "WindowsServer-preview",
-		SKU:       "2016-Datacenter",
-		Version:   "2016.127.20180917",
+		Offer:     "confidential-compute-preview",
+		SKU:       "acc-windows-server-2016-datacenter",
+		Version:   "latest",
 		IsWindows: true,
 	},
 }
