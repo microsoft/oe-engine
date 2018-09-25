@@ -1,5 +1,5 @@
     {
-      "condition": "[equals(parameters('diagnosticsStorageAccountNewOrExisting'), 'new')]",
+      "condition": "[equals(variables('diagnosticsStorageAction'), 'new')]",
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "[variables('apiVersionStorage')]",
       "name": "[parameters('diagnosticsStorageAccountName')]",

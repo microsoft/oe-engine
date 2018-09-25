@@ -97,6 +97,7 @@
       }
     ],
     "securityRules": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsSecurityRules'), variables('linuxSecurityRules'))]",
+    "diagnosticsStorageAction": "[if(equals(parameters('bootDiagnostics'), 'disable'), 'nop', parameters('diagnosticsStorageAccountNewOrExisting'))]",
     "diagnosticsProfile": {
       "bootDiagnostics": {
         "enabled": true,

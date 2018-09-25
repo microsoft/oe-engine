@@ -139,7 +139,7 @@
     },
     "diagnosticsStorageAccountNewOrExisting": {
       "type": "string",
-      "defaultValue": "existing",
+      "defaultValue": "new",
       "allowedValues": [
         "new",
         "existing"
