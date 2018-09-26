@@ -159,7 +159,8 @@
       "type": "string",
       "defaultValue": "Standard_LRS",
       "allowedValues": [
-        "Standard_LRS"
+        "Standard_LRS",
+        "Standard_GRS"
       ],
       "metadata": {
         "description": "Type of storage account."
@@ -167,7 +168,7 @@
     },
     "diagnosticsStorageAccountKind": {
       "type": "string",
-      "defaultValue": "StorageV2",
+      "defaultValue": "Storage",
       "allowedValues": [
         "Storage",
         "StorageV2"
