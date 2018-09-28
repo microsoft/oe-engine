@@ -176,6 +176,13 @@
       "metadata": {
         "description": "Type of storage account."
       }
+    },
+    "diagnosticsStorageAccountResourceGroupName": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Name of the resource group for the existing virtual network."
+      }
     }
 {{if .IsLinux}}{{if .LinuxProfile.HasSecrets}}
   {{range  $vIndex, $vault := .LinuxProfile.Secrets}}

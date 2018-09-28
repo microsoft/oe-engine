@@ -22,12 +22,16 @@ if [ $? -eq 0 ] ; then
     exit -1
 fi
 
-# Setup repositories for clang-7
+# Configure apt to use clang-7
 echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main" >> /etc/apt/sources.list
 echo "deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main" >> /etc/apt/sources.list
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 
-# Setup repository for Intel 01.org repo
+# Configure apt to use packages.microsoft.com repo
+echo "deb [arch=amd64] https://packages.microsoft.com/ubuntu/16.04/prod xenial main" | sudo tee /etc/apt/sources.list.d/msprod.list
+wget -qO - https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+
+# Configure apt to use Intel 01.org repo
 echo "deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu xenial main" | sudo tee /etc/apt/sources.list.d/intel-sgx.list
 wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo apt-key add -
 
@@ -37,40 +41,29 @@ if [ $? -ne 0  ]; then
   exit 1
 fi
 
-# Install public packages:
-PACKAGES="make gcc g++ libmbedtls10 libssl-dev dh-exec libcurl3 libprotobuf9v5"
+# Add public packages:
+PACKAGES="make gcc gdb g++ libssl-dev"
+
+# Add clang-7 packages:
+PACKAGES="$PACKAGES clang-7 lldb-7 lld-7"
+
+# Add Intel packages
+PACKAGES="$PACKAGES libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev"
+
+# Add Microsoft packages
+PACKAGES="$PACKAGES az-dcap-client"
 
 retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
 if [ $? -ne 0  ]; then
   exit 1
 fi
 
-# Install clang-7 packages:
-PACKAGES="clang-7 lldb-7 lld-7"
-retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
+
+# Install OE package
+retry_get_install_deb 10 10 120 "$OE_PKG_BASE/open-enclave-0.4.0-Linux.deb"
 if [ $? -ne 0  ]; then
   exit 1
 fi
-
-# Install Intel packages
-PACKAGES="libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev"
-retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
-if [ $? -ne 0  ]; then
-  exit 1
-fi
-
-# Install OE packages
-OE_PACKAGES=(
-  azquotprov_0.3-1_amd64.deb
-  open-enclave-0.2.0-Linux.deb
-)
-
-for pkg in ${OE_PACKAGES[@]}; do
-  retry_get_install_deb 10 10 120 "$OE_PKG_BASE/$pkg"
-  if [ $? -ne 0  ]; then
-    exit 1
-  fi
-done
 
 systemctl disable aesmd
 systemctl stop aesmd
