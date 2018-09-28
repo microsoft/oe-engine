@@ -181,7 +181,7 @@
       "type": "string",
       "defaultValue": "[resourceGroup().name]",
       "metadata": {
-        "description": "Name of the resource group for the existing virtual network."
+        "description": "Name of the resource group for the existing diagnostics storage account."
       }
     }
 {{if .IsLinux}}{{if .LinuxProfile.HasSecrets}}
