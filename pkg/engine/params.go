@@ -45,6 +45,9 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 		addValue(parametersMap, "authenticationType", "password")
 		addValue(parametersMap, "adminUsername", properties.WindowsProfile.AdminUsername)
 		addValue(parametersMap, "adminPasswordOrKey", properties.WindowsProfile.AdminPassword)
+		if properties.WindowsProfile.HasCustomImage() {
+			addValue(parametersMap, "windowsImageSourceUrl", properties.WindowsProfile.WindowsImageSourceURL)
+		}
 	}
 
 	if properties.LinuxProfile != nil && !cs.OeSdkExcluded {

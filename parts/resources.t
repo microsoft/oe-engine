@@ -79,6 +79,23 @@
       },
       "type": "Microsoft.Network/networkInterfaces"
     },
+{{if HasWindowsCustomImage}}
+    {"type": "Microsoft.Compute/images",
+      "apiVersion": "[variables('apiVersionDefault')]",
+      "name": "CustomWindowsImage",
+      "location": "[parameters('location')]",
+      "properties": {
+        "storageProfile": {
+          "osDisk": {
+            "osType": "Windows",
+            "osState": "Generalized",
+            "blobUri": "[parameters('windowsImageSourceUrl')]",
+            "storageAccountType": "Standard_LRS"
+          }
+        }
+      }
+    },
+{{end}}
     {
       "apiVersion": "[variables('apiVersionDefault')]",
       "dependsOn": [
@@ -115,7 +132,13 @@
           {{end}}{{end}}
         },
         "storageProfile": {
+{{if HasWindowsCustomImage}}
+        "imageReference": {
+          "id": "[resourceId('Microsoft.Compute/images','CustomWindowsImage')]"
+        },
+{{else}}
           "imageReference": "[variables('imageReference')[parameters('osImageName')]]",
+{{end}}
           "osDisk": {
             "caching": "ReadWrite",
             "createOption": "FromImage",

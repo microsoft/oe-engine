@@ -204,7 +204,18 @@
     {{end}}
   {{end}}
 {{end}}{{end}}
-{{if .IsWindows}}{{if .WindowsProfile.HasSecrets}}
+{{if .IsWindows}}
+{{if HasWindowsCustomImage}}
+    ,
+    "windowsImageSourceUrl": {
+      "defaultValue": "",
+      "metadata": {
+        "description": "The source of the generalized blob which will be used to create a custom windows image."
+      },
+      "type": "string"
+    }
+{{end}}
+{{if .WindowsProfile.HasSecrets}}
   {{range  $vIndex, $vault := .WindowsProfile.Secrets}}
     ,
     "windowsKeyVaultID{{$vIndex}}": {
@@ -229,4 +240,5 @@
       }
     {{end}}
   {{end}}
-{{end}} {{end}}
+{{end}}
+{{end}}
