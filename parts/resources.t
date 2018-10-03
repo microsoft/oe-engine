@@ -1,7 +1,7 @@
     {
       "condition": "[equals(variables('diagnosticsStorageAction'), 'new')]",
       "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "[variables('apiVersionStorage')]",
+      "apiVersion": "2018-02-01",
       "name": "[parameters('diagnosticsStorageAccountName')]",
       "location": "[parameters('location')]",
       "kind": "[parameters('diagnosticsStorageAccountKind')]",
@@ -11,7 +11,7 @@
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
-      "apiVersion": "[variables('apiVersionDefault')]",
+      "apiVersion": "2018-06-01",
       "location": "[parameters('location')]",
       "name": "[parameters('vnetName')]",
       "properties": {
@@ -32,7 +32,7 @@
       "type": "Microsoft.Network/virtualNetworks"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
+      "apiVersion": "2018-06-01",
       "location": "[parameters('location')]",
       "name": "[variables('publicIPAddressName')]",
       "properties": {
@@ -41,7 +41,7 @@
       "type": "Microsoft.Network/publicIPAddresses"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
+      "apiVersion": "2018-06-01",
       "location": "[parameters('location')]",
       "name": "[variables('nsgName')]",
       "properties": {
@@ -50,7 +50,7 @@
       "type": "Microsoft.Network/networkSecurityGroups"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
+      "apiVersion": "2018-06-01",
       "dependsOn": [
         "[variables('publicIPAddressName')]",
         "[parameters('vnetName')]",
@@ -81,7 +81,7 @@
     },
 {{if HasWindowsCustomImage}}
     {"type": "Microsoft.Compute/images",
-      "apiVersion": "[variables('apiVersionDefault')]",
+      "apiVersion": "2018-06-01",
       "name": "CustomWindowsImage",
       "location": "[parameters('location')]",
       "properties": {
@@ -97,7 +97,7 @@
     },
 {{end}}
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
+      "apiVersion": "2018-06-01",
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', parameters('vmName'), '-nic')]"
       ],
@@ -121,7 +121,7 @@
         "osProfile": {
           "computername": "[parameters('vmName')]",
           "adminUsername": "[variables('adminUsername')]",
-          "adminPassword": "[if(equals(parameters('authenticationType'), 'password'), parameters('adminPasswordOrKey'), '')]",
+          "adminPassword": "[parameters('adminPasswordOrKey')]",
           "customData": "[if(equals(parameters('oeSDKIncluded'), 'no'), json('null'), {{GetCustomData}})]",
           "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
           "windowsConfiguration": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsConfiguration'), json('null'))]"
@@ -151,12 +151,21 @@
       "type": "Microsoft.Compute/virtualMachines"
     },
     {
-      "apiVersion": "[variables('apiVersionDefault')]",
+      "condition": "[equals(parameters('osImageName'), 'UbuntuServer_16.04')]",
+      "apiVersion": "2018-06-01",
       "dependsOn": [
         "[parameters('vmName')]"
       ],
       "location": "[parameters('location')]",
       "name": "[concat(parameters('vmName'), '/validate')]",
-      "properties": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsExtensionProperties'), variables('linuxExtensionProperties'))]",
+      "properties": {
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "CustomScriptForLinux",
+        "typeHandlerVersion": "1.4",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "commandToExecute": "[variables('linuxExtCommand')]"
+        }
+      },
       "type": "Microsoft.Compute/virtualMachines/extensions"
     }{{WriteLinkedTemplatesForExtensions}}

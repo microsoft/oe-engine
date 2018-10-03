@@ -1,9 +1,4 @@
     "adminUsername": "[parameters('adminUsername')]",
-    "maxVMsPerPool": 100,
-    "apiVersionDefault": "2018-06-01",
-    "apiVersionStorage": "2018-02-01",
-    "singleQuote": "'",
-    "doubleSingleQuote": "''",
 {{if .IsLinux}}{{if .LinuxProfile.HasSecrets}}
     "linuxProfileSecrets" :
       [
@@ -43,24 +38,6 @@
     },
     "windowsConfiguration": {
       "provisionVmAgent": "true"
-    },
-    "linuxExtensionProperties": {
-      "publisher": "Microsoft.OSTCExtensions",
-      "type": "CustomScriptForLinux",
-      "typeHandlerVersion": "1.4",
-      "autoUpgradeMinorVersion": true,
-      "settings": {
-        "commandToExecute": "[variables('linuxExtCommand')]"
-      }
-    },
-    "windowsExtensionProperties": {
-      "publisher": "Microsoft.Compute",
-      "type": "CustomScriptExtension",
-      "typeHandlerVersion": "1.8",
-      "autoUpgradeMinorVersion": true,
-      "settings": {
-          "commandToExecute": "exit 0"
-      }
     },
     "linuxSecurityRules": [
       {
