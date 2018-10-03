@@ -43,9 +43,9 @@ type OSImage struct {
 // OsImageMap contains supported OS images
 var OsImageMap = map[string]OSImage{
 	OsUbuntu1604: {
-		Publisher: "microsoft-azure-compute",
-		Offer:     "azureconfidentialcompute",
-		SKU:       "acc-ubuntu-16",
+		Publisher: "Canonical",
+		Offer:     "confidential-compute-preview",
+		SKU:       "16.04-LTS",
 		Version:   "latest",
 		IsWindows: false,
 	},

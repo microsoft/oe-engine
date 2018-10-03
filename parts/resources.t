@@ -107,7 +107,6 @@
       },
       "location": "[parameters('location')]",
       "name": "[parameters('vmName')]",
-      "plan": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), json('null'), variables('plan'))]",
       "properties": {
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"

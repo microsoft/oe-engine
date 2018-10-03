@@ -30,8 +30,6 @@
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
     "vnetSubnetID": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('vnetName'), parameters('subnetName'))]",
     {{GetOSImageReferences}},
-    {{GetVMPlans}},
-    "plan": "[variables('plans')[parameters('osImageName')]]",
     "linuxConfiguration": {
       "disablePasswordAuthentication": "true",
       "ssh": {

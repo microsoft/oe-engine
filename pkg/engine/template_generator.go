@@ -122,13 +122,12 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 			return getSecurityRules(ports)
 		},
 		"GetCustomData": func() string {
-			script := getProvisionScript(provisionScript, map[string]string{"PACKAGE_BASE_URL": cs.PackageBaseURL})
 			str := getSingleLineCustomData(
 				customdata,
 				map[string]string{
 					"UTILS_STR":      getProvisionScript(utilsScript, nil),
-					"PROVISION_STR":  script,
-					"VALIDATION_STR": getProvisionScript(validationScript, nil),
+					"PROVISION_STR":  getProvisionScript(provisionScript, nil),
+					"VALIDATION_STR": getProvisionScript(validationScript, map[string]string{"PACKAGE_BASE_URL": cs.PackageBaseURL}),
 				})
 			return fmt.Sprintf("base64(concat('#cloud-config\\n\\n', '%s'))", str)
 		},
