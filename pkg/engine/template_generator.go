@@ -126,8 +126,8 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 				customdata,
 				map[string]string{
 					"UTILS_STR":      getProvisionScript(utilsScript, nil),
-					"PROVISION_STR":  getProvisionScript(provisionScript, nil),
-					"VALIDATION_STR": getProvisionScript(validationScript, map[string]string{"PACKAGE_BASE_URL": cs.PackageBaseURL}),
+					"PROVISION_STR":  getProvisionScript(provisionScript, map[string]string{"PACKAGE_BASE_URL": cs.PackageBaseURL}),
+					"VALIDATION_STR": getProvisionScript(validationScript, nil),
 				})
 			return fmt.Sprintf("base64(concat('#cloud-config\\n\\n', '%s'))", str)
 		},
