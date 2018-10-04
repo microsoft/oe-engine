@@ -149,7 +149,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "[equals(parameters('bootDiagnostics'), 'enable')]",
-            "storageUri": "[if(equals(parameters('bootDiagnostics'), 'enable'), reference(parameters('diagnosticsStorageAccountName'), '2018-02-01').primaryEndpoints['blob'], json('null'))]"
+            "storageUri": "[if(equals(parameters('bootDiagnostics'), 'enable'), reference(resourceId(parameters('diagnosticsStorageAccountResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), '2018-02-01').primaryEndpoints['blob'], json('null'))]"
           }
         }
       },
