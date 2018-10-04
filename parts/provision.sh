@@ -48,7 +48,7 @@ if [ $? -ne 0  ]; then
 fi
 
 # Add public packages:
-PACKAGES="make gcc gdb g++ libssl-dev"
+PACKAGES="make gcc gdb g++ libssl-dev pkg-config"
 
 # Add clang-7 packages:
 PACKAGES="$PACKAGES clang-7 lldb-7 lld-7"

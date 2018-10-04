@@ -22,6 +22,7 @@ cp -r /opt/openenclave/share/openenclave/samples/ $tempdir
 
 # build and run samples
 cd $tempdir/samples
+source /opt/openenclave/share/openenclaverc
 make
 make run
 
