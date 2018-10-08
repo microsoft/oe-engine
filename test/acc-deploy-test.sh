@@ -1,6 +1,9 @@
 #!/bin/bash
 
 set -x
+
+env
+
 if [[ -z "${SUBSCRIPTION_ID:-}" ]]; then echo "Must specify SUBSCRIPTION_ID"; exit 1; fi
 if [[ -z "${TENANT:-}" ]]; then echo "Must specify TENANT"; exit 1; fi
 
