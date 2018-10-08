@@ -15,11 +15,12 @@ SSH_PUB_KEY=$(az keyvault secret show --vault-name oe-ci-test-kv --name id-rsa-o
 
 sed -i "/\"keyData\":/c \"keyData\": \"${SSH_PUB_KEY}\"" oe-lnx.json
 
-wget https://oejenkinsciartifacts.blob.core.windows.net/oe-engine/latest/bin/oe-engine
+cat oe-lnx.json
+wget -q https://oejenkinsciartifacts.blob.core.windows.net/oe-engine/latest/bin/oe-engine
 chmod 755 oe-engine
-
+ls
 ./oe-engine generate --api-model oe-lnx.json
-
+ls
 RGNAME="acc-lnx-${LOCATION}-${BUILD_NUMBER}"
 az group create --name $RGNAME --location $LOCATION
 az group deployment create -n acc-lnx -g $RGNAME --template-file _output/azuredeploy.json --parameters _output/azuredeploy.parameters.json
