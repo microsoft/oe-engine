@@ -1,0 +1,11 @@
+{
+  "properties": {
+    "masterProfile": {
+      "vmSize": "Standard_DC2s"
+    },
+    "windowsProfile": {
+      "adminUsername": "azureuser",
+      "adminPassword": ""
+    }
+  }
+}
