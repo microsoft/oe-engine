@@ -17,14 +17,6 @@ function error_exit() {
   echo "failed" > /opt/azure/acc/completed
   exit 1
 }
-# Check to see this is an openenclave supporting hardware environment
-retrycmd_if_failure 10 10 120 curl -fsSL -o oesgx "$OE_PKG_BASE/oesgx"
-chmod a+x ./oesgx
-
-./oesgx | grep "does not support"
-if [ $? -eq 0 ] ; then
-  error_exit "This hardware does not support open enclave"
-fi
 
 # Configure apt to use clang-7
 echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main" >> /etc/apt/sources.list
@@ -73,21 +65,21 @@ fi
 PACKAGES="libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev"
 
 # Add Microsoft packages
-PACKAGES="$PACKAGES az-dcap-client"
+PACKAGES="$PACKAGES az-dcap-client open-enclave"
 
 retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
 if [ $? -ne 0  ]; then
   error_exit "apt-get install failed"
 fi
 
-# Install OE package
-retry_get_install_deb 10 10 120 "$OE_PKG_BASE/open-enclave-0.4.0-Linux.deb"
-if [ $? -ne 0  ]; then
-  error_exit "failed to install OE SDK package"
-fi
-
 systemctl disable aesmd
 systemctl stop aesmd
+
+# Check to see this is an openenclave supporting hardware environment
+/opt/openenclave/bin/oesgx | grep "does not support"
+if [ $? -eq 0 ] ; then
+  error_exit "This hardware does not support open enclave"
+fi
 
 # Indicate readiness
 echo "ok" > /opt/azure/acc/completed
