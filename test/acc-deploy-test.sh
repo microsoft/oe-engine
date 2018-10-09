@@ -30,7 +30,7 @@ else
   exit 1
 fi
 
-RGNAME="acc-lnx-${LOCATION}-${BUILD_NUMBER}"
+RGNAME="acc-${OS}-${LOCATION}-${BUILD_NUMBER}"
 az group create --name $RGNAME --location $LOCATION
 trap 'az group delete --name $RGNAME --yes --no-wait' EXIT
 az group deployment create -n acc-lnx -g $RGNAME --template-file _output/azuredeploy.json --parameters _output/azuredeploy.parameters.json
