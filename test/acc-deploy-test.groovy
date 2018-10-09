@@ -10,7 +10,7 @@ pipeline {
       }
       steps {
         dir("gopath/src/github.com/Microsoft/oe-engine") {
-          git branch: 'ds-acc-deploy-test', credentialsId: 'oe-engine-ro-deploy-key', url: 'git@github.com:Microsoft/oe-engine'
+          git branch: 'master', credentialsId: 'oe-engine-ro-deploy-key', url: 'git@github.com:Microsoft/oe-engine'
           sh 'rm -rf work'
           sh 'mkdir work'
           sh 'cp test/oe-lnx.json test/oe-win.json work/'
