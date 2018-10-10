@@ -122,7 +122,11 @@
           "computername": "[parameters('vmName')]",
           "adminUsername": "[variables('adminUsername')]",
           "adminPassword": "[parameters('adminPasswordOrKey')]",
-          "customData": "[if(equals(parameters('oeSDKIncluded'), 'no'), json('null'), {{GetCustomData}})]",
+{{if .IsLinux}}
+          "customData": "[if(equals(parameters('oeSDKIncluded'), 'no'), json('null'), {{GetLinuxCustomData}})]",
+{{else}}
+          "customData": "{{GetWindowsCustomData}}"
+{{end}}
           "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
           "windowsConfiguration": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsConfiguration'), json('null'))]"
           {{if .IsLinux}}{{if .LinuxProfile.HasSecrets}}
