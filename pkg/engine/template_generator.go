@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"runtime/debug"
+	"strings"
 	"text/template"
 
 	"github.com/Microsoft/oe-engine/pkg/api"
@@ -136,11 +137,10 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 			if err != nil {
 				// this should never happen and this is a bug
 				panic(fmt.Sprintf("BUG: %s", err.Error()))
-			} else {
-                //fmt.Printf(" get windows custom data from asset %s\n", b);
-            }
+			}
 			csStr := string(b)
-            return getBase64CustomScriptFromStr(csStr)
+			csStr = strings.Replace(csStr, "SSH_PUB_KEY", cs.Properties.WindowsProfile.SSHPubKey, -1)
+			return getBase64CustomScriptFromStr(csStr)
 		},
 		"GetAllowedVMSizes": func() string {
 			return api.GetAllowedVMSizes()
