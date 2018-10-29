@@ -11,7 +11,8 @@ type OpenEnclave struct {
 
 // Properties represents the ACS cluster definition
 type Properties struct {
-	MasterProfile      *MasterProfile      `json:"masterProfile,omitempty"`
+	VnetProfile        *VnetProfile        `json:"vnetProfile"`
+	VMProfiles         []*VMProfile        `json:"vmProfiles"`
 	LinuxProfile       *LinuxProfile       `json:"linuxProfile,omitempty"`
 	WindowsProfile     *WindowsProfile     `json:"windowsProfile,omitempty"`
 	DiagnosticsProfile *DiagnosticsProfile `json:"diagnosticsProfile,omitempty"`
@@ -19,12 +20,9 @@ type Properties struct {
 
 // LinuxProfile represents the linux parameters passed to the cluster
 type LinuxProfile struct {
-	AdminUsername string `json:"adminUsername"`
-	AdminPassword string `json:"adminPassword"`
-	SSH           struct {
-		PublicKeys []PublicKey `json:"publicKeys"`
-	} `json:"ssh"`
-	Secrets            []KeyVaultSecrets   `json:"secrets,omitempty"`
+	AdminUsername      string              `json:"adminUsername"`
+	AdminPassword      string              `json:"adminPassword"`
+	SSHPubKey          string              `json:"sshPublicKey"`
 	ScriptRootURL      string              `json:"scriptroot,omitempty"`
 	CustomSearchDomain *CustomSearchDomain `json:"customSearchDomain,omitempty"`
 	CustomNodesDNS     *CustomNodesDNS     `json:"CustomNodesDNS,omitempty"`
@@ -49,23 +47,27 @@ type CustomNodesDNS struct {
 
 // WindowsProfile represents the windows parameters passed to the cluster
 type WindowsProfile struct {
-	AdminUsername         string            `json:"adminUsername"`
-	AdminPassword         string            `json:"adminPassword"`
-	SSHPubKey             string            `json:"sshPublicKey"`
-	ImageVersion          string            `json:"imageVersion"`
-	WindowsImageSourceURL string            `json:"windowsImageSourceURL"`
-	WindowsPublisher      string            `json:"windowsPublisher"`
-	WindowsOffer          string            `json:"windowsOffer"`
-	WindowsSku            string            `json:"windowsSku"`
-	Secrets               []KeyVaultSecrets `json:"secrets,omitempty"`
+	AdminUsername         string `json:"adminUsername"`
+	AdminPassword         string `json:"adminPassword"`
+	SSHPubKey             string `json:"sshPublicKey"`
+	ImageVersion          string `json:"imageVersion"`
+	WindowsImageSourceURL string `json:"windowsImageSourceURL"`
+	WindowsPublisher      string `json:"windowsPublisher"`
+	WindowsOffer          string `json:"windowsOffer"`
+	WindowsSku            string `json:"windowsSku"`
 }
 
-// MasterProfile represents the definition of the master cluster
-type MasterProfile struct {
-	VMName            string `json:"vmName"`
-	OSImageName       string `json:"osImageName"`
-	OSDiskType        string `json:"osDiskType"`
-	VMSize            string `json:"vmSize"`
+// VMProfile represents the definition of a VM
+type VMProfile struct {
+	Name        string `json:"name"`
+	OSImageName string `json:"osImageName"`
+	OSDiskType  string `json:"osDiskType"`
+	VMSize      string `json:"vmSize"`
+	Ports       []int  `json:"ports,omitempty"`
+}
+
+// VnetProfile represents the definition of a vnet
+type VnetProfile struct {
 	VnetResourceGroup string `json:"vnetResourceGroup,omitempty"`
 	VnetName          string `json:"vnetName,omitempty"`
 	VnetAddress       string `json:"vnetAddress,omitempty"`
@@ -81,78 +83,12 @@ type DiagnosticsProfile struct {
 	IsNewStorageAccount bool   `json:"isNewStorageAccount"`
 }
 
-// KeyVaultSecrets specifies certificates to install on the pool
-// of machines from a given key vault
-// the key vault specified must have been granted read permissions to CRP
-type KeyVaultSecrets struct {
-	SourceVault       *KeyVaultID           `json:"sourceVault,omitempty"`
-	VaultCertificates []KeyVaultCertificate `json:"vaultCertificates,omitempty"`
-}
-
-// KeyVaultID specifies a key vault
-type KeyVaultID struct {
-	ID string `json:"id,omitempty"`
-}
-
-// KeyVaultCertificate specifies a certificate to install
-// On Linux, the certificate file is placed under the /var/lib/waagent directory
-// with the file name <UppercaseThumbprint>.crt for the X509 certificate file
-// and <UppercaseThumbprint>.prv for the private key. Both of these files are .pem formatted.
-// On windows the certificate will be saved in the specified store.
-type KeyVaultCertificate struct {
-	CertificateURL   string `json:"certificateUrl,omitempty"`
-	CertificateStore string `json:"certificateStore,omitempty"`
-}
-
-// OSType represents OS types of agents
-type OSType string
-
-// IsWindows returns true for Windows VM
-func (p *Properties) IsWindows() bool {
-	return p.WindowsProfile != nil
-}
-
-// IsLinux returns true for Linux VM
-func (p *Properties) IsLinux() bool {
-	return p.LinuxProfile != nil
-}
-
 // IsCustomVNET returns true if the customer brought their own VNET
-func (m *MasterProfile) IsCustomVNET() bool {
-	return len(m.VnetResourceGroup) > 0 && len(m.VnetName) > 0 && len(m.SubnetName) > 0
-}
-
-// HasSecrets returns true if the customer specified secrets to install
-func (w *WindowsProfile) HasSecrets() bool {
-	return len(w.Secrets) > 0
+func (p *VnetProfile) IsCustomVNET() bool {
+	return len(p.VnetResourceGroup) > 0 && len(p.VnetName) > 0 && len(p.SubnetName) > 0
 }
 
 // HasCustomImage returns true if there is a custom windows os image url specified
 func (w *WindowsProfile) HasCustomImage() bool {
 	return len(w.WindowsImageSourceURL) > 0
-}
-
-// HasSecrets returns true if the customer specified secrets to install
-func (l *LinuxProfile) HasSecrets() bool {
-	return len(l.Secrets) > 0
-}
-
-// HasSearchDomain returns true if the customer specified secrets to install
-func (l *LinuxProfile) HasSearchDomain() bool {
-	if l.CustomSearchDomain != nil {
-		if l.CustomSearchDomain.Name != "" && l.CustomSearchDomain.RealmPassword != "" && l.CustomSearchDomain.RealmUser != "" {
-			return true
-		}
-	}
-	return false
-}
-
-// HasCustomNodesDNS returns true if the customer specified a dns server
-func (l *LinuxProfile) HasCustomNodesDNS() bool {
-	if l.CustomNodesDNS != nil {
-		if l.CustomNodesDNS.DNSServer != "" {
-			return true
-		}
-	}
-	return false
 }

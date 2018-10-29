@@ -1,12 +1,15 @@
 package engine
 
 const (
-	baseFile   = "accbase.t"
-	vars       = "vars.t"
-	params     = "params.t"
-	resources  = "resources.t"
-	outputs    = "outputs.t"
-	customdata = "customdata.t"
+	baseFile    = "accbase.t"
+	vars        = "vars.t"
+	vmvars      = "vmvars.t"
+	params      = "params.t"
+	vmparams    = "vmparams.t"
+	resources   = "resources.t"
+	vmresources = "vmresources.t"
+	outputs     = "outputs.t"
+	customdata  = "customdata.t"
 
 	windowsProvision = "windowsProvision.ps1"
 

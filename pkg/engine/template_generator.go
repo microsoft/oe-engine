@@ -160,9 +160,6 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"Base64": func(s string) string {
 			return base64.StdEncoding.EncodeToString([]byte(s))
 		},
-		"WriteLinkedTemplatesForExtensions": func() string {
-			return ""
-		},
 		"GetAllowedLocations": func() string {
 			return api.GetAllowedLocations()
 		},
@@ -171,18 +168,6 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		},
 		"WrapAsVerbatim": func(s string) string {
 			return fmt.Sprintf("',%s,'", s)
-		},
-		"HasLinuxSecrets": func() bool {
-			return cs.Properties.LinuxProfile != nil && cs.Properties.LinuxProfile.HasSecrets()
-		},
-		"HasCustomSearchDomain": func() bool {
-			return cs.Properties.LinuxProfile != nil && cs.Properties.LinuxProfile.HasSearchDomain()
-		},
-		"HasCustomNodesDNS": func() bool {
-			return cs.Properties.LinuxProfile != nil && cs.Properties.LinuxProfile.HasCustomNodesDNS()
-		},
-		"HasWindowsSecrets": func() bool {
-			return cs.Properties.WindowsProfile != nil && cs.Properties.WindowsProfile.HasSecrets()
 		},
 		"HasWindowsCustomImage": func() bool {
 			return cs.Properties.WindowsProfile != nil && cs.Properties.WindowsProfile.HasCustomImage()
