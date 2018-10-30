@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Microsoft/oe-engine/pkg/api"
+	"github.com/Sirupsen/logrus"
 )
 
 // setPropertiesDefaults for the container Properties, returns true if certs are generated
@@ -14,35 +15,26 @@ func setPropertiesDefaults(oe *api.OpenEnclave, isUpgrade bool) {
 	if len(oe.PackageBaseURL) == 0 {
 		oe.PackageBaseURL = api.DefaultPackageBaseURL
 	}
-	if oe.Properties.MasterProfile == nil {
-		oe.Properties.MasterProfile = &api.MasterProfile{}
-	}
-	if len(oe.Properties.MasterProfile.VMName) == 0 {
-		oe.Properties.MasterProfile.VMName = api.DefaultVMName
-	}
-	if len(oe.Properties.MasterProfile.OSImageName) == 0 {
-		if oe.Properties.LinuxProfile != nil {
-			oe.Properties.MasterProfile.OSImageName = api.DefaultLinuxImage
+	for i, p := range oe.Properties.VMProfiles {
+		if len(p.Name) == 0 {
+			logrus.Warnf("Missing Name for VM pool #%d. Assuming %s", i, api.DefaultVMName)
+			oe.Properties.VMProfiles[i].Name = api.DefaultVMName
 		}
-		if oe.Properties.WindowsProfile != nil {
-			oe.Properties.MasterProfile.OSImageName = api.DefaultWindowsImage
+		if len(p.OSImageName) == 0 {
+			logrus.Warnf("Missing OSImageName for VM pool #%d. Assuming %s", i, api.DefaultLinuxImage)
+			oe.Properties.VMProfiles[i].OSImageName = api.DefaultLinuxImage
 		}
 	}
-	setMasterNetworkDefaults(oe.Properties, isUpgrade)
-}
-
-// SetMasterNetworkDefaults for masters
-func setMasterNetworkDefaults(a *api.Properties, isUpgrade bool) {
-	if a.MasterProfile == nil {
-		return
+	// set network defaults
+	if oe.Properties.VnetProfile == nil {
+		oe.Properties.VnetProfile = &api.VnetProfile{}
 	}
-
-	if !a.MasterProfile.IsCustomVNET() {
-		if len(a.MasterProfile.VnetAddress) == 0 {
-			a.MasterProfile.VnetAddress = api.DefaultVnet
+	if !oe.Properties.VnetProfile.IsCustomVNET() {
+		if len(oe.Properties.VnetProfile.VnetAddress) == 0 {
+			oe.Properties.VnetProfile.VnetAddress = api.DefaultVnet
 		}
-		if len(a.MasterProfile.SubnetAddress) == 0 {
-			a.MasterProfile.SubnetAddress = api.DefaultSubnet
+		if len(oe.Properties.VnetProfile.SubnetAddress) == 0 {
+			oe.Properties.VnetProfile.SubnetAddress = api.DefaultSubnet
 		}
 	}
 }

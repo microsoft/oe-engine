@@ -13,7 +13,7 @@ const (
 )
 
 const (
-	// DefaultVMName is default VM name
+	// DefaultVMName is default VM pool name
 	DefaultVMName = "accVM"
 	// DefaultGeneratorCode specifies the source generator of the cluster template.
 	DefaultGeneratorCode = "oe-engine"

@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"fmt"
+
 	"github.com/Microsoft/oe-engine/pkg/api"
 )
 
@@ -12,39 +14,40 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 	if len(cs.Location) > 0 {
 		addValue(parametersMap, "location", location)
 	}
-	addValue(parametersMap, "vmName", properties.MasterProfile.VMName)
-	addValue(parametersMap, "vmSize", properties.MasterProfile.VMSize)
-	addValue(parametersMap, "osImageName", properties.MasterProfile.OSImageName)
 	addValue(parametersMap, "publicInboundPorts", "enable")
 
-	if len(properties.MasterProfile.OSDiskType) > 0 {
-		addValue(parametersMap, "osDiskType", properties.MasterProfile.OSDiskType)
+	for _, vm := range properties.VMProfiles {
+		addValue(parametersMap, fmt.Sprintf("%sVMSize", vm.Name), vm.VMSize)
+		addValue(parametersMap, fmt.Sprintf("%sOSImageName", vm.Name), vm.OSImageName)
+
+		if len(vm.OSDiskType) > 0 {
+			addValue(parametersMap, fmt.Sprintf("%sOSDiskType", vm.Name), vm.OSDiskType)
+		}
 	}
 
-	if properties.MasterProfile.IsCustomVNET() {
+	if properties.VnetProfile.IsCustomVNET() {
 		addValue(parametersMap, "vnetNewOrExisting", "existing")
-		addValue(parametersMap, "vnetResourceGroupName", properties.MasterProfile.VnetResourceGroup)
-		addValue(parametersMap, "vnetName", properties.MasterProfile.VnetName)
-		addValue(parametersMap, "subnetName", properties.MasterProfile.SubnetName)
+		addValue(parametersMap, "vnetResourceGroupName", properties.VnetProfile.VnetResourceGroup)
+		addValue(parametersMap, "vnetName", properties.VnetProfile.VnetName)
+		addValue(parametersMap, "subnetName", properties.VnetProfile.SubnetName)
 	} else {
 		addValue(parametersMap, "vnetNewOrExisting", "new")
-		addValue(parametersMap, "subnetAddress", properties.MasterProfile.SubnetAddress)
+		addValue(parametersMap, "subnetAddress", properties.VnetProfile.SubnetAddress)
 	}
 
 	if properties.LinuxProfile != nil {
-		addValue(parametersMap, "adminUsername", properties.LinuxProfile.AdminUsername)
+		addValue(parametersMap, "LinuxAdminUsername", properties.LinuxProfile.AdminUsername)
 		if len(properties.LinuxProfile.AdminPassword) > 0 {
 			addValue(parametersMap, "authenticationType", "password")
-			addValue(parametersMap, "adminPasswordOrKey", properties.LinuxProfile.AdminPassword)
+			addValue(parametersMap, "LinuxAdminPasswordOrKey", properties.LinuxProfile.AdminPassword)
 		} else {
 			addValue(parametersMap, "authenticationType", "sshPublicKey")
-			addValue(parametersMap, "adminPasswordOrKey", properties.LinuxProfile.SSH.PublicKeys[0].KeyData)
+			addValue(parametersMap, "LinuxAdminPasswordOrKey", properties.LinuxProfile.SSHPubKey)
 		}
 	}
 	if properties.WindowsProfile != nil {
-		addValue(parametersMap, "authenticationType", "password")
-		addValue(parametersMap, "adminUsername", properties.WindowsProfile.AdminUsername)
-		addValue(parametersMap, "adminPasswordOrKey", properties.WindowsProfile.AdminPassword)
+		addValue(parametersMap, "WindowsAdminUsername", properties.WindowsProfile.AdminUsername)
+		addValue(parametersMap, "WindowsAdminPassword", properties.WindowsProfile.AdminPassword)
 		if properties.WindowsProfile.HasCustomImage() {
 			addValue(parametersMap, "windowsImageSourceUrl", properties.WindowsProfile.WindowsImageSourceURL)
 		}

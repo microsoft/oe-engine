@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"net/url"
 	"regexp"
 	"strings"
 
@@ -35,19 +34,7 @@ func (a *Properties) Validate(isUpdate bool) error {
 	if e := validate.Struct(a); e != nil {
 		return handleValidationErrors(e.(validator.ValidationErrors))
 	}
-	if a.LinuxProfile != nil && a.WindowsProfile != nil {
-		return fmt.Errorf("Linux and Windows profiles are mutually exclusive")
-	}
-	if a.LinuxProfile == nil && a.WindowsProfile == nil {
-		return fmt.Errorf("Must specify either Linux or Windows profile")
-	}
-	if e := a.validateMasterProfile(); e != nil {
-		return e
-	}
-	if e := a.validateLinuxProfile(); e != nil {
-		return e
-	}
-	if e := a.validateWindowsProfile(); e != nil {
+	if e := a.validateVMPoolProfiles(); e != nil {
 		return e
 	}
 	if e := a.validateDiagnosticsProfile(); e != nil {
@@ -62,26 +49,47 @@ func handleValidationErrors(e validator.ValidationErrors) error {
 	return common.HandleValidationErrors(e)
 }
 
-func (a *Properties) validateMasterProfile() error {
-	m := a.MasterProfile
-	if m == nil {
-		return nil
-	}
-	if len(m.OSImageName) > 0 {
-		if _, ok := OsImageMap[m.OSImageName]; !ok {
-			return fmt.Errorf("OS image '%s' is not supported", m.OSImageName)
+func (a *Properties) validateVMPoolProfiles() error {
+	var hasLinux, hasWindows bool
+	names := map[string]bool{}
+	for _, p := range a.VMProfiles {
+		if names[p.Name] {
+			return fmt.Errorf("Duplicated VM pool name %s", p.Name)
 		}
-	}
-	if len(m.OSDiskType) > 0 {
-		found := false
-		for _, t := range AllowedOsDiskTypes {
-			if t == m.OSDiskType {
-				found = true
-				break
+		names[p.Name] = true
+
+		if len(p.OSImageName) == 0 {
+			return fmt.Errorf("OS image is not specified")
+		}
+		switch p.OSImageName {
+		case OsUbuntu1604:
+			hasLinux = true
+		case OsWindows2016:
+			hasWindows = true
+		default:
+			return fmt.Errorf("OS image '%s' is not supported", p.OSImageName)
+		}
+		if len(p.OSDiskType) > 0 {
+			found := false
+			for _, t := range AllowedOsDiskTypes {
+				if t == p.OSDiskType {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return fmt.Errorf("OS disk type '%s' is not included in supported [%s]", p.OSDiskType, strings.Join(AllowedOsDiskTypes, ","))
 			}
 		}
-		if !found {
-			return fmt.Errorf("OS disk type '%s' is not included in supported [%s]", m.OSDiskType, strings.Join(AllowedOsDiskTypes, ","))
+	}
+	if hasLinux {
+		if e := a.validateLinuxProfile(); e != nil {
+			return e
+		}
+	}
+	if hasWindows {
+		if e := a.validateWindowsProfile(); e != nil {
+			return e
 		}
 	}
 	return nil
@@ -91,13 +99,13 @@ func (a *Properties) validateLinuxProfile() error {
 	if a.LinuxProfile == nil {
 		return nil
 	}
-	if len(a.LinuxProfile.AdminPassword) > 0 && len(a.LinuxProfile.SSH.PublicKeys[0].KeyData) > 0 {
+	if len(a.LinuxProfile.AdminPassword) > 0 && len(a.LinuxProfile.SSHPubKey) > 0 {
 		return fmt.Errorf("AdminPassword and SSH public key are mutually exclusive")
 	}
-	if len(a.LinuxProfile.AdminPassword) == 0 && len(a.LinuxProfile.SSH.PublicKeys[0].KeyData) == 0 {
+	if len(a.LinuxProfile.AdminPassword) == 0 && len(a.LinuxProfile.SSHPubKey) == 0 {
 		return fmt.Errorf("Must specify either AdminPassword or SSH public key")
 	}
-	return validateKeyVaultSecrets(a.LinuxProfile.Secrets, false)
+	return nil
 }
 
 func (a *Properties) validateWindowsProfile() error {
@@ -120,29 +128,6 @@ func (a *Properties) validateDiagnosticsProfile() error {
 	return nil
 }
 
-func validateKeyVaultSecrets(secrets []KeyVaultSecrets, requireCertificateStore bool) error {
-	for _, s := range secrets {
-		if len(s.VaultCertificates) == 0 {
-			return fmt.Errorf("Invalid KeyVaultSecrets must have no empty VaultCertificates")
-		}
-		if s.SourceVault == nil {
-			return fmt.Errorf("missing SourceVault in KeyVaultSecrets")
-		}
-		if s.SourceVault.ID == "" {
-			return fmt.Errorf("KeyVaultSecrets must have a SourceVault.ID")
-		}
-		for _, c := range s.VaultCertificates {
-			if _, e := url.Parse(c.CertificateURL); e != nil {
-				return fmt.Errorf("Certificate url was invalid. received error %s", e)
-			}
-			if e := validateName(c.CertificateStore, "KeyVaultCertificate.CertificateStore"); requireCertificateStore && e != nil {
-				return fmt.Errorf("%s for certificates in a WindowsProfile", e)
-			}
-		}
-	}
-	return nil
-}
-
 // Validate ensures that the WindowsProfile is valid
 func (w *WindowsProfile) Validate(orchestratorType string) error {
 	if e := validate.Var(w.AdminUsername, "required"); e != nil {
@@ -151,7 +136,7 @@ func (w *WindowsProfile) Validate(orchestratorType string) error {
 	if e := validate.Var(w.AdminPassword, "required"); e != nil {
 		return fmt.Errorf("WindowsProfile.AdminPassword is required, when agent pool specifies windows")
 	}
-	return validateKeyVaultSecrets(w.Secrets, true)
+	return nil
 }
 
 func validateName(name string, label string) error {
