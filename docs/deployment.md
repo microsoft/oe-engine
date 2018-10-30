@@ -13,12 +13,12 @@ Alternatively you can download latest release from https://github.com/Microsoft/
 The VM definition file is a JSON document, that describes properties of the VMs, such as compute power, OS image, credentials, etc.
 The syntax of the file is self-explanatory. The examples below illustrate how to set various properties.
 
-* [Multi-VM deployment](docs/examples/oe-multi-vm.json) - Deploying multiple VMs
-* [Existing VNET](docs/examples/oe-vnet.json) - Deploying VMs into existing VNET
-* [Enabling boot diagnostics](docs/examples/oe-bootdiagnostics.json) - Creating new or using existing storage account for boot diagnostics
-* [vanila VM deployment](docs/examples/oe-vanila.json) - Skipping installation of OE SDK
-* [Linux user password](docs/examples/oe-lnx-passwd.json) - Using Linux user password instead of public SSH key
-* [Windows OpenSSH](docs/examples/oe-win-ssh.json) - Installing and configuring OpenSSH on Windows VMs
+* [Multi-VM deployment](examples/oe-multi-vm.json) - Deploying multiple VMs
+* [Existing VNET](examples/oe-vnet.json) - Deploying VMs into existing VNET
+* [Enabling boot diagnostics](examples/oe-bootdiagnostics.json) - Creating new or using existing storage account for boot diagnostics
+* [vanila VM deployment](examples/oe-vanila.json) - Skipping installation of OE SDK
+* [Linux user password](examples/oe-lnx-passwd.json) - Using Linux user password instead of public SSH key
+* [Windows OpenSSH](examples/oe-win-ssh.json) - Installing and configuring OpenSSH on Windows VMs
 
 The table below summarizes enumerated properties
 
