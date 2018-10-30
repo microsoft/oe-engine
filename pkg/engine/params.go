@@ -53,7 +53,7 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 		}
 	}
 
-	if properties.LinuxProfile != nil && !cs.OeSdkExcluded {
+	if properties.LinuxProfile != nil && !cs.Properties.OeSdkExcluded {
 		addValue(parametersMap, "oeSDKIncluded", "yes")
 	} else {
 		addValue(parametersMap, "oeSDKIncluded", "no")

@@ -2,14 +2,14 @@
   "properties": {
     "vmProfiles": [
       {
-        "name": "accwin",
-        "osImageName": "WindowsServer_2016",
+        "name": "acclnx",
+        "osImageName": "UbuntuServer_16.04",
         "vmSize": "Standard_DC2s"
       }
     ],
-    "windowsProfile": {
+    "linuxProfile": {
       "adminUsername": "azureuser",
-      "adminPassword": ""
+      "adminPassword": "myPassword"
     }
   }
 }

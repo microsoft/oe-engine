@@ -9,7 +9,8 @@
     ],
     "windowsProfile": {
       "adminUsername": "azureuser",
-      "adminPassword": ""
+      "adminPassword": "myPassword",
+      "sshPublicKey": "ssh-rsa AAAA..."
     }
   }
 }

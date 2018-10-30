@@ -1,5 +1,6 @@
 {
   "properties": {
+    "oeSdkExcluded": true,
     "vmProfiles": [
       {
         "name": "acclnx",
@@ -9,7 +10,7 @@
     ],
     "linuxProfile": {
       "adminUsername": "azureuser",
-      "sshPublicKey": ""
+      "sshPublicKey": "ssh-rsa AAAA..."
     }
   }
 }
