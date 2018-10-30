@@ -47,7 +47,9 @@
       "type": "Microsoft.Network/networkInterfaces"
     },
 {{if HasWindowsCustomImage}}
-    {"type": "Microsoft.Compute/images",
+    {
+      "condition": "[equals(parameters('{{.Name}}OSImageName'), 'WindowsServer_2016')]",
+      "type": "Microsoft.Compute/images",
       "apiVersion": "2018-06-01",
       "name": "CustomWindowsImage",
       "location": "[parameters('location')]",
@@ -85,30 +87,8 @@
             }
           ]
         },
-        "osProfile": {
-          "computername": "{{.Name}}",
-          "adminUsername": "[if(equals(parameters('{{.Name}}OSImageName'), 'WindowsServer_2016'), parameters('WindowsAdminUsername'), parameters('LinuxAdminUsername'))]",
-          "adminPassword": "[if(equals(parameters('{{.Name}}OSImageName'), 'WindowsServer_2016'), parameters('WindowsAdminPassword'), parameters('LinuxAdminPasswordOrKey'))]",
-          "customData": "[if(equals(parameters('oeSDKIncluded'), 'no'), json('null'), {{GetLinuxCustomData}})]",
-          "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
-          "windowsConfiguration": "[if(equals(parameters('{{.Name}}OSImageName'), 'WindowsServer_2016'), variables('windowsConfiguration'), json('null'))]"
-        },
-        "storageProfile": {
-{{if HasWindowsCustomImage}}
-        "imageReference": {
-          "id": "[resourceId('Microsoft.Compute/images','CustomWindowsImage')]"
-        },
-{{else}}
-          "imageReference": "[variables('imageReference')[parameters('{{.Name}}OSImageName')]]",
-{{end}}
-          "osDisk": {
-            "caching": "ReadWrite",
-            "createOption": "FromImage",
-            "managedDisk": {
-              "storageAccountType": "[parameters('{{.Name}}OSDiskType')]"
-            }
-          }
-        },
+        "osProfile": "[if(equals(parameters('{{.Name}}OSImageName'), 'WindowsServer_2016'), variables('{{.Name}}WindowsOsProfile'), variables('{{.Name}}LinuxOsProfile'))]",
+        "storageProfile": "[if(equals(parameters('{{.Name}}OSImageName'), 'WindowsServer_2016'), variables('{{.Name}}WindowsStorageProfile'), variables('{{.Name}}LinuxStorageProfile'))]",
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "[equals(parameters('bootDiagnostics'), 'enable')]",
