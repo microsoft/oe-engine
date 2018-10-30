@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/Microsoft/oe-engine/pkg/api"
-	"github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // setPropertiesDefaults for the container Properties, returns true if certs are generated
@@ -17,11 +17,11 @@ func setPropertiesDefaults(oe *api.OpenEnclave, isUpgrade bool) {
 	}
 	for i, p := range oe.Properties.VMProfiles {
 		if len(p.Name) == 0 {
-			logrus.Warnf("Missing Name for VM pool #%d. Assuming %s", i, api.DefaultVMName)
+			log.Warnf("Missing Name for VM pool #%d. Assuming %s", i, api.DefaultVMName)
 			oe.Properties.VMProfiles[i].Name = api.DefaultVMName
 		}
 		if len(p.OSImageName) == 0 {
-			logrus.Warnf("Missing OSImageName for VM pool #%d. Assuming %s", i, api.DefaultLinuxImage)
+			log.Warnf("Missing OSImageName for VM pool #%d. Assuming %s", i, api.DefaultLinuxImage)
 			oe.Properties.VMProfiles[i].OSImageName = api.DefaultLinuxImage
 		}
 	}
