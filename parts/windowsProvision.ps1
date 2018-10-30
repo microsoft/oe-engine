@@ -1,4 +1,7 @@
-﻿mkdir c:/bin
+﻿# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+mkdir c:/bin
 mkdir c:/tmp
 cd c:/tmp
 

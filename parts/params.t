@@ -1,10 +1,10 @@
     "location": {
+      "type": "string",
       "defaultValue": "[resourceGroup().location]",
       {{GetAllowedLocations}}
       "metadata": {
         "description": "Sets the location for all resources in the cluster"
-      },
-      "type": "string"
+      }
     },
     "authenticationType": {
       "type": "string",
@@ -18,28 +18,32 @@
       }
     },
     "LinuxAdminUsername": {
+      "type": "string",
+      "defaultValue": "azureuser",
       "metadata": {
         "description": "User name for the Linux Virtual Machines."
-      },
-      "type": "string"
+      }
     },
     "LinuxAdminPasswordOrKey": {
       "type": "securestring",
+      "defaultValue": "",
       "metadata": {
         "description": "Linux password or ssh key value."
       }
     },
     "WindowsAdminUsername": {
+      "type": "string",
+      "defaultValue": "azureuser",
       "metadata": {
         "description": "User name for the Windows Virtual Machines."
-      },
-      "type": "string"
+      }
     },
     "WindowsAdminPassword": {
+      "type": "securestring",
+      "defaultValue": "",
       "metadata": {
         "description": "Windows password."
-      },
-      "type": "string"
+      }
     },
     "vnetNewOrExisting": {
       "type": "string",

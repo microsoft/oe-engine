@@ -20,29 +20,9 @@ type Properties struct {
 
 // LinuxProfile represents the linux parameters passed to the cluster
 type LinuxProfile struct {
-	AdminUsername      string              `json:"adminUsername"`
-	AdminPassword      string              `json:"adminPassword"`
-	SSHPubKey          string              `json:"sshPublicKey"`
-	ScriptRootURL      string              `json:"scriptroot,omitempty"`
-	CustomSearchDomain *CustomSearchDomain `json:"customSearchDomain,omitempty"`
-	CustomNodesDNS     *CustomNodesDNS     `json:"CustomNodesDNS,omitempty"`
-}
-
-// PublicKey represents an SSH key for LinuxProfile
-type PublicKey struct {
-	KeyData string `json:"keyData"`
-}
-
-// CustomSearchDomain represents the Search Domain when the custom vnet has a windows server DNS as a nameserver.
-type CustomSearchDomain struct {
-	Name          string `json:"name,omitempty"`
-	RealmUser     string `json:"realmUser,omitempty"`
-	RealmPassword string `json:"realmPassword,omitempty"`
-}
-
-// CustomNodesDNS represents the Search Domain when the custom vnet for a custom DNS as a nameserver.
-type CustomNodesDNS struct {
-	DNSServer string `json:"dnsServer,omitempty"`
+	AdminUsername string `json:"adminUsername"`
+	AdminPassword string `json:"adminPassword"`
+	SSHPubKey     string `json:"sshPublicKey"`
 }
 
 // WindowsProfile represents the windows parameters passed to the cluster

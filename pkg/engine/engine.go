@@ -45,36 +45,6 @@ func addValue(m paramsMap, k string, v interface{}) {
 	}
 }
 
-func addKeyvaultReference(m paramsMap, k string, vaultID, secretName, secretVersion string) {
-	m[k] = paramsMap{
-		"reference": &KeyVaultRef{
-			KeyVault: KeyVaultID{
-				ID: vaultID,
-			},
-			SecretName:    secretName,
-			SecretVersion: secretVersion,
-		},
-	}
-}
-
-func addSecret(m paramsMap, k string, v interface{}, encode bool) {
-	str, ok := v.(string)
-	if !ok {
-		addValue(m, k, v)
-		return
-	}
-	parts := keyvaultSecretPathRe.FindStringSubmatch(str)
-	if parts == nil || len(parts) != 5 {
-		if encode {
-			addValue(m, k, base64.StdEncoding.EncodeToString([]byte(str)))
-		} else {
-			addValue(m, k, str)
-		}
-		return
-	}
-	addKeyvaultReference(m, k, parts[1], parts[2], parts[4])
-}
-
 // getStorageAccountType returns the support managed disk storage tier for a give VM size
 func getStorageAccountType(sizeName string) (string, error) {
 	spl := strings.Split(sizeName, "_")
