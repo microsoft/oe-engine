@@ -1,6 +1,6 @@
 # Deployment of ACC VMs
 
-Typical deployment consist of the following steps:
+A typical deployment consists of the following steps:
 
 ### Build oe-engine
 ```sh
@@ -8,24 +8,25 @@ git clone https://github.com/Microsoft/oe-engine
 cd oe-engine
 make build
 ```
-Alternatively you can download latest release from https://github.com/Microsoft/oe-engine/releases
+Alternatively, you can download latest release from [here](https://github.com/Microsoft/oe-engine/releases)
+
 ### Create VM definition file
-The VM definition file is a JSON document, that describes properties of the VMs, such as compute power, OS image, credentials, etc.
-The syntax of the file is self-explanatory. The examples below illustrate how to set various properties.
+The VM definition file is a JSON-formatted description of the properties of the VMs, such as: compute power, OS image, credentials, etc.
+The examples below illustrate how to set the various properties.
 
 * [Multi-VM deployment](examples/oe-multi-vm.json) - Deploying multiple VMs
-* [Existing VNET](examples/oe-vnet.json) - Deploying VMs into existing VNET
-* [Enabling boot diagnostics](examples/oe-bootdiagnostics.json) - Creating new or using existing storage account for boot diagnostics
-* [vanila VM deployment](examples/oe-vanila.json) - Skipping installation of OE SDK
-* [Linux user password](examples/oe-lnx-passwd.json) - Using Linux user password instead of public SSH key
-* [Windows OpenSSH](examples/oe-win-ssh.json) - Installing and configuring OpenSSH on Windows VMs
+* [Existing VNET](examples/oe-vnet.json) - Deploying VMs into an existing virtual network
+* [Enabling boot diagnostics](examples/oe-bootdiagnostics.json) - Creating a new storage account, or using an existing storage account for boot diagnostics
+* [Vanilla VM deployment](examples/oe-vanilla.json) - Skipping installation of the Open Enclave SDK
+* [Linux user password](examples/oe-lnx-passwd.json) - Using password authentication instead of SSH on Linux
+* [Windows OpenSSH](examples/oe-win-ssh.json) - Installing and configuring OpenSSH on Windows
 
-The table below summarizes enumerated properties
+The table below summarizes enumerated properties:
 
 | Property | Key | Values |
 | ------ | ------ |------ |
-| OS | osImageName | `UbuntuServer_16.04` `WindowsServer_2016` |
-| Compute| vmSize | `Standard_DC2s` `Standard_DC4s` |
+| OS | `osImageName` | `UbuntuServer_16.04` `WindowsServer_2016` |
+| Compute| `vmSize` | `Standard_DC2s` `Standard_DC4s` |
 
 ## Generate deployment template
 
