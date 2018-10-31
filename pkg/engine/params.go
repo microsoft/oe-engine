@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/Microsoft/oe-engine/pkg/api"
 )
@@ -19,7 +20,7 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 	for _, vm := range properties.VMProfiles {
 		addValue(parametersMap, fmt.Sprintf("%sVMSize", vm.Name), vm.VMSize)
 		addValue(parametersMap, fmt.Sprintf("%sOSImageName", vm.Name), vm.OSImageName)
-
+		addValue(parametersMap, fmt.Sprintf("%sIsVanilla", vm.Name), strconv.FormatBool(vm.IsVanilla))
 		if len(vm.OSDiskType) > 0 {
 			addValue(parametersMap, fmt.Sprintf("%sOSDiskType", vm.Name), vm.OSDiskType)
 		}
@@ -51,12 +52,6 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 		if properties.WindowsProfile.HasCustomImage() {
 			addValue(parametersMap, "windowsImageSourceUrl", properties.WindowsProfile.WindowsImageSourceURL)
 		}
-	}
-
-	if properties.LinuxProfile != nil && !cs.Properties.OeSdkExcluded {
-		addValue(parametersMap, "oeSDKIncluded", "yes")
-	} else {
-		addValue(parametersMap, "oeSDKIncluded", "no")
 	}
 
 	if properties.DiagnosticsProfile != nil && properties.DiagnosticsProfile.Enabled {

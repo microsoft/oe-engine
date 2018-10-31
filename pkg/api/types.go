@@ -10,7 +10,6 @@ type OpenEnclave struct {
 
 // Properties represents the ACS cluster definition
 type Properties struct {
-	OeSdkExcluded      bool                `json:"oeSdkExcluded"`
 	VnetProfile        *VnetProfile        `json:"vnetProfile"`
 	VMProfiles         []*VMProfile        `json:"vmProfiles"`
 	LinuxProfile       *LinuxProfile       `json:"linuxProfile,omitempty"`
@@ -44,6 +43,7 @@ type VMProfile struct {
 	OSDiskType  string `json:"osDiskType"`
 	VMSize      string `json:"vmSize"`
 	Ports       []int  `json:"ports,omitempty"`
+	IsVanilla   bool   `json:"isVanilla"`
 }
 
 // VnetProfile represents the definition of a vnet

@@ -1,11 +1,11 @@
 {
   "properties": {
-    "oeSdkExcluded": true,
     "vmProfiles": [
       {
         "name": "acclnx",
         "osImageName": "UbuntuServer_16.04",
-        "vmSize": "Standard_DC2s"
+        "vmSize": "Standard_DC2s",
+        "isVanilla": true
       }
     ],
     "linuxProfile": {
