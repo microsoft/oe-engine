@@ -7,14 +7,14 @@
       "computername": "{{.Name}}",
       "adminUsername": "[parameters('LinuxAdminUsername')]",
       "adminPassword": "[parameters('LinuxAdminPasswordOrKey')]",
-      "customData": "[if(equals(parameters('oeSDKIncluded'), 'no'), json('null'), {{GetLinuxCustomData}})]",
+      "customData": "[if(equals(parameters('{{.Name}}IsVanilla'), 'true'), json('null'), {{GetLinuxCustomData}})]",
       "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
     },
     "{{.Name}}WindowsOsProfile": {
       "computername": "{{.Name}}",
       "adminUsername": "[parameters('WindowsAdminUsername')]",
       "adminPassword": "[parameters('WindowsAdminPassword')]",
-      "customData": "{{GetWindowsCustomData}}",
+      "customData": "{{GetWindowsCustomData .}}",
       "windowsConfiguration": "[variables('windowsConfiguration')]"
     },
     "{{.Name}}LinuxStorageProfile": {

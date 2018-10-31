@@ -99,7 +99,7 @@
       "type": "Microsoft.Compute/virtualMachines"
     },
     {
-      "condition": "[equals(parameters('{{.Name}}OSImageName'), 'UbuntuServer_16.04')]",
+      "condition": "[and(equals(parameters('{{.Name}}IsVanilla'), 'false'), equals(parameters('{{.Name}}OSImageName'), 'UbuntuServer_16.04'))]",
       "apiVersion": "2018-06-01",
       "dependsOn": [
         "{{.Name}}"
@@ -112,7 +112,7 @@
         "typeHandlerVersion": "1.4",
         "autoUpgradeMinorVersion": true,
         "settings": {
-          "commandToExecute": "[variables('linuxExtCommand')]"
+          "commandToExecute": "/bin/bash -c \"secs=600; SECONDS=0; while (( SECONDS < secs )); do if [ -e /opt/azure/acc/completed ]; then if [ $(cat /opt/azure/acc/completed) == ok ]; then /opt/azure/acc/validate.sh; exit $? ; else echo provision failed; exit 1; fi; fi; sleep 20; done; echo validation timeout; exit 1; \""
         }
       },
       "type": "Microsoft.Compute/virtualMachines/extensions"

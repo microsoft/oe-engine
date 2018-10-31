@@ -92,6 +92,13 @@ Start-Process -Wait -FilePath $seven_zip_file -ArgumentList " /quiet /passive"
 #  Install OpenSSH
 InstallOpenSSH
 
+$is_vanilla = "IS_VANILLA_VM"
+if ($is_vanilla -eq "true") {
+    Write-Output "Skipping Open Enclave installation."
+    exit 0
+}
+Write-Output "Installing Open Enclave"
+
 # Install the intel sgx drivers
 & curl.exe  -o "c:/tmp/sgx_base.cab" "http://download.windowsupdate.com/d/msdownload/update/driver/drvs/2018/01/af564f2c-2bc5-43be-a863-437a5a0008cb_61e7ba0c2e17c87caf4d5d3cdf1f35f6be462b38.cab"
 & 7z x c:/tmp/sgx_base.cab -o"c:/tmp/sgx_base" -y

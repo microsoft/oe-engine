@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"runtime/debug"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -132,7 +133,7 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 				})
 			return fmt.Sprintf("base64(concat('#cloud-config\\n\\n', '%s'))", str)
 		},
-		"GetWindowsCustomData": func() string {
+		"GetWindowsCustomData": func(vm *api.VMProfile) string {
 			if cs.Properties.WindowsProfile == nil {
 				return ""
 			}
@@ -143,6 +144,7 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 			}
 			csStr := string(b)
 			csStr = strings.Replace(csStr, "SSH_PUB_KEY", cs.Properties.WindowsProfile.SSHPubKey, -1)
+			csStr = strings.Replace(csStr, "IS_VANILLA_VM", strconv.FormatBool(vm.IsVanilla), -1)
 			return getBase64CustomScriptFromStr(csStr)
 		},
 		"GetAllowedVMSizes": func() string {
