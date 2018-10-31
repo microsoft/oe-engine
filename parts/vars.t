@@ -2,14 +2,7 @@
     {{GetOSImageReferences}},
     "linuxConfiguration": {
       "disablePasswordAuthentication": "true",
-      "ssh": {
-        "publicKeys": [
-          {
-            "keyData": "[parameters('LinuxAdminPasswordOrKey')]",
-            "path": "[concat('/home/', parameters('LinuxAdminUsername'), '/.ssh/authorized_keys')]"
-          }
-        ]
-      }
+      "ssh": {{GetLinuxPublicKeys}}
     },
     "singleQuote": "'",
     "windowsConfiguration": {

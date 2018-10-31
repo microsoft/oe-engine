@@ -97,20 +97,28 @@ func (a *Properties) validateVMPoolProfiles() error {
 
 func (a *Properties) validateLinuxProfile() error {
 	if a.LinuxProfile == nil {
-		return nil
+		return fmt.Errorf("LinuxProfile cannot be empty")
 	}
-	if len(a.LinuxProfile.AdminPassword) > 0 && len(a.LinuxProfile.SSHPubKey) > 0 {
-		return fmt.Errorf("AdminPassword and SSH public key are mutually exclusive")
+	if len(a.LinuxProfile.AdminUsername) == 0 {
+		return fmt.Errorf("LinuxProfile.AdminUsername cannot be empty")
 	}
-	if len(a.LinuxProfile.AdminPassword) == 0 && len(a.LinuxProfile.SSHPubKey) == 0 {
-		return fmt.Errorf("Must specify either AdminPassword or SSH public key")
+	if len(a.LinuxProfile.AdminPassword) > 0 && len(a.LinuxProfile.SSHPubKeys) > 0 {
+		return fmt.Errorf("AdminPassword and SSH public keys are mutually exclusive")
+	}
+	if len(a.LinuxProfile.AdminPassword) == 0 && len(a.LinuxProfile.SSHPubKeys) == 0 {
+		return fmt.Errorf("Must specify either AdminPassword or SSH public keys")
+	}
+	for i, key := range a.LinuxProfile.SSHPubKeys {
+		if key == nil || len(key.KeyData) == 0 {
+			return fmt.Errorf("SSH public key #%d cannot be empty", i)
+		}
 	}
 	return nil
 }
 
 func (a *Properties) validateWindowsProfile() error {
 	if a.WindowsProfile == nil {
-		return nil
+		return fmt.Errorf("WindowsProfile cannot be empty")
 	}
 	if e := validate.Var(a.WindowsProfile.AdminPassword, "required"); e != nil {
 		return fmt.Errorf("WindowsProfile.AdminPassword cannot be empty string")

@@ -123,6 +123,22 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"GetSecurityRules": func(ports []int) string {
 			return getSecurityRules(ports)
 		},
+		"GetLinuxPublicKeys": func() string {
+			keyTempl := `          {
+            "keyData": "%s",
+            "path": "/home/%s/.ssh/authorized_keys"
+          }`
+			keyData := make([]string, len(cs.Properties.LinuxProfile.SSHPubKeys))
+			for i, key := range cs.Properties.LinuxProfile.SSHPubKeys {
+				keyData[i] = fmt.Sprintf(keyTempl, key.KeyData, cs.Properties.LinuxProfile.AdminUsername)
+			}
+			sshTempl := `{
+        "publicKeys": [
+%s
+        ]
+      }`
+			return fmt.Sprintf(sshTempl, strings.Join(keyData, ",\n"))
+		},
 		"GetLinuxCustomData": func() string {
 			str := getSingleLineCustomData(
 				customdata,

@@ -6,7 +6,7 @@
     "{{.Name}}LinuxOsProfile": {
       "computername": "{{.Name}}",
       "adminUsername": "[parameters('LinuxAdminUsername')]",
-      "adminPassword": "[parameters('LinuxAdminPasswordOrKey')]",
+      "adminPassword": "[parameters('LinuxAdminPassword')]",
       "customData": "[if(equals(parameters('{{.Name}}IsVanilla'), 'true'), json('null'), {{GetLinuxCustomData}})]",
       "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
     },

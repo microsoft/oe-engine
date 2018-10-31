@@ -40,10 +40,9 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 		addValue(parametersMap, "LinuxAdminUsername", properties.LinuxProfile.AdminUsername)
 		if len(properties.LinuxProfile.AdminPassword) > 0 {
 			addValue(parametersMap, "authenticationType", "password")
-			addValue(parametersMap, "LinuxAdminPasswordOrKey", properties.LinuxProfile.AdminPassword)
+			addValue(parametersMap, "LinuxAdminPassword", properties.LinuxProfile.AdminPassword)
 		} else {
 			addValue(parametersMap, "authenticationType", "sshPublicKey")
-			addValue(parametersMap, "LinuxAdminPasswordOrKey", properties.LinuxProfile.SSHPubKey)
 		}
 	}
 	if properties.WindowsProfile != nil {

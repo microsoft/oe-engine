@@ -24,11 +24,11 @@
         "description": "User name for the Linux Virtual Machines."
       }
     },
-    "LinuxAdminPasswordOrKey": {
+    "LinuxAdminPassword": {
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "Linux password or ssh key value."
+        "description": "Linux password."
       }
     },
     "WindowsAdminUsername": {
