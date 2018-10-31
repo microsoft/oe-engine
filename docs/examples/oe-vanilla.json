@@ -10,7 +10,11 @@
     ],
     "linuxProfile": {
       "adminUsername": "azureuser",
-      "sshPublicKey": "ssh-rsa AAAA..."
+      "sshPublicKeys": [
+        {
+          "keyData": "ssh-rsa AAAA..."
+        }
+      ]
     }
   }
 }

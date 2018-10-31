@@ -19,7 +19,7 @@ chmod 755 oe-engine
 
 if [ "$OS" = "Linux" ]; then
   SSH_PUB_KEY=$(az keyvault secret show --vault-name oe-ci-test-kv --name id-rsa-oe-test-pub | jq -r .value | base64 -d)
-  sed -i "/\"sshPublicKey\":/c \"sshPublicKey\": \"${SSH_PUB_KEY}\"" oe-lnx.json
+  sed -i "/\"keyData\":/c \"keyData\": \"${SSH_PUB_KEY}\"" oe-lnx.json
   ./oe-engine generate --api-model oe-lnx.json
 elif [ "$OS" = "Windows" ]; then
   ADMIN_PASSWORD=$(az keyvault secret show --vault-name oe-ci-test-kv --name windows-pwd | jq -r .value)

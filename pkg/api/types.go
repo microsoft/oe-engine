@@ -19,9 +19,9 @@ type Properties struct {
 
 // LinuxProfile represents the linux parameters passed to the cluster
 type LinuxProfile struct {
-	AdminUsername string `json:"adminUsername"`
-	AdminPassword string `json:"adminPassword"`
-	SSHPubKey     string `json:"sshPublicKey"`
+	AdminUsername string       `json:"adminUsername"`
+	AdminPassword string       `json:"adminPassword"`
+	SSHPubKeys    []*PublicKey `json:"sshPublicKeys"`
 }
 
 // WindowsProfile represents the windows parameters passed to the cluster
@@ -61,6 +61,10 @@ type DiagnosticsProfile struct {
 	Enabled             bool   `json:"enabled"`
 	StorageAccountName  string `json:"storageAccountName"`
 	IsNewStorageAccount bool   `json:"isNewStorageAccount"`
+}
+
+type PublicKey struct {
+	KeyData string `json:"keyData"`
 }
 
 // IsCustomVNET returns true if the customer brought their own VNET
