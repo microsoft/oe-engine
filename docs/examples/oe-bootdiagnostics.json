@@ -1,0 +1,25 @@
+{
+  "properties": {
+    "vmProfiles": [
+      {
+        "name": "accvm1",
+        "osImageName": "UbuntuServer_16.04",
+        "vmSize": "Standard_DC2s"
+      },
+      {
+        "name": "accvm2",
+        "osImageName": "UbuntuServer_16.04",
+        "vmSize": "Standard_DC2s"
+      }
+    ],
+    "linuxProfile": {
+      "adminUsername": "azureuser",
+      "sshPublicKey": "ssh-rsa AAAA..."
+    },
+    "diagnosticsProfile": {
+      "enabled": true,
+      "storageAccountName": "myStorageAccount",
+      "isNewStorageAccount": true
+    }
+  }
+}

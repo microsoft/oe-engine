@@ -1,0 +1,34 @@
+{
+  "properties": {
+    "vmProfiles": [
+      {
+        "name": "acclnx1",
+        "osImageName": "UbuntuServer_16.04",
+        "vmSize": "Standard_DC2s"
+      },
+      {
+        "name": "acclnx2",
+        "osImageName": "UbuntuServer_16.04",
+        "vmSize": "Standard_DC2s"
+      },
+      {
+        "name": "accwin1",
+        "osImageName": "WindowsServer_2016",
+        "vmSize": "Standard_DC2s"
+      },
+      {
+        "name": "accwin2",
+        "osImageName": "WindowsServer_2016",
+        "vmSize": "Standard_DC2s"
+      }
+    ],
+    "linuxProfile": {
+      "adminUsername": "azureuser",
+      "sshPublicKey": "ssh-rsa AAAA..."
+    },
+    "windowsProfile": {
+      "adminUsername": "azureuser",
+      "adminPassword": "myPassword"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "properties": {
+    "vmProfiles": [
+      {
+        "name": "accvm1",
+        "osImageName": "UbuntuServer_16.04",
+        "vmSize": "Standard_DC2s"
+      },
+      {
+        "name": "accvm2",
+        "osImageName": "UbuntuServer_16.04",
+        "vmSize": "Standard_DC2s"
+      }
+    ],
+    "vnetProfile": {
+      "vnetResourceGroup": "existingVnetResourceGroupName",
+      "vnetName": "existingVnetName",
+      "subnetName": "existingVnetSubnetName"
+    },
+    "linuxProfile": {
+      "adminUsername": "azureuser",
+      "sshPublicKey": "ssh-rsa AAAA..."
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "properties": {
+    "vmProfiles": [
+      {
+        "name": "accwin",
+        "osImageName": "WindowsServer_2016",
+        "vmSize": "Standard_DC2s"
+      }
+    ],
+    "windowsProfile": {
+      "adminUsername": "azureuser",
+      "adminPassword": "myPassword",
+      "sshPublicKey": "ssh-rsa AAAA..."
+    }
+  }
+}

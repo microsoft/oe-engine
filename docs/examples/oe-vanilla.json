@@ -1,0 +1,16 @@
+{
+  "properties": {
+    "oeSdkExcluded": true,
+    "vmProfiles": [
+      {
+        "name": "acclnx",
+        "osImageName": "UbuntuServer_16.04",
+        "vmSize": "Standard_DC2s"
+      }
+    ],
+    "linuxProfile": {
+      "adminUsername": "azureuser",
+      "sshPublicKey": "ssh-rsa AAAA..."
+    }
+  }
+}
