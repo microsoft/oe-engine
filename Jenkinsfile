@@ -14,6 +14,7 @@ pipeline {
         }
 	  }
 	  steps {
+            sh 'mkdir go'
             sh 'ls'
             sh 'pwd'
             sh 'id'
