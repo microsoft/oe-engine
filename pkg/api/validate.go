@@ -37,6 +37,9 @@ func (a *Properties) Validate(isUpdate bool) error {
 	if e := a.validateVMPoolProfiles(); e != nil {
 		return e
 	}
+	if e := a.validateVnetProfile(); e != nil {
+		return e
+	}
 	if e := a.validateDiagnosticsProfile(); e != nil {
 		return e
 	}
@@ -120,8 +123,11 @@ func (a *Properties) validateWindowsProfile() error {
 	if a.WindowsProfile == nil {
 		return fmt.Errorf("WindowsProfile cannot be empty")
 	}
+	if e := validate.Var(a.WindowsProfile.AdminUsername, "required"); e != nil {
+		return fmt.Errorf("WindowsProfile.AdminUsername cannot be empty")
+	}
 	if e := validate.Var(a.WindowsProfile.AdminPassword, "required"); e != nil {
-		return fmt.Errorf("WindowsProfile.AdminPassword cannot be empty string")
+		return fmt.Errorf("WindowsProfile.AdminPassword cannot be empty")
 	}
 	return nil
 }
@@ -136,34 +142,25 @@ func (a *Properties) validateDiagnosticsProfile() error {
 	return nil
 }
 
-// Validate ensures that the WindowsProfile is valid
-func (w *WindowsProfile) Validate(orchestratorType string) error {
-	if e := validate.Var(w.AdminUsername, "required"); e != nil {
-		return fmt.Errorf("WindowsProfile.AdminUsername is required, when agent pool specifies windows")
+func (a *Properties) validateVnetProfile() error {
+	p := a.VnetProfile
+	if p == nil {
+		return nil
 	}
-	if e := validate.Var(w.AdminPassword, "required"); e != nil {
-		return fmt.Errorf("WindowsProfile.AdminPassword is required, when agent pool specifies windows")
-	}
-	return nil
-}
-
-func validateName(name string, label string) error {
-	if name == "" {
-		return fmt.Errorf("%s must be a non-empty value", label)
-	}
-	return nil
-}
-
-func validatePoolName(poolName string) error {
-	// we will cap at length of 12 and all lowercase letters since this makes up the VMName
-	poolNameRegex := `^([a-z][a-z0-9]{0,11})$`
-	re, err := regexp.Compile(poolNameRegex)
-	if err != nil {
-		return err
-	}
-	submatches := re.FindStringSubmatch(poolName)
-	if len(submatches) != 2 {
-		return fmt.Errorf("pool name '%s' is invalid. A pool name must start with a lowercase letter, have max length of 12, and only have characters a-z0-9", poolName)
+	// existing vnet is uniquely defined by resource group, vnet name, and subnet name
+	if len(p.VnetResourceGroup) > 0 {
+		if len(p.VnetName) == 0 {
+			return fmt.Errorf("vnetProfile.vnetName cannot be empty for existing vnet")
+		}
+		if len(p.SubnetName) == 0 {
+			return fmt.Errorf("vnetProfile.subnetName cannot be empty for existing vnet")
+		}
+		if len(p.VnetAddress) > 0 {
+			return fmt.Errorf("vnetProfile.VnetResourceGroup and vnetProfile.vnetAddress are mutually exclusive")
+		}
+		if len(p.SubnetAddress) > 0 {
+			return fmt.Errorf("vnetProfile.VnetResourceGroup and vnetProfile.subnetAddress are mutually exclusive")
+		}
 	}
 	return nil
 }
@@ -172,7 +169,7 @@ func validateUniquePorts(ports []int, name string) error {
 	portMap := make(map[int]bool)
 	for _, port := range ports {
 		if _, ok := portMap[port]; ok {
-			return fmt.Errorf("agent profile '%s' has duplicate port '%d', ports must be unique", name, port)
+			return fmt.Errorf("VM profile '%s' has duplicate port '%d', ports must be unique", name, port)
 		}
 		portMap[port] = true
 	}

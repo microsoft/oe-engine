@@ -19,21 +19,17 @@ type Properties struct {
 
 // LinuxProfile represents the linux parameters passed to the cluster
 type LinuxProfile struct {
-	AdminUsername string       `json:"adminUsername"`
+	AdminUsername string       `json:"adminUsername" validate:"required"`
 	AdminPassword string       `json:"adminPassword"`
 	SSHPubKeys    []*PublicKey `json:"sshPublicKeys"`
 }
 
 // WindowsProfile represents the windows parameters passed to the cluster
 type WindowsProfile struct {
-	AdminUsername         string `json:"adminUsername"`
-	AdminPassword         string `json:"adminPassword"`
-	SSHPubKey             string `json:"sshPublicKey"`
-	ImageVersion          string `json:"imageVersion"`
-	WindowsImageSourceURL string `json:"windowsImageSourceURL"`
-	WindowsPublisher      string `json:"windowsPublisher"`
-	WindowsOffer          string `json:"windowsOffer"`
-	WindowsSku            string `json:"windowsSku"`
+	AdminUsername         string `json:"adminUsername" validate:"required"`
+	AdminPassword         string `json:"adminPassword" validate:"required"`
+	SSHPubKey             string `json:"sshPublicKey,omitempty"`
+	WindowsImageSourceURL string `json:"windowsImageSourceURL,omitempty"`
 }
 
 // VMProfile represents the definition of a VM
@@ -63,6 +59,7 @@ type DiagnosticsProfile struct {
 	IsNewStorageAccount bool   `json:"isNewStorageAccount"`
 }
 
+// PublicKey contains puvlic SSH key
 type PublicKey struct {
 	KeyData string `json:"keyData"`
 }
