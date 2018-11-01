@@ -14,8 +14,6 @@ pipeline {
         }
 	  }
 	  steps {
-	      
-            sh 'mkdir gopath'
             sh 'ls'
             sh 'pwd'
 	        sh 'make test'
