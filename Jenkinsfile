@@ -15,14 +15,14 @@ pipeline {
   stages {
     stage('clone') {
       steps {
-        dir("$GOPATH/src/github.com/Microsoft/oe-engine") {
+        dir('gopath/src/github.com/Microsoft/oe-engine') {
           checkout scm
         }
       }
     }
 	stage('unit-test') {
 	  steps {
-        dir("$GOPATH/src/github.com/Microsoft/oe-engine") {
+        dir('gopath/src/github.com/Microsoft/oe-engine') {
           sh 'ls'
           sh 'pwd'
           sh 'id'
