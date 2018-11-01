@@ -10,7 +10,7 @@ pipeline {
 	    docker {
           image 'golang:1.11.0'
           label 'nonSGX'
-          args  '-e GOPATH=$WORKSPACE/gopath -e PATH=$PATH:/usr/local/go/bin:$WORKSPACE/gopath/bin -e GOCACHE=$WORKSPACE/gopath/.cache'
+          args  ' -e PATH=$PATH:/usr/local/go/bin'
         }
 	  }
 	  steps {
