@@ -124,6 +124,9 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 			return getSecurityRules(ports)
 		},
 		"GetLinuxPublicKeys": func() string {
+			if cs.Properties.LinuxProfile == nil {
+				return `"json('null')"`
+			}
 			keyTempl := `          {
             "keyData": "%s",
             "path": "/home/%s/.ssh/authorized_keys"
