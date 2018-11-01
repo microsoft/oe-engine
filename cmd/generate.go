@@ -3,7 +3,9 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/Microsoft/oe-engine/pkg/api"
 	"github.com/Microsoft/oe-engine/pkg/engine"
@@ -15,13 +17,13 @@ import (
 const (
 	generateName             = "generate"
 	generateShortDescription = "Generate an Azure Resource Manager template"
-	generateLongDescription  = "Generates an Azure Resource Manager template, parameters file and other assets for a cluster"
+	generateLongDescription  = "Generates an Azure Resource Manager template and parameters file"
 )
 
 type generateCmd struct {
 	apimodelPath    string
-	outputDirectory string // can be auto-determined from clusterDefinition
-	classicMode     bool
+	outputDirectory string
+	sshPubKeys      []string
 	noPrettyPrint   bool
 	parametersOnly  bool
 
@@ -51,8 +53,8 @@ func newGenerateCmd() *cobra.Command {
 
 	f := generateCmd.Flags()
 	f.StringVar(&gc.apimodelPath, "api-model", "", "")
-	f.StringVar(&gc.outputDirectory, "output-directory", "", "output directory (derived from FQDN if absent)")
-	f.BoolVar(&gc.classicMode, "classic-mode", false, "enable classic parameters and outputs")
+	f.StringVar(&gc.outputDirectory, "output-directory", "", "output directory (_output if absent)")
+	f.StringArrayVar(&gc.sshPubKeys, "ssh-public-key", nil, "SSH public key file path")
 	f.BoolVar(&gc.noPrettyPrint, "no-pretty-print", false, "skip pretty printing the output")
 	f.BoolVar(&gc.parametersOnly, "parameters-only", false, "only output parameters files")
 
@@ -77,6 +79,17 @@ func (gc *generateCmd) validate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf(fmt.Sprintf("specified api model does not exist (%s)", gc.apimodelPath))
 	}
 
+	for i, keyPath := range gc.sshPubKeys {
+		if _, err := os.Stat(keyPath); os.IsNotExist(err) {
+			return fmt.Errorf(fmt.Sprintf("ssh public key file %s does not exist", keyPath))
+		}
+		b, err := ioutil.ReadFile(keyPath)
+		if err != nil {
+			return err
+		}
+		gc.sshPubKeys[i] = strings.TrimSpace(string(b))
+	}
+
 	return nil
 }
 
@@ -84,7 +97,7 @@ func (gc *generateCmd) loadAPIModel(cmd *cobra.Command, args []string) error {
 	var err error
 
 	apiloader := &api.Apiloader{}
-	gc.oe, err = apiloader.LoadOpenEnclaveFromFile(gc.apimodelPath, true, false)
+	gc.oe, err = apiloader.LoadOpenEnclaveFromFile(gc.apimodelPath, true, false, gc.sshPubKeys)
 	if err != nil {
 		return fmt.Errorf(fmt.Sprintf("error parsing the api model: %s", err.Error()))
 	}
