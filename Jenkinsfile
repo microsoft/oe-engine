@@ -14,7 +14,8 @@ pipeline {
         }
 	  }
 	  steps {
-	      dir("gopath/src/github.com/Microsoft/oe-engine") {
+	      
+            sh 'mkdir gopath'
             sh 'ls'
             sh 'pwd'
 	        sh 'make test'
@@ -22,7 +23,7 @@ pipeline {
 	        withCredentials([usernamePassword(credentialsId: '40060061-6050-40f7-ac6a-53aeb767245f', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
               sh 'AZURE_CONFIG_DIR=$(pwd) test/acc-pr-test.sh'
             }
-	    }
+	    
 	  }
 	}
   }
