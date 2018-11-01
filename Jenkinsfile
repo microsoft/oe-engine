@@ -16,6 +16,9 @@ pipeline {
 	  steps {
             sh 'ls'
             sh 'pwd'
+            sh 'id'
+            sh 'echo $GOPATH'
+            sh 'echo $GOROOT'
 	        sh 'make test'
 	        sh 'make build'
 	        withCredentials([usernamePassword(credentialsId: '40060061-6050-40f7-ac6a-53aeb767245f', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
