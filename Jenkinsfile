@@ -5,7 +5,7 @@ pipeline {
     docker {
       image 'golang:1.11.0'
       label 'nonSGX'
-      args  '-e GOPATH=$WORKSPACE -e GOROOT=$WORKSPACE/go -e PATH=$PATH:/usr/local/go/bin:$WORKSPACE/go/bin -e GOCACHE=$WORKSPACE/.cache'
+      args  '-e GOPATH=$WORKSPACE/gopath -e GOROOT=/usr/local/go -e PATH=$PATH:/usr/local/go/bin:$WORKSPACE/gopath/bin -e GOCACHE=$WORKSPACE/gopath/.cache'
     }
   }
   environment {
@@ -13,15 +13,21 @@ pipeline {
     TENANT_ID = credentials('TenantID')
   }
   stages {
-	stage('unit-test') {  
+    stage('clone') {
+      dir('$GOPATH/src/github.com/Microsoft/oe-engine') {
+          checkout scm
+      }
+    }
+	stage('unit-test') {
 	  steps {
-        sh 'mkdir go'
-        sh 'ls'
-        sh 'pwd'
-        sh 'id'
-        sh 'echo $GOPATH'
-        sh 'echo $GOROOT'
-	    sh 'make test'
+        dir('$GOPATH/src/github.com/Microsoft/oe-engine') {        
+          sh 'ls'
+          sh 'pwd'
+          sh 'id'
+          sh 'echo $GOPATH'
+          sh 'echo $GOROOT'
+	      sh 'make test'
+        }
       }
     }
     stage('build') { 
