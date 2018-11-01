@@ -51,10 +51,8 @@ Setting both the password and the public key(s) is **not allowed**.
 * Path: `properties/linuxProfile/adminUsername`
 * Value: string
 
-
 * Path: `properties/linuxProfile/adminPassword`
 * Value: string
-
 
 * Path: `properties/linuxProfile/sshPublicKeys[]/keyData`
 * Value: public SSH key
@@ -69,7 +67,6 @@ If at least one of the VMs runs Windows, `windowsProfile` must be present and co
 
 * Path: `properties/windowsProfile/adminUsername`
 * Value: string
-
 
 * Path: `properties/windowsProfile/adminPassword`
 * Value: string
