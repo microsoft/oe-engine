@@ -36,13 +36,12 @@ Specifies VM compute characteristics
 Refer to the [VM sizes in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes) for more details.
 
 ### VM Software
-Indicates whether Open Enclave SDK and its dependencies should be installed.
+Indicates whether Open Enclave SDK and its dependencies should be installed or not.
 
 * Path: `properties/vmProfiles[]/isVanilla`
 * Values: boolean
-    * `true` - Vanilla VM. Open Enclave SDK will not be installed
-    * `false` - Open Enclave SDK will be installed and verified
-
+    * `true` - a vanilla VM. Open Enclave SDK will not be installed
+    * `false` - not a vanilla VM. Open Enclave SDK will be installed and verified
 
 ### Linux credentials
 If at least one of the VMs runs Linux, `linuxProfile` must be present and contain admin user name and password or public SSH key.
@@ -52,8 +51,10 @@ Setting both the password and the public key(s) is **not allowed**.
 * Path: `properties/linuxProfile/adminUsername`
 * Value: string
 
+
 * Path: `properties/linuxProfile/adminPassword`
 * Value: string
+
 
 * Path: `properties/linuxProfile/sshPublicKeys[]/keyData`
 * Value: public SSH key
@@ -68,6 +69,7 @@ If at least one of the VMs runs Windows, `windowsProfile` must be present and co
 
 * Path: `properties/windowsProfile/adminUsername`
 * Value: string
+
 
 * Path: `properties/windowsProfile/adminPassword`
 * Value: string
