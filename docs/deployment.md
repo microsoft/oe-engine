@@ -12,6 +12,9 @@ Alternatively, you can download latest release from [here](https://github.com/Mi
 
 ### Create VM definition file
 The VM definition file is a JSON-formatted description of the properties of the VMs, such as: compute power, OS image, credentials, etc.
+
+For details, refer to the [Setting properties in the VM definition file](properties.md)
+
 The examples below illustrate how to set the various properties.
 
 * [Multi-VM deployment](examples/oe-multi-vm.json) - Deploying multiple VMs
@@ -20,13 +23,6 @@ The examples below illustrate how to set the various properties.
 * [Vanilla VM deployment](examples/oe-vanilla.json) - Skipping installation of the Open Enclave SDK
 * [Linux user password](examples/oe-lnx-passwd.json) - Using password authentication instead of SSH on Linux
 * [Windows OpenSSH](examples/oe-win-ssh.json) - Installing and configuring OpenSSH on Windows
-
-The table below summarizes enumerated properties:
-
-| Property | Key | Values |
-| ------ | ------ |------ |
-| OS | `osImageName` | `UbuntuServer_16.04` `WindowsServer_2016` |
-| Compute| `vmSize` | `Standard_DC2s` `Standard_DC4s` |
 
 ## Generate deployment template
 
