@@ -23,20 +23,23 @@ pipeline {
 	stage('unit-test') {
 	  steps {
         dir('gopath/src/github.com/Microsoft/oe-engine') {
-          sh 'ls'
-          sh 'pwd'
-          sh 'id'
-          sh 'echo $GOPATH'
-          sh 'echo $GOROOT'
 	      sh 'make test'
         }
       }
     }
     stage('build') { 
       steps {
-        sh 'make build'
-        withCredentials([usernamePassword(credentialsId: '40060061-6050-40f7-ac6a-53aeb767245f', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
-          sh 'AZURE_CONFIG_DIR=$(pwd) test/acc-pr-test.sh'
+        dir('gopath/src/github.com/Microsoft/oe-engine') {
+          sh 'make build'
+        }
+      }
+    }
+    stage('run') { 
+      steps {
+        dir('gopath/src/github.com/Microsoft/oe-engine') {
+          withCredentials([usernamePassword(credentialsId: '40060061-6050-40f7-ac6a-53aeb767245f', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
+            sh 'AZURE_CONFIG_DIR=$(pwd) test/acc-pr-test.sh'
+          }
         }
       }
     }
