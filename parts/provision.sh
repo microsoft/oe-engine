@@ -51,12 +51,15 @@ if [ $? -ne 0  ]; then
 fi
 
 # Install SGX driver
-retrycmd_if_failure 10 10 120 curl -fsSL -O https://download.01.org/intel-sgx/dcap-1.0/sgx_linux_x64_driver_dcap_36594a7.bin
+sgx_driver="sgx_linux_x64_driver_dcap_a06cb75.bin"
+sgx_driver_url="${OE_PKG_BASE}/${sgx_driver}"
+
+retrycmd_if_failure 10 10 120 curl -fsSL -O ${sgx_driver_url}
 if [ $? -ne 0  ]; then
   error_exit "failed to download SGX driver"
 fi
-chmod a+x ./sgx_linux_x64_driver_dcap_36594a7.bin
-./sgx_linux_x64_driver_dcap_36594a7.bin
+chmod a+x ./${sgx_driver}
+./${sgx_driver}
 if [ $? -ne 0  ]; then
   error_exit "failed to install SGX driver"
 fi
