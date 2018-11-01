@@ -12,6 +12,7 @@ Alternatively, you can download latest release from [here](https://github.com/Mi
 
 ### Create VM definition file
 The VM definition file is a JSON-formatted description of the properties of the VMs, such as: compute power, OS image, credentials, etc.
+
 For details, refer to the [Setting properties in the VM definition file](properties.md)
 
 The examples below illustrate how to set the various properties.

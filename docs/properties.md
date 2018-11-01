@@ -58,8 +58,8 @@ Setting both the password and the public key(s) is **not allowed**.
 * Value: public SSH key
 
 The public SSH key(s) could also be set from the command line using `--ssh-public-key` argument.
-```
-oe-engine generate oe-vm.json --ssh-public-key .ssh/id_rsa1.pub --ssh-public-key .ssh/id_rsa2.pub ...
+```sh
+oe-engine generate oe-vm.json --ssh-public-key .ssh/id_rsa1.pub --ssh-public-key .ssh/id_rsa2.pub
 ```
 
 ### Windows credentials
