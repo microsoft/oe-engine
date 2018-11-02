@@ -33,11 +33,11 @@ sed -i "/\"keyData\":/c \"keyData\": \"${SSH_PUB_KEY}\"" ${API_MODEL}
 ADMIN_PASSWORD=$(az keyvault secret show --vault-name oe-ci-test-kv --name windows-pwd | jq -r .value)
 sed -i "/\"adminPassword\":/c \"adminPassword\": \"${ADMIN_PASSWORD}\"" ${API_MODEL}
 
-OUTPUT=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 6)
+ID=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 6)
 
-../bin/oe-engine generate --api-model ${API_MODEL} --output-directory "_output/$OUTPUT"
+../bin/oe-engine generate --api-model ${API_MODEL} --output-directory "_output/$ID"
 
-RGNAME="oe-engine-pr-${BUILD_NUMBER}"
+RGNAME="oe-engine-pr-${BUILD_NUMBER}-$ID"
 az group create --name $RGNAME --location $LOCATION
 trap 'az group delete --name $RGNAME --yes --no-wait' EXIT
-az group deployment create -n acc-lnx -g $RGNAME --template-file _output/$OUTPUT/azuredeploy.json --parameters _output/$OUTPUT/azuredeploy.parameters.json
+az group deployment create -n acc-lnx -g $RGNAME --template-file _output/$ID/azuredeploy.json --parameters _output/$ID/azuredeploy.parameters.json
