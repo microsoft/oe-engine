@@ -23,7 +23,8 @@ pipeline {
 	stage('Unit-test') {
 	  steps {
         dir('gopath/src/github.com/Microsoft/oe-engine') {
-	      sh 'echo make test'
+          sh 'find .'
+  	      sh 'echo make test'
         }
       }
     }
