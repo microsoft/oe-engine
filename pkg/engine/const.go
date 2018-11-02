@@ -9,6 +9,7 @@ const (
 	resources   = "resources.t"
 	vmresources = "vmresources.t"
 	outputs     = "outputs.t"
+	vmoutputs   = "vmoutputs.t"
 	customdata  = "customdata.t"
 
 	windowsProvision = "windowsProvision.ps1"

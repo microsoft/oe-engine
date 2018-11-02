@@ -1,0 +1,4 @@
+  "status": {
+    "type": "string",
+    "value": ""
+  }

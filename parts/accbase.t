@@ -21,6 +21,9 @@
     {{template "resources.t" .}}
   ],
   "outputs": {
+    {{range .VMProfiles}}
+      {{template "vmoutputs.t" .}}
+    {{end}}
     {{template "outputs.t" .}}
   }
 }

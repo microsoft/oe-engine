@@ -40,6 +40,7 @@ type VMProfile struct {
 	VMSize      string `json:"vmSize"`
 	Ports       []int  `json:"ports,omitempty"`
 	IsVanilla   bool   `json:"isVanilla"`
+	HasDNSName  bool   `json:"hasDNSName"`
 }
 
 // VnetProfile represents the definition of a vnet
