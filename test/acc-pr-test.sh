@@ -40,4 +40,4 @@ ID=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 6)
 RGNAME="oe-engine-pr-${BUILD_NUMBER}-$ID"
 az group create --name $RGNAME --location $LOCATION
 trap 'az group delete --name $RGNAME --yes --no-wait' EXIT
-az group deployment create -n acc-lnx -g $RGNAME --template-file _output/$ID/azuredeploy.json --parameters _output/$ID/azuredeploy.parameters.json
+az group deployment create -n $ID -g $RGNAME --template-file _output/$ID/azuredeploy.json --parameters _output/$ID/azuredeploy.parameters.json
