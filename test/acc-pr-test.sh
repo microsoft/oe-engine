@@ -19,7 +19,9 @@ if [[ -z "${SERVICE_PRINCIPAL_PASSWORD:-}" ]]; then echo "Must specify SERVICE_P
 
 LOCATION=eastus
 
+echo "az login ..."
 az login --service-principal -u ${SERVICE_PRINCIPAL_ID} -p ${SERVICE_PRINCIPAL_PASSWORD} --tenant ${TENANT_ID}
+echo "az account set --subscription ${SUBSCRIPTION_ID}"
 az account set --subscription ${SUBSCRIPTION_ID}
 
 SSH_PUB_KEY=$(az keyvault secret show --vault-name oe-ci-test-kv --name id-rsa-oe-test-pub | jq -r .value | base64 -d)
