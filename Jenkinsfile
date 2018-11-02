@@ -3,7 +3,7 @@
 pipeline {
   agent {
     docker {
-      image 'golang:1.11.0'
+      image 'ubuntu18.04-dev'
       label 'nonSGX'
       args  '-e GOPATH=$WORKSPACE/gopath -e GOROOT=/usr/local/go -e PATH=$PATH:/usr/local/go/bin:$WORKSPACE/gopath/bin -e GOCACHE=$WORKSPACE/gopath/.cache'
     }
