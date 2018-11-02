@@ -13,6 +13,9 @@ cd $DIR
 
 ###
 
+API_MODEL=$1
+if [[ -z "${API_MODEL:-}" ]]; then echo "Usage: $0 <api-model>"; exit 1; fi
+
 if [[ -z "${SUBSCRIPTION_ID:-}" ]]; then echo "Must specify SUBSCRIPTION_ID"; exit 1; fi
 if [[ -z "${TENANT_ID:-}" ]]; then echo "Must specify TENANT_ID"; exit 1; fi
 
@@ -25,10 +28,16 @@ az login --service-principal -u ${SERVICE_PRINCIPAL_ID} -p ${SERVICE_PRINCIPAL_P
 az account set --subscription ${SUBSCRIPTION_ID}
 
 SSH_PUB_KEY=$(az keyvault secret show --vault-name oe-ci-test-kv --name id-rsa-oe-test-pub | jq -r .value | base64 -d)
-sed -i "/\"keyData\":/c \"keyData\": \"${SSH_PUB_KEY}\"" oe-lnx.json
-../bin/oe-engine generate --api-model oe-lnx.json
+sed -i "/\"keyData\":/c \"keyData\": \"${SSH_PUB_KEY}\"" ${API_MODEL}
+
+ADMIN_PASSWORD=$(az keyvault secret show --vault-name oe-ci-test-kv --name windows-pwd | jq -r .value)
+sed -i "/\"adminPassword\":/c \"adminPassword\": \"${ADMIN_PASSWORD}\"" ${API_MODEL}
+
+OUTPUT=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 6)
+
+../bin/oe-engine generate --api-model ${API_MODEL} --output-directory "_output/$OUTPUT"
 
 RGNAME="oe-engine-pr-${BUILD_NUMBER}"
 az group create --name $RGNAME --location $LOCATION
 trap 'az group delete --name $RGNAME --yes --no-wait' EXIT
-az group deployment create -n acc-lnx -g $RGNAME --template-file _output/azuredeploy.json --parameters _output/azuredeploy.parameters.json
+az group deployment create -n acc-lnx -g $RGNAME --template-file _output/$OUTPUT/azuredeploy.json --parameters _output/$OUTPUT/azuredeploy.parameters.json
