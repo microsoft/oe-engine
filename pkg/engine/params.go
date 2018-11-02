@@ -21,6 +21,7 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 		addValue(parametersMap, fmt.Sprintf("%sVMSize", vm.Name), vm.VMSize)
 		addValue(parametersMap, fmt.Sprintf("%sOSImageName", vm.Name), vm.OSImageName)
 		addValue(parametersMap, fmt.Sprintf("%sIsVanilla", vm.Name), strconv.FormatBool(vm.IsVanilla))
+		addValue(parametersMap, fmt.Sprintf("%sHasDNSName", vm.Name), strconv.FormatBool(vm.HasDNSName))
 		if len(vm.OSDiskType) > 0 {
 			addValue(parametersMap, fmt.Sprintf("%sOSDiskType", vm.Name), vm.OSDiskType)
 		}

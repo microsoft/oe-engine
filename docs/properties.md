@@ -43,6 +43,14 @@ Indicates whether Open Enclave SDK and its dependencies should be installed or n
     * `true` - a vanilla VM. Open Enclave SDK will not be installed
     * `false` - not a vanilla VM. Open Enclave SDK will be installed and verified
 
+### DNS name
+Indicates whether the VM has DNS name configured to `<vmName>.<region>.cloudapp.azure.com`
+
+* Path: `properties/vmProfiles[]/hasDNSName`
+* Values: boolean
+    * `true` - the VM has DNS name
+    * `false` - the VM doesn't have DNS name
+
 ### Linux credentials
 If at least one of the VMs runs Linux, `linuxProfile` must be present and contain admin user name and password or public SSH key.
 Multiple public keys are **supported**.

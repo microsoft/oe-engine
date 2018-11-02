@@ -3,6 +3,11 @@
       "location": "[parameters('location')]",
       "name": "[variables('{{.Name}}PublicIPAddressName')]",
       "properties": {
+{{if HasDNSName .}}
+        "dnsSettings": {
+          "domainNameLabel": "{{.Name}}"
+        },
+{{end}}
         "publicIPAllocationMethod": "Dynamic"
       },
       "type": "Microsoft.Network/publicIPAddresses"

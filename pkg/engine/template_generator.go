@@ -196,6 +196,9 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"HasWindowsCustomImage": func() bool {
 			return cs.Properties.WindowsProfile != nil && cs.Properties.WindowsProfile.HasCustomImage()
 		},
+		"HasDNSName": func(vm *api.VMProfile) bool {
+			return vm.HasDNSName
+		},
 		// inspired by http://stackoverflow.com/questions/18276173/calling-a-template-with-several-pipeline-parameters/18276968#18276968
 		"dict": func(values ...interface{}) (map[string]interface{}, error) {
 			if len(values)%2 != 0 {

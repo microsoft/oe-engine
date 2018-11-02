@@ -31,3 +31,14 @@
         "description": "Flag to provision vanilla VM or install OE SDK."
       }
     },
+    "{{.Name}}HasDNSName": {
+      "type": "string",
+      "defaultValue": "false",
+      "allowedValues": [
+        "false",
+        "true"
+      ],
+      "metadata": {
+        "description": "Flag to configure VM DNS name."
+      }
+    },
