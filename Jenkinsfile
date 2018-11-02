@@ -31,14 +31,38 @@ pipeline {
       steps {
         dir('gopath/src/github.com/Microsoft/oe-engine') {
           sh 'make build'
+          stash includes: 'bin/**/*', name: 'bin'
+          stash includes: 'test/**/*.json', name: 'config'
         }
       }
     }
     stage('Test') {
-      steps {
-        dir('gopath/src/github.com/Microsoft/oe-engine') {
-          withCredentials([usernamePassword(credentialsId: 'SERVICE_PRINCIPAL_OSTCLAB', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
-            sh 'AZURE_CONFIG_DIR=$(pwd) test/acc-pr-test.sh'
+      failFast true
+      parallel {
+        stage('Linux') {
+          agent {
+            docker {
+              image 'ubuntu18.04-dev'
+              label 'nonSGX'
+            }
+          }
+          steps {
+            unstash 'bin'
+            unstash 'config'
+            sh 'find .'
+          }
+        }
+        stage('Windows') {
+          agent {
+            docker {
+              image 'ubuntu18.04-dev'
+              label 'nonSGX'
+            }
+          }
+          steps {
+            unstash 'bin'
+            unstash 'config'
+            sh 'find .'
           }
         }
       }
