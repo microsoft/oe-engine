@@ -25,37 +25,27 @@ const (
 	DefaultOsDiskType = "Premium_LRS"
 	// DefaultPackageBaseURL specifies default package base URL
 	DefaultPackageBaseURL = "https://oe.azureedge.net/data"
-	// DefaultLinuxImage specifies default Linux OS image
-	DefaultLinuxImage = OsUbuntu1604
-	// DefaultWindowsImage specifies default Linux OS image
-	DefaultWindowsImage = OsWindows2016
 )
 
-// OSImage represents Azure OS Image
-type OSImage struct {
-	Publisher string
-	Offer     string
-	SKU       string
-	Version   string
-	IsWindows bool
+const (
+	// Windows OSType
+	Windows OSType = "Windows"
+	// Linux OSType
+	Linux OSType = "Linux"
+)
+
+// DefaultLinuxImage specifies default Linux OS image
+var DefaultLinuxImage = OSImage{
+	Publisher: "Canonical",
+	Offer:     "confidential-compute-preview",
+	SKU:       "16.04-LTS",
 }
 
-// OsImageMap contains supported OS images
-var OsImageMap = map[string]OSImage{
-	OsUbuntu1604: {
-		Publisher: "Canonical",
-		Offer:     "confidential-compute-preview",
-		SKU:       "16.04-LTS",
-		Version:   "latest",
-		IsWindows: false,
-	},
-	OsWindows2016: {
-		Publisher: "MicrosoftWindowsServer",
-		Offer:     "confidential-compute-preview",
-		SKU:       "acc-windows-server-2016-datacenter",
-		Version:   "latest",
-		IsWindows: true,
-	},
+// DefaultWindowsImage specifies default Windows OS image
+var DefaultWindowsImage = OSImage{
+	Publisher: "MicrosoftWindowsServer",
+	Offer:     "confidential-compute-preview",
+	SKU:       "acc-windows-server-2016-datacenter",
 }
 
 // AllowedLocations provides supported azure regions
@@ -108,52 +98,4 @@ func GetAllowedVMSizes() string {
 // GetOsDiskTypes returns allowed and default OS disk types
 func GetOsDiskTypes() string {
 	return getAllowedDefaultValues(AllowedOsDiskTypes, DefaultOsDiskType)
-}
-
-// GetOSImageNames returns allowed and default OS image name
-func GetOSImageNames() string {
-	osNames := []string{}
-	for name := range OsImageMap {
-		osNames = append(osNames, name)
-	}
-	return getAllowedValues(osNames)
-}
-
-// GetOSImageReferences returns image references
-func GetOSImageReferences() string {
-	osRefs := []string{}
-	osRefFormat := `  "%s": {
-        "publisher": "%s",
-        "offer": "%s",
-        "sku": "%s",
-        "version": "%s"
-      }`
-	for osname, img := range OsImageMap {
-		osRefs = append(osRefs, fmt.Sprintf(osRefFormat, osname, img.Publisher, img.Offer, img.SKU, img.Version))
-	}
-
-	strFormat := `"imageReference": {
-    %s
-  }
-  `
-	return fmt.Sprintf(strFormat, strings.Join(osRefs, ",\n    "))
-}
-
-// GetVMPlans returns VM plans
-func GetVMPlans() string {
-	vmPlans := []string{}
-	vmPlanFormat := `  "%s": {
-        "name": "%s",
-        "publisher": "%s",
-        "product": "%s"
-      }`
-	for osname, img := range OsImageMap {
-		vmPlans = append(vmPlans, fmt.Sprintf(vmPlanFormat, osname, img.SKU, img.Publisher, img.Offer))
-	}
-
-	strFormat := `"plans": {
-    %s
-  }
-  `
-	return fmt.Sprintf(strFormat, strings.Join(vmPlans, ",\n    "))
 }

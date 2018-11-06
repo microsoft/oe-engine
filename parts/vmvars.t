@@ -2,38 +2,25 @@
     "{{.Name}}PublicIPAddressName": "[concat('{{.Name}}', '-ip')]",
     "{{.Name}}NSGName": "[concat('{{.Name}}', '-nsg')]",
     "{{.Name}}NSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('{{.Name}}NSGName'))]",
-    "{{.Name}}SecurityRules": "[if(equals(parameters('{{.Name}}OSImageName'), 'WindowsServer_2016'), variables('windowsSecurityRules'), variables('linuxSecurityRules'))]",
-    "{{.Name}}LinuxOsProfile": {
+    "{{.Name}}SecurityRules": "[if(equals(parameters('{{.Name}}OSType'), 'Windows'), variables('windowsSecurityRules'), variables('linuxSecurityRules'))]",
+{{if IsLinux .}}
+    "{{.Name}}OSProfile": {
       "computername": "{{.Name}}",
-      "adminUsername": "[parameters('LinuxAdminUsername')]",
-      "adminPassword": "[parameters('LinuxAdminPassword')]",
+      "adminUsername": "[parameters('linuxAdminUsername')]",
+      "adminPassword": "[parameters('linuxAdminPassword')]",
       "customData": "[if(equals(parameters('{{.Name}}IsVanilla'), 'true'), json('null'), {{GetLinuxCustomData}})]",
       "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
     },
-    "{{.Name}}WindowsOsProfile": {
-      "computername": "{{.Name}}",
-      "adminUsername": "[parameters('WindowsAdminUsername')]",
-      "adminPassword": "[parameters('WindowsAdminPassword')]",
-      "customData": "{{GetWindowsCustomData .}}",
-      "windowsConfiguration": "[variables('windowsConfiguration')]"
-    },
-    "{{.Name}}LinuxStorageProfile": {
-      "imageReference": "[variables('imageReference')[parameters('{{.Name}}OSImageName')]]",
-      "osDisk": {
-        "caching": "ReadWrite",
-        "createOption": "FromImage",
-        "managedDisk": {
-          "storageAccountType": "[parameters('{{.Name}}OSDiskType')]"
-        }
-      }
-    },
-    "{{.Name}}WindowsStorageProfile": {
-{{if HasWindowsCustomImage}}
+    "{{.Name}}StorageProfile": {
       "imageReference": {
-        "id": "[resourceId('Microsoft.Compute/images','CustomWindowsImage')]"
-      },
+{{if HasLinuxCustomImage}}
+        "id": "[resourceId('Microsoft.Compute/images','CustomLinuxImage')]"
 {{else}}
-      "imageReference": "[variables('imageReference')[parameters('{{.Name}}OSImageName')]]",
+        "publisher": "[parameters('linuxImagePublisher')]",
+        "offer": "[parameters('linuxImageOffer')]",
+        "sku": "[parameters('linuxImageSKU')]",
+        "version": "[parameters('linuxImageVersion')]"
+      },
 {{end}}
       "osDisk": {
         "caching": "ReadWrite",
@@ -43,3 +30,32 @@
         }
       }
     },
+{{end}}
+{{if IsWindows .}}
+    "{{.Name}}OSProfile": {
+      "computername": "{{.Name}}",
+      "adminUsername": "[parameters('windowsAdminUsername')]",
+      "adminPassword": "[parameters('windowsAdminPassword')]",
+      "customData": "{{GetWindowsCustomData .}}",
+      "windowsConfiguration": "[variables('windowsConfiguration')]"
+    },    
+    "{{.Name}}StorageProfile": {
+      "imageReference": {
+{{if HasWindowsCustomImage}}
+        "id": "[resourceId('Microsoft.Compute/images','CustomWindowsImage')]"
+{{else}}
+        "publisher": "[parameters('windowsImagePublisher')]",
+        "offer": "[parameters('windowsImageOffer')]",
+        "sku": "[parameters('windowsImageSKU')]",
+        "version": "[parameters('windowsImageVersion')]"
+      },
+{{end}}
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "managedDisk": {
+          "storageAccountType": "[parameters('{{.Name}}OSDiskType')]"
+        }
+      }
+    },
+{{end}}

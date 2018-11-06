@@ -22,6 +22,42 @@
         "name": "[parameters('diagnosticsStorageAccountType')]"
       }
     },
+{{if HasWindowsCustomImage}}
+    {
+      "type": "Microsoft.Compute/images",
+      "apiVersion": "2018-06-01",
+      "name": "CustomWindowsImage",
+      "location": "[parameters('location')]",
+      "properties": {
+        "storageProfile": {
+          "osDisk": {
+            "osType": "Windows",
+            "osState": "Generalized",
+            "blobUri": "[parameters('windowsImageSourceUrl')]",
+            "storageAccountType": "Standard_LRS"
+          }
+        }
+      }
+    },
+{{end}}
+{{if HasLinuxCustomImage}}
+    {
+      "type": "Microsoft.Compute/images",
+      "apiVersion": "2018-06-01",
+      "name": "CustomLinuxImage",
+      "location": "[parameters('location')]",
+      "properties": {
+        "storageProfile": {
+          "osDisk": {
+            "osType": "Linux",
+            "osState": "Generalized",
+            "blobUri": "[parameters('linuxImageSourceUrl')]",
+            "storageAccountType": "Standard_LRS"
+          }
+        }
+      }
+    },
+{{end}}
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
       "apiVersion": "2018-06-01",

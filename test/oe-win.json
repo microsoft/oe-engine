@@ -3,7 +3,7 @@
     "vmProfiles": [
       {
         "name": "accwin",
-        "osImageName": "WindowsServer_2016",
+        "osType": "Windows",
         "vmSize": "Standard_DC2s"
       }
     ],

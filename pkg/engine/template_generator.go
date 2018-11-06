@@ -172,15 +172,6 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"GetOsDiskTypes": func() string {
 			return api.GetOsDiskTypes()
 		},
-		"GetOSImageNames": func() string {
-			return api.GetOSImageNames()
-		},
-		"GetOSImageReferences": func() string {
-			return api.GetOSImageReferences()
-		},
-		"GetVMPlans": func() string {
-			return api.GetVMPlans()
-		},
 		"Base64": func(s string) string {
 			return base64.StdEncoding.EncodeToString([]byte(s))
 		},
@@ -192,6 +183,15 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		},
 		"WrapAsVerbatim": func(s string) string {
 			return fmt.Sprintf("',%s,'", s)
+		},
+		"IsLinux": func(vm *api.VMProfile) bool {
+			return vm.OSType == api.Linux
+		},
+		"IsWindows": func(vm *api.VMProfile) bool {
+			return vm.OSType == api.Windows
+		},
+		"HasLinuxCustomImage": func() bool {
+			return cs.Properties.LinuxProfile != nil && cs.Properties.LinuxProfile.HasCustomImage()
 		},
 		"HasWindowsCustomImage": func() bool {
 			return cs.Properties.WindowsProfile != nil && cs.Properties.WindowsProfile.HasCustomImage()

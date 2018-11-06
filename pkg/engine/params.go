@@ -19,7 +19,7 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 
 	for _, vm := range properties.VMProfiles {
 		addValue(parametersMap, fmt.Sprintf("%sVMSize", vm.Name), vm.VMSize)
-		addValue(parametersMap, fmt.Sprintf("%sOSImageName", vm.Name), vm.OSImageName)
+		addValue(parametersMap, fmt.Sprintf("%sOSType", vm.Name), vm.OSType)
 		addValue(parametersMap, fmt.Sprintf("%sIsVanilla", vm.Name), strconv.FormatBool(vm.IsVanilla))
 		addValue(parametersMap, fmt.Sprintf("%sHasDNSName", vm.Name), strconv.FormatBool(vm.HasDNSName))
 		if len(vm.OSDiskType) > 0 {
@@ -38,19 +38,36 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 	}
 
 	if properties.LinuxProfile != nil {
-		addValue(parametersMap, "LinuxAdminUsername", properties.LinuxProfile.AdminUsername)
+		addValue(parametersMap, "linuxAdminUsername", properties.LinuxProfile.AdminUsername)
 		if len(properties.LinuxProfile.AdminPassword) > 0 {
 			addValue(parametersMap, "authenticationType", "password")
-			addValue(parametersMap, "LinuxAdminPassword", properties.LinuxProfile.AdminPassword)
+			addValue(parametersMap, "linuxAdminPassword", properties.LinuxProfile.AdminPassword)
 		} else {
 			addValue(parametersMap, "authenticationType", "sshPublicKey")
 		}
+		if properties.LinuxProfile.HasCustomImage() {
+			addValue(parametersMap, "linuxImageSourceUrl", properties.LinuxProfile.OSImage.URL)
+		} else {
+			addValue(parametersMap, "linuxImagePublisher", properties.LinuxProfile.OSImage.Publisher)
+			addValue(parametersMap, "linuxImageOffer", properties.LinuxProfile.OSImage.Offer)
+			addValue(parametersMap, "linuxImageSKU", properties.LinuxProfile.OSImage.SKU)
+			if len(properties.LinuxProfile.OSImage.Version) > 0 {
+				addValue(parametersMap, "linuxImageVersion", properties.LinuxProfile.OSImage.Version)
+			}
+		}
 	}
 	if properties.WindowsProfile != nil {
-		addValue(parametersMap, "WindowsAdminUsername", properties.WindowsProfile.AdminUsername)
-		addValue(parametersMap, "WindowsAdminPassword", properties.WindowsProfile.AdminPassword)
+		addValue(parametersMap, "windowsAdminUsername", properties.WindowsProfile.AdminUsername)
+		addValue(parametersMap, "windowsAdminPassword", properties.WindowsProfile.AdminPassword)
 		if properties.WindowsProfile.HasCustomImage() {
-			addValue(parametersMap, "windowsImageSourceUrl", properties.WindowsProfile.WindowsImageSourceURL)
+			addValue(parametersMap, "windowsImageSourceUrl", properties.WindowsProfile.OSImage.URL)
+		} else {
+			addValue(parametersMap, "windowsImagePublisher", properties.WindowsProfile.OSImage.Publisher)
+			addValue(parametersMap, "windowsImageOffer", properties.WindowsProfile.OSImage.Offer)
+			addValue(parametersMap, "windowsImageSKU", properties.WindowsProfile.OSImage.SKU)
+			if len(properties.WindowsProfile.OSImage.Version) > 0 {
+				addValue(parametersMap, "windowsImageVersion", properties.WindowsProfile.OSImage.Version)
+			}
 		}
 	}
 

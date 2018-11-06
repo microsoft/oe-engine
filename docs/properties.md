@@ -8,13 +8,15 @@ Specifies VM name.
 * Path: `properties/vmProfiles[]/name`
 * Value: string (follows the rules of underlying OS)
 
-### OS image
-Specifies the type and the version of the operating system.
+### OS type
+Specifies the type of the OS.
 
-* Path: `properties/vmProfiles[]/osImageName`
+* Path: `properties/vmProfiles[]/osType`
 * Values:
-    * `UbuntuServer_16.04`
-    * `WindowsServer_2016`
+    * `Linux`
+    * `Windows`
+
+The credentials and the image details of the OS deployment are specified in `properties/linuxProfile` and `properties/windowsProfile` respectively.
 
 ### OS disk type
 Specifies OS disk characteristics.
@@ -77,4 +79,27 @@ If at least one of the VMs runs Windows, `windowsProfile` must be present and co
 * Value: string
 
 * Path: `properties/windowsProfile/adminPassword`
+* Value: string
+
+### OS image
+OS images can be either fetched from the Azure Image Gallery, or downloaded from the Internet.
+The OS image settings equally apply to both Linux and Windows VMs.
+
+To get the image from the Azure Image Gallery, one must provide image `publisher`, `offer`, `SKU`, and optionally the `version`.
+
+* Path: `properties/{linux|windows}Profile/osImage/publisher`
+* Value: string
+
+* Path: `properties/{linux|windows}Profile/osImage/offer`
+* Value: string
+
+* Path: `properties/{linux|windows}Profile/osImage/sku`
+* Value: string
+
+* Path: `properties/{linux|windows}Profile/osImage/version`
+* Value: string
+
+Alternatively, you can specify image source URL.
+
+* Path: `properties/{linux|windows}Profile/osImage/url`
 * Value: string

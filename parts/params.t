@@ -17,28 +17,98 @@
         "description": "Type of authentication to use on Linux virtual machine."
       }
     },
-    "LinuxAdminUsername": {
+    "linuxAdminUsername": {
       "type": "string",
       "defaultValue": "azureuser",
       "metadata": {
         "description": "User name for the Linux Virtual Machines."
       }
     },
-    "LinuxAdminPassword": {
+    "linuxAdminPassword": {
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
         "description": "Linux password."
       }
     },
-    "WindowsAdminUsername": {
+    "linuxImagePublisher": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Linux image publisher."
+      }
+    },
+    "linuxImageOffer": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Linux image offer."
+      }
+    },
+    "linuxImageSKU": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Linux image SKU."
+      }
+    },
+    "linuxImageVersion": {
+      "type": "string",
+      "defaultValue": "latest",
+      "metadata": {
+        "description": "Linux image version."
+      }
+    },
+    "linuxImageSourceUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Linux image source URL."
+      }
+    },
+    "windowsImagePublisher": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Windows image publisher."
+      }
+    },
+    "windowsImageOffer": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Windows image offer."
+      }
+    },
+    "windowsImageSKU": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Windows image SKU."
+      }
+    },
+    "windowsImageVersion": {
+      "type": "string",
+      "defaultValue": "latest",
+      "metadata": {
+        "description": "Windows image version."
+      }
+    },
+    "windowsImageSourceUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Windows image source URL."
+      }
+    },
+    "windowsAdminUsername": {
       "type": "string",
       "defaultValue": "azureuser",
       "metadata": {
         "description": "User name for the Windows Virtual Machines."
       }
     },
-    "WindowsAdminPassword": {
+    "windowsAdminPassword": {
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
