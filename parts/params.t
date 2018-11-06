@@ -174,6 +174,24 @@
         "description": "Determines whether inbound SSH/RDP connection is enabled in NSG"
       }
     },
+{{if HasLinuxCustomImage}}
+    "linuxImageSourceUrl": {
+      "defaultValue": "",
+      "metadata": {
+        "description": "The source of the generalized blob which will be used to create a custom Linux image."
+      },
+      "type": "string"
+    },
+{{end}}
+{{if HasWindowsCustomImage}}
+    "windowsImageSourceUrl": {
+      "defaultValue": "",
+      "metadata": {
+        "description": "The source of the generalized blob which will be used to create a custom Windows image."
+      },
+      "type": "string"
+    },
+{{end}}
     "bootDiagnostics": {
       "type": "string",
       "defaultValue": "enable",
@@ -232,13 +250,3 @@
         "description": "Name of the resource group for the existing diagnostics storage account."
       }
     }
-{{if HasWindowsCustomImage}}
-    ,
-    "windowsImageSourceUrl": {
-      "defaultValue": "",
-      "metadata": {
-        "description": "The source of the generalized blob which will be used to create a custom windows image."
-      },
-      "type": "string"
-    }
-{{end}}

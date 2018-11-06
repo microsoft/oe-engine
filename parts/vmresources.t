@@ -54,6 +54,12 @@
     {
       "apiVersion": "2018-06-01",
       "dependsOn": [
+{{if HasLinuxCustomImage}}
+        "CustomLinuxImage",
+{{end}}
+{{if HasWindowsCustomImage}}
+        "CustomWindowsImage",
+{{end}}
         "[concat('Microsoft.Network/networkInterfaces/', '{{.Name}}', '-nic')]"
       ],
       "tags":

@@ -20,8 +20,8 @@
         "offer": "[parameters('linuxImageOffer')]",
         "sku": "[parameters('linuxImageSKU')]",
         "version": "[parameters('linuxImageVersion')]"
-      },
 {{end}}
+      },
       "osDisk": {
         "caching": "ReadWrite",
         "createOption": "FromImage",
@@ -48,8 +48,8 @@
         "offer": "[parameters('windowsImageOffer')]",
         "sku": "[parameters('windowsImageSKU')]",
         "version": "[parameters('windowsImageVersion')]"
-      },
 {{end}}
+      },
       "osDisk": {
         "caching": "ReadWrite",
         "createOption": "FromImage",
