@@ -20,9 +20,9 @@ func setPropertiesDefaults(oe *api.OpenEnclave, isUpgrade bool) {
 			log.Warnf("Missing Name for VM pool #%d. Assuming %s", i, api.DefaultVMName)
 			oe.Properties.VMProfiles[i].Name = api.DefaultVMName
 		}
-		if len(p.OSImageName) == 0 {
-			log.Warnf("Missing OSImageName for VM pool #%d. Assuming %s", i, api.DefaultLinuxImage)
-			oe.Properties.VMProfiles[i].OSImageName = api.DefaultLinuxImage
+		if len(p.OSType) == 0 {
+			log.Warnf("Missing OSType for VM pool #%d. Assuming %s", i, api.Linux)
+			oe.Properties.VMProfiles[i].OSType = api.Linux
 		}
 	}
 	// set network defaults
@@ -35,6 +35,18 @@ func setPropertiesDefaults(oe *api.OpenEnclave, isUpgrade bool) {
 		}
 		if len(oe.Properties.VnetProfile.SubnetAddress) == 0 {
 			oe.Properties.VnetProfile.SubnetAddress = api.DefaultSubnet
+		}
+	}
+	// set default Linux OS image
+	if oe.Properties.LinuxProfile != nil && !oe.Properties.LinuxProfile.HasCustomImage() {
+		if oe.Properties.LinuxProfile.OSImage == nil {
+			oe.Properties.LinuxProfile.OSImage = &api.DefaultLinuxImage
+		}
+	}
+	// set default Windows OS image
+	if oe.Properties.WindowsProfile != nil && !oe.Properties.WindowsProfile.HasCustomImage() {
+		if oe.Properties.WindowsProfile.OSImage == nil {
+			oe.Properties.WindowsProfile.OSImage = &api.DefaultWindowsImage
 		}
 	}
 }

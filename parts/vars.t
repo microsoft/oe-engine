@@ -1,5 +1,4 @@
     "vnetSubnetID": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('vnetName'), parameters('subnetName'))]",
-    {{GetOSImageReferences}},
     "linuxConfiguration": {
       "disablePasswordAuthentication": "true",
       "ssh": {{GetLinuxPublicKeys}}

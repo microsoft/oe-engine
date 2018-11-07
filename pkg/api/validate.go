@@ -30,17 +30,17 @@ func init() {
 }
 
 // Validate implements APIObject
-func (a *Properties) Validate(isUpdate bool) error {
-	if e := validate.Struct(a); e != nil {
+func (p *Properties) Validate(isUpdate bool) error {
+	if e := validate.Struct(p); e != nil {
 		return handleValidationErrors(e.(validator.ValidationErrors))
 	}
-	if e := a.validateVMPoolProfiles(); e != nil {
+	if e := p.validateVMPoolProfiles(); e != nil {
 		return e
 	}
-	if e := a.validateVnetProfile(); e != nil {
+	if e := p.validateVnetProfile(); e != nil {
 		return e
 	}
-	if e := a.validateDiagnosticsProfile(); e != nil {
+	if e := p.validateDiagnosticsProfile(); e != nil {
 		return e
 	}
 	return nil
@@ -52,113 +52,145 @@ func handleValidationErrors(e validator.ValidationErrors) error {
 	return common.HandleValidationErrors(e)
 }
 
-func (a *Properties) validateVMPoolProfiles() error {
+func (p *Properties) validateVMPoolProfiles() error {
 	var hasLinux, hasWindows bool
 	names := map[string]bool{}
-	for _, p := range a.VMProfiles {
-		if names[p.Name] {
-			return fmt.Errorf("Duplicated VM pool name %s", p.Name)
+	for _, vm := range p.VMProfiles {
+		if names[vm.Name] {
+			return fmt.Errorf("Duplicated VM pool name %s", vm.Name)
 		}
-		names[p.Name] = true
+		names[vm.Name] = true
 
-		if len(p.OSImageName) == 0 {
-			return fmt.Errorf("OS image is not specified")
+		if len(vm.OSType) == 0 {
+			return fmt.Errorf("OS type is not specified")
 		}
-		switch p.OSImageName {
-		case OsUbuntu1604:
+		switch vm.OSType {
+		case Linux:
 			hasLinux = true
-		case OsWindows2016:
+		case Windows:
 			hasWindows = true
 		default:
-			return fmt.Errorf("OS image '%s' is not supported", p.OSImageName)
+			return fmt.Errorf("OS type '%s' is not supported", vm.OSType)
 		}
-		if len(p.OSDiskType) > 0 {
+		if len(vm.OSDiskType) > 0 {
 			found := false
 			for _, t := range AllowedOsDiskTypes {
-				if t == p.OSDiskType {
+				if t == vm.OSDiskType {
 					found = true
 					break
 				}
 			}
 			if !found {
-				return fmt.Errorf("OS disk type '%s' is not included in supported [%s]", p.OSDiskType, strings.Join(AllowedOsDiskTypes, ","))
+				return fmt.Errorf("OS disk type '%s' is not included in supported [%s]", vm.OSDiskType, strings.Join(AllowedOsDiskTypes, ","))
 			}
 		}
 	}
 	if hasLinux {
-		if e := a.validateLinuxProfile(); e != nil {
+		if e := validateLinuxProfile(p.LinuxProfile); e != nil {
 			return e
 		}
 	}
 	if hasWindows {
-		if e := a.validateWindowsProfile(); e != nil {
+		if e := validateWindowsProfile(p.WindowsProfile); e != nil {
 			return e
 		}
 	}
 	return nil
 }
 
-func (a *Properties) validateLinuxProfile() error {
-	if a.LinuxProfile == nil {
+func validateLinuxProfile(p *LinuxProfile) error {
+	if p == nil {
 		return fmt.Errorf("LinuxProfile cannot be empty")
 	}
-	if len(a.LinuxProfile.AdminUsername) == 0 {
+	if len(p.AdminUsername) == 0 {
 		return fmt.Errorf("LinuxProfile.AdminUsername cannot be empty")
 	}
-	if len(a.LinuxProfile.AdminPassword) > 0 && len(a.LinuxProfile.SSHPubKeys) > 0 {
+	if len(p.AdminPassword) > 0 && len(p.SSHPubKeys) > 0 {
 		return fmt.Errorf("AdminPassword and SSH public keys are mutually exclusive")
 	}
-	if len(a.LinuxProfile.AdminPassword) == 0 && len(a.LinuxProfile.SSHPubKeys) == 0 {
+	if len(p.AdminPassword) == 0 && len(p.SSHPubKeys) == 0 {
 		return fmt.Errorf("Must specify either AdminPassword or SSH public keys")
 	}
-	for i, key := range a.LinuxProfile.SSHPubKeys {
+	for i, key := range p.SSHPubKeys {
 		if key == nil || len(key.KeyData) == 0 {
 			return fmt.Errorf("SSH public key #%d cannot be empty", i)
+		}
+	}
+	if p.OSImage != nil {
+		if err := validateOSImage(p.OSImage); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (a *Properties) validateWindowsProfile() error {
-	if a.WindowsProfile == nil {
+func validateWindowsProfile(p *WindowsProfile) error {
+	if p == nil {
 		return fmt.Errorf("WindowsProfile cannot be empty")
 	}
-	if e := validate.Var(a.WindowsProfile.AdminUsername, "required"); e != nil {
+	if e := validate.Var(p.AdminUsername, "required"); e != nil {
 		return fmt.Errorf("WindowsProfile.AdminUsername cannot be empty")
 	}
-	if e := validate.Var(a.WindowsProfile.AdminPassword, "required"); e != nil {
+	if e := validate.Var(p.AdminPassword, "required"); e != nil {
 		return fmt.Errorf("WindowsProfile.AdminPassword cannot be empty")
+	}
+	if p.OSImage != nil {
+		if err := validateOSImage(p.OSImage); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func (a *Properties) validateDiagnosticsProfile() error {
-	if a.DiagnosticsProfile == nil || !a.DiagnosticsProfile.Enabled {
+func validateOSImage(p *OSImage) error {
+	if p == nil {
 		return nil
 	}
-	if len(a.DiagnosticsProfile.StorageAccountName) == 0 {
+	if len(p.URL) > 0 && (len(p.Publisher) > 0 || len(p.Offer) > 0 || len(p.SKU) > 0 || len(p.Version) > 0) {
+		return fmt.Errorf("OSImage URL and Publisher/Offer/SKU are mutually exclusive")
+	}
+	if len(p.Publisher) > 0 || len(p.Offer) > 0 || len(p.SKU) > 0 || len(p.Version) > 0 {
+		if len(p.Publisher) == 0 {
+			return fmt.Errorf("OSImage Publisher is not set")
+		}
+		if len(p.Offer) == 0 {
+			return fmt.Errorf("OSImage Offer is not set")
+		}
+		if len(p.SKU) == 0 {
+			return fmt.Errorf("OSImage SKU is not set")
+		}
+		// version is optional
+	}
+	return nil
+}
+
+func (p *Properties) validateDiagnosticsProfile() error {
+	if p.DiagnosticsProfile == nil || !p.DiagnosticsProfile.Enabled {
+		return nil
+	}
+	if len(p.DiagnosticsProfile.StorageAccountName) == 0 {
 		return fmt.Errorf("DiagnosticsProfile.StorageAccountName cannot be empty string")
 	}
 	return nil
 }
 
-func (a *Properties) validateVnetProfile() error {
-	p := a.VnetProfile
-	if p == nil {
+func (p *Properties) validateVnetProfile() error {
+	h := p.VnetProfile
+	if h == nil {
 		return nil
 	}
 	// existing vnet is uniquely defined by resource group, vnet name, and subnet name
-	if len(p.VnetResourceGroup) > 0 {
-		if len(p.VnetName) == 0 {
+	if len(h.VnetResourceGroup) > 0 {
+		if len(h.VnetName) == 0 {
 			return fmt.Errorf("vnetProfile.vnetName cannot be empty for existing vnet")
 		}
-		if len(p.SubnetName) == 0 {
+		if len(h.SubnetName) == 0 {
 			return fmt.Errorf("vnetProfile.subnetName cannot be empty for existing vnet")
 		}
-		if len(p.VnetAddress) > 0 {
+		if len(h.VnetAddress) > 0 {
 			return fmt.Errorf("vnetProfile.VnetResourceGroup and vnetProfile.vnetAddress are mutually exclusive")
 		}
-		if len(p.SubnetAddress) > 0 {
+		if len(h.SubnetAddress) > 0 {
 			return fmt.Errorf("vnetProfile.VnetResourceGroup and vnetProfile.subnetAddress are mutually exclusive")
 		}
 	}

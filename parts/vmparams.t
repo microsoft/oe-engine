@@ -6,11 +6,14 @@
         "description": "The size of the Virtual Machine."
       }
     },
-    "{{.Name}}OSImageName": {
+    "{{.Name}}OSType": {
       "type": "string",
-      {{GetOSImageNames}}
+      "allowedValues": [
+        "Linux",
+        "Windows"
+      ],
       "metadata": {
-        "description": "OS image name"
+        "description": "OS type"
       }
     },
     "{{.Name}}OSDiskType": {

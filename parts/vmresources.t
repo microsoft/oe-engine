@@ -51,28 +51,15 @@
       },
       "type": "Microsoft.Network/networkInterfaces"
     },
-{{if HasWindowsCustomImage}}
-    {
-      "condition": "[equals(parameters('{{.Name}}OSImageName'), 'WindowsServer_2016')]",
-      "type": "Microsoft.Compute/images",
-      "apiVersion": "2018-06-01",
-      "name": "CustomWindowsImage",
-      "location": "[parameters('location')]",
-      "properties": {
-        "storageProfile": {
-          "osDisk": {
-            "osType": "Windows",
-            "osState": "Generalized",
-            "blobUri": "[parameters('windowsImageSourceUrl')]",
-            "storageAccountType": "Standard_LRS"
-          }
-        }
-      }
-    },
-{{end}}
     {
       "apiVersion": "2018-06-01",
       "dependsOn": [
+{{if HasLinuxCustomImage}}
+        "CustomLinuxImage",
+{{end}}
+{{if HasWindowsCustomImage}}
+        "CustomWindowsImage",
+{{end}}
         "[concat('Microsoft.Network/networkInterfaces/', '{{.Name}}', '-nic')]"
       ],
       "tags":
@@ -92,8 +79,8 @@
             }
           ]
         },
-        "osProfile": "[if(equals(parameters('{{.Name}}OSImageName'), 'WindowsServer_2016'), variables('{{.Name}}WindowsOsProfile'), variables('{{.Name}}LinuxOsProfile'))]",
-        "storageProfile": "[if(equals(parameters('{{.Name}}OSImageName'), 'WindowsServer_2016'), variables('{{.Name}}WindowsStorageProfile'), variables('{{.Name}}LinuxStorageProfile'))]",
+        "osProfile": "[variables('{{.Name}}OSProfile')]",
+        "storageProfile": "[variables('{{.Name}}StorageProfile')]",
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "[equals(parameters('bootDiagnostics'), 'enable')]",
@@ -104,7 +91,7 @@
       "type": "Microsoft.Compute/virtualMachines"
     },
     {
-      "condition": "[and(equals(parameters('{{.Name}}IsVanilla'), 'false'), equals(parameters('{{.Name}}OSImageName'), 'UbuntuServer_16.04'))]",
+      "condition": "[and(equals(parameters('{{.Name}}IsVanilla'), 'false'), equals(parameters('{{.Name}}OSType'), 'Linux'))]",
       "apiVersion": "2018-06-01",
       "dependsOn": [
         "{{.Name}}"
@@ -123,7 +110,7 @@
       "type": "Microsoft.Compute/virtualMachines/extensions"
     },
     {
-      "condition": "[equals(parameters('{{.Name}}OSImageName'), 'WindowsServer_2016')]",
+      "condition": "[equals(parameters('{{.Name}}OSType'), 'Windows')]",
       "apiVersion": "2018-06-01",
       "dependsOn": [
         "{{.Name}}"
