@@ -19,7 +19,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-var templateFiles = []string{baseFile, params, vmparams, vars, vmvars, resources, vmresources, outputs, vmoutputs, customdata, utilsScript, provisionScript, validationScript}
+var templateFiles = []string{baseFile, params, vmparams, vars, vmvars, resources, vmresources, outputs, vmoutputs, customdata, utilsScript, provisionScript, validationScript, reinstallDriverScript}
 
 var keyvaultSecretPathRe *regexp.Regexp
 
@@ -207,15 +207,15 @@ func getProvisionScript(script string, replaceMap map[string]string) string {
 		panic(fmt.Sprintf("BUG: %s", err.Error()))
 	}
 
-	provisionScript := string(bp)
-	if strings.Contains(provisionScript, "'") {
+	pScript := string(bp)
+	if strings.Contains(pScript, "'") {
 		panic(fmt.Sprintf("BUG: %s may not contain character '", script))
 	}
 
 	for k, v := range replaceMap {
-		provisionScript = strings.Replace(provisionScript, k, v, -1)
+		pScript = strings.Replace(pScript, k, v, -1)
 	}
-	return strings.Replace(strings.Replace(provisionScript, "\r\n", "\n", -1), "\n", "\n\n    ", -1)
+	return strings.Replace(strings.Replace(pScript, "\r\n", "\n", -1), "\n", "\n\n    ", -1)
 }
 
 // getSingleLineCustomData returns the file as a single line for embedding in an arm template

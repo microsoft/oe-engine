@@ -13,3 +13,8 @@ write_files:
   path: /opt/azure/acc/validate.sh
   permissions: "0744"
   owner: "root"
+- content: 'REINSTALL_SGX_STR'
+  path: /opt/azure/acc/reinstall_sgx_driver.sh
+  permissions: "0744"
+  owner: "root"
+  

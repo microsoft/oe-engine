@@ -146,9 +146,10 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 			str := getSingleLineCustomData(
 				customdata,
 				map[string]string{
-					"UTILS_STR":      getProvisionScript(utilsScript, nil),
-					"PROVISION_STR":  getProvisionScript(provisionScript, map[string]string{"PACKAGE_BASE_URL": cs.PackageBaseURL}),
-					"VALIDATION_STR": getProvisionScript(validationScript, nil),
+					"UTILS_STR":         getProvisionScript(utilsScript, nil),
+					"PROVISION_STR":     getProvisionScript(provisionScript, map[string]string{"PACKAGE_BASE_URL": cs.PackageBaseURL}),
+					"VALIDATION_STR":    getProvisionScript(validationScript, nil),
+					"REINSTALL_SGX_STR": getProvisionScript(reinstallDriverScript, nil),
 				})
 			return fmt.Sprintf("base64(concat('#cloud-config\\n\\n', '%s'))", str)
 		},

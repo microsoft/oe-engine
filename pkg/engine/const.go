@@ -17,4 +17,6 @@ const (
 	utilsScript      = "utils.sh"
 	provisionScript  = "provision.sh"
 	validationScript = "validate.sh"
+
+	reinstallDriverScript = "reinstall_sgx_driver.sh"
 )

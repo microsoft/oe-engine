@@ -89,6 +89,12 @@ if [ $? -ne 0  ]; then
   error_exit "failed to install SGX driver"
 fi
 
+# Save kernel version for SGX driver
+uname -r > /opt/azure/acc/sgx_kernel_version
+
+# Enable cron job to rebuild SGX driver if needed
+echo "@reboot root /opt/azure/acc/reinstall_sgx_driver.sh" >> /etc/crontab
+
 # Add Intel packages
 PACKAGES="libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev"
 
