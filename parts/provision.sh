@@ -18,37 +18,62 @@ function error_exit() {
   exit 1
 }
 
-# Configure apt to use clang-7
-echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main" >> /etc/apt/sources.list
-echo "deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main" >> /etc/apt/sources.list
-wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+function setup_ubuntu() {
+  release=$(lsb_release -cs)
 
-# Configure apt to use packages.microsoft.com repo
-echo "deb [arch=amd64] https://packages.microsoft.com/ubuntu/16.04/prod xenial main" | sudo tee /etc/apt/sources.list.d/msprod.list
-wget -qO - https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+  # Configure apt to use clang-7
+  echo "deb http://apt.llvm.org/$release/ llvm-toolchain-$release-7 main" >> /etc/apt/sources.list
+  echo "deb-src http://apt.llvm.org/$release/ llvm-toolchain-$release-7 main" >> /etc/apt/sources.list
+  wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 
-# Configure apt to use Intel 01.org repo
-echo "deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu xenial main" | sudo tee /etc/apt/sources.list.d/intel-sgx.list
-wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo apt-key add -
+  # Configure apt to use packages.microsoft.com repo
+  echo "deb [arch=amd64] https://packages.microsoft.com/ubuntu/$version/prod $release main" | sudo tee /etc/apt/sources.list.d/msprod.list
+  wget -qO - https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
 
-export DEBIAN_FRONTEND=noninteractive
+  # Configure apt to use Intel 01.org repo
+  echo "deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu $release main" | sudo tee /etc/apt/sources.list.d/intel-sgx.list
+  wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo apt-key add -
 
-# Update pkg repository
-retrycmd_if_failure 10 10 120 apt update
-if [ $? -ne 0  ]; then
-  error_exit "apt update failed"
-fi
+  export DEBIAN_FRONTEND=noninteractive
 
-# Add public packages:
-PACKAGES="make gcc gdb g++ libssl-dev pkg-config"
+  case $version in
+    "18.04")
+      ;;
+    "16.04")
+      ;;
+    "*")
+      error_exit "Version $version is not supported"
+      ;;
+  esac
 
-# Add clang-7 packages:
-PACKAGES="$PACKAGES clang-7 lldb-7 lld-7"
+  # Update pkg repository
+  retrycmd_if_failure 10 10 120 apt update
+  if [ $? -ne 0  ]; then
+    error_exit "apt update failed"
+  fi
 
-retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
-if [ $? -ne 0  ]; then
-  error_exit "apt-get install failed"
-fi
+  # Add public packages:
+  PACKAGES="make gcc gdb g++ libssl-dev pkg-config"
+
+  # Add clang-7 packages:
+  PACKAGES="$PACKAGES clang-7 lldb-7 lld-7"
+
+  retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
+  if [ $? -ne 0  ]; then
+    error_exit "apt-get install failed"
+  fi
+}
+
+distro=`grep DISTRIB_ID /etc/*-release | cut -f 2 -d "="`
+version=`grep DISTRIB_RELEASE /etc/*-release| cut -f 2 -d "="`
+case $distro in
+  "Ubuntu")
+    setup_ubuntu
+    ;;
+  *)
+    error_exit "Distro $distro is not currently supported"
+  ;;
+esac
 
 # Install SGX driver
 sgx_driver="sgx_linux_x64_driver_dcap_a06cb75.bin"
