@@ -8,6 +8,7 @@ The VM definition file describes properties of the VMs, such as: compute power, 
 
 Refer to the [deployment documentation](docs/deployment.md) for more details.
 
+
 License
 ----
 
