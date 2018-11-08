@@ -15,7 +15,6 @@ func getParameters(cs *api.OpenEnclave, generatorCode string) (paramsMap, error)
 	if len(cs.Location) > 0 {
 		addValue(parametersMap, "location", location)
 	}
-	addValue(parametersMap, "publicInboundPorts", "enable")
 
 	for _, vm := range properties.VMProfiles {
 		addValue(parametersMap, fmt.Sprintf("%sVMSize", vm.Name), vm.VMSize)

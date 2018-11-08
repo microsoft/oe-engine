@@ -17,7 +17,7 @@ type VMProfile struct {
 	OSType     OSType `json:"osType"`
 	OSDiskType string `json:"osDiskType"`
 	VMSize     string `json:"vmSize"`
-	Ports      []int  `json:"ports,omitempty"`
+	Ports      []int  `json:"ports,omitempty" validate:"dive,min=1,max=65535"`
 	IsVanilla  bool   `json:"isVanilla"`
 	HasDNSName bool   `json:"hasDNSName"`
 }

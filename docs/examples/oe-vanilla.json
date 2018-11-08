@@ -5,6 +5,7 @@
         "name": "acclnx",
         "osType": "Linux",
         "vmSize": "Standard_DC2s",
+        "ports": [22],
         "isVanilla": true
       }
     ],

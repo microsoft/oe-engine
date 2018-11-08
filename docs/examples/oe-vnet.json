@@ -4,12 +4,14 @@
       {
         "name": "accvm1",
         "osType": "Linux",
-        "vmSize": "Standard_DC2s"
+        "vmSize": "Standard_DC2s",
+        "ports": [22]
       },
       {
         "name": "accvm2",
         "osType": "Linux",
-        "vmSize": "Standard_DC2s"
+        "vmSize": "Standard_DC2s",
+        "ports": [22]
       }
     ],
     "vnetProfile": {
