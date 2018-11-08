@@ -2,7 +2,6 @@
     "{{.Name}}PublicIPAddressName": "[concat('{{.Name}}', '-ip')]",
     "{{.Name}}NSGName": "[concat('{{.Name}}', '-nsg')]",
     "{{.Name}}NSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('{{.Name}}NSGName'))]",
-    "{{.Name}}SecurityRules": "[if(equals(parameters('{{.Name}}OSType'), 'Windows'), variables('windowsSecurityRules'), variables('linuxSecurityRules'))]",
 {{if IsLinux .}}
     "{{.Name}}OSProfile": {
       "computername": "{{.Name}}",

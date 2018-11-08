@@ -4,22 +4,26 @@
       {
         "name": "acclnx1",
         "osType": "Linux",
-        "vmSize": "Standard_DC2s"
+        "vmSize": "Standard_DC2s",
+        "ports": [22]
       },
       {
         "name": "acclnx2",
         "osType": "Linux",
-        "vmSize": "Standard_DC2s"
+        "vmSize": "Standard_DC2s",
+        "ports": [22]
       },
       {
         "name": "accwin1",
         "osType": "Windows",
-        "vmSize": "Standard_DC2s"
+        "vmSize": "Standard_DC2s",
+        "ports": [3389]
       },
       {
         "name": "accwin2",
         "osType": "Windows",
-        "vmSize": "Standard_DC2s"
+        "vmSize": "Standard_DC2s",
+        "ports": [3389]
       }
     ],
     "linuxProfile": {

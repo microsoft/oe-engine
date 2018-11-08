@@ -17,7 +17,9 @@
       "location": "[parameters('location')]",
       "name": "[variables('{{.Name}}NSGName')]",
       "properties": {
-        "securityRules": "[if(equals(parameters('publicInboundPorts'), 'enable'), variables('{{.Name}}SecurityRules'), json('null'))]"
+        "securityRules": [
+          {{GetSecurityRules .Ports}}
+        ]
       },
       "type": "Microsoft.Network/networkSecurityGroups"
     },

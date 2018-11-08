@@ -84,6 +84,11 @@ func (p *Properties) validateVMPoolProfiles() error {
 				return fmt.Errorf("OS disk type '%s' is not included in supported [%s]", vm.OSDiskType, strings.Join(AllowedOsDiskTypes, ","))
 			}
 		}
+		if len(vm.Ports) > 0 {
+			if e := validateUniquePorts(vm.Ports, vm.Name); e != nil {
+				return e
+			}
+		}
 	}
 	if hasLinux {
 		if e := validateLinuxProfile(p.LinuxProfile); e != nil {
@@ -201,7 +206,7 @@ func validateUniquePorts(ports []int, name string) error {
 	portMap := make(map[int]bool)
 	for _, port := range ports {
 		if _, ok := portMap[port]; ok {
-			return fmt.Errorf("VM profile '%s' has duplicate port '%d', ports must be unique", name, port)
+			return fmt.Errorf("VM '%s' has duplicate port '%d', ports must be unique", name, port)
 		}
 		portMap[port] = true
 	}

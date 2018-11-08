@@ -37,6 +37,12 @@ Specifies VM compute characteristics
 
 Refer to the [VM sizes in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes) for more details.
 
+### Open ports
+Specifies open ports in the Network Security Group (NSG)
+
+* Path: `properties/vmProfiles[]/ports`
+* Value: comma-separated array of port numbers
+
 ### VM Software
 Indicates whether Open Enclave SDK and its dependencies should be installed or not.
 

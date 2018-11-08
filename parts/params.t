@@ -163,17 +163,6 @@
         "description": "Sets the subnet of the VM."
       }
     },
-    "publicInboundPorts": {
-      "type": "string",
-      "defaultValue": "disable",
-      "allowedValues": [
-        "enable",
-        "disable"
-      ],
-      "metadata": {
-        "description": "Determines whether inbound SSH/RDP connection is enabled in NSG"
-      }
-    },
 {{if HasLinuxCustomImage}}
     "linuxImageSourceUrl": {
       "defaultValue": "",
