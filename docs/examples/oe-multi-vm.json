@@ -3,22 +3,22 @@
     "vmProfiles": [
       {
         "name": "acclnx1",
-        "osImageName": "UbuntuServer_16.04",
+        "osType": "Linux",
         "vmSize": "Standard_DC2s"
       },
       {
         "name": "acclnx2",
-        "osImageName": "UbuntuServer_16.04",
+        "osType": "Linux",
         "vmSize": "Standard_DC2s"
       },
       {
         "name": "accwin1",
-        "osImageName": "WindowsServer_2016",
+        "osType": "Windows",
         "vmSize": "Standard_DC2s"
       },
       {
         "name": "accwin2",
-        "osImageName": "WindowsServer_2016",
+        "osType": "Windows",
         "vmSize": "Standard_DC2s"
       }
     ],

@@ -3,7 +3,7 @@
     "vmProfiles": [
       {
         "name": "acclnx",
-        "osImageName": "UbuntuServer_16.04",
+        "osType": "Linux",
         "vmSize": "Standard_DC2s",
         "isVanilla": true
       }

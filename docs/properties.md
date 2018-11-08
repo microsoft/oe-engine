@@ -21,7 +21,7 @@ The credentials and the image details of the OS deployment are specified in `pro
 ### OS disk type
 Specifies OS disk characteristics.
 
-* Path: `properties/vmProfiles[]/osImageName`
+* Path: `properties/vmProfiles[]/osDiskType`
 * Values:
     * `Premium_LRS` - Premium SSD
     * `StandardSSD_LRS` - Standard SSD

@@ -3,12 +3,12 @@
     "vmProfiles": [
       {
         "name": "accvm1",
-        "osImageName": "UbuntuServer_16.04",
+        "osType": "Linux",
         "vmSize": "Standard_DC2s"
       },
       {
         "name": "accvm2",
-        "osImageName": "UbuntuServer_16.04",
+        "osType": "Linux",
         "vmSize": "Standard_DC2s"
       }
     ],
