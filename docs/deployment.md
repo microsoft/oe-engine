@@ -2,13 +2,31 @@
 
 A typical deployment consists of the following steps:
 
-### Build oe-engine
+### Getting oe-engine binary
+
+There are two ways to get oe-engine binary:
+* Download latest [release](https://github.com/Microsoft/oe-engine/releases)
+* Build from the [source code](https://github.com/Microsoft/oe-engine), by following the instructions below.
+
+### Build oe-engine from source (optional)
+
+If you don't have Golang development environment yet, you may want to set it up:
 ```sh
-git clone https://github.com/Microsoft/oe-engine
-cd oe-engine
+wget https://dl.google.com/go/go1.11.linux-amd64.tar.gz
+sudo tar xvfz go1.11.linux-amd64.tar.gz -C /usr/local/
+mkdir $HOME/gopath
+export GOPATH=$HOME/gopath
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+```
+It is recommended to preserve `GOPATH` and `PATH` in configuration files, such as `.profile` or `.bashrc`
+
+Next, download oe-engine github project and build the binary:
+```sh
+go get -d github.com/Microsoft/oe-engine
+cd gopath/src/github.com/Microsoft/oe-engine
 make build
 ```
-Alternatively, you can download latest release from [here](https://github.com/Microsoft/oe-engine/releases)
+The binary is located in `./bin` directory
 
 ### Create VM definition file
 The VM definition file is a JSON-formatted description of the properties of the VMs, such as: compute power, OS image, credentials, etc.
