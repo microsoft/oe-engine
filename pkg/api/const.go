@@ -6,13 +6,6 @@ import (
 )
 
 const (
-	// OsUbuntu1604 image
-	OsUbuntu1604 = "UbuntuServer_16.04"
-	// OsWindows2016 image
-	OsWindows2016 = "WindowsServer_2016"
-)
-
-const (
 	// DefaultVMName is default VM pool name
 	DefaultVMName = "accVM"
 	// DefaultGeneratorCode specifies the source generator of the cluster template.
