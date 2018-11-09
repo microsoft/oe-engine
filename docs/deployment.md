@@ -4,8 +4,8 @@ A typical deployment consists of the following steps:
 
 ### Getting oe-engine binary
 
-There are two ways to get oe-engine binary:
-* Download latest [release](https://github.com/Microsoft/oe-engine/releases)
+There are two ways to get `oe-engine` binary:
+* Download the latest [release](https://github.com/Microsoft/oe-engine/releases)
 * Build from the [source code](https://github.com/Microsoft/oe-engine), by following the instructions below.
 
 ### Build oe-engine from source (optional)
@@ -26,9 +26,10 @@ go get -d github.com/Microsoft/oe-engine
 cd gopath/src/github.com/Microsoft/oe-engine
 make build
 ```
-The binary is located in `./bin` directory
+The `oe-engine` binary is located in `./bin` directory
 
 ### Create VM definition file
+
 The VM definition file is a JSON-formatted description of the properties of the VMs, such as: compute power, OS image, credentials, etc.
 
 For details, refer to the [Setting properties in the VM definition file](properties.md)
