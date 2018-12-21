@@ -10,8 +10,6 @@ source /opt/azure/acc/utils.sh
 
 cd /opt/azure/acc/
 
-OE_PKG_BASE="PACKAGE_BASE_URL"
-
 function error_exit() {
   echo $1
   echo "failed" > /opt/azure/acc/completed
@@ -24,16 +22,15 @@ function setup_ubuntu() {
   case $version in
     "18.04")
       sgx_driver_url="https://download.01.org/intel-sgx/dcap-1.0/sgx_linux_x64_driver_dcap_36594a7.bin"
-      sgx_driver="sgx_linux_x64_driver_dcap_36594a7.bin"
       ;;
     "16.04")
-      sgx_driver="sgx_linux_x64_driver_dcap_a06cb75.bin"
-      sgx_driver_url="${OE_PKG_BASE}/${sgx_driver}"
+      sgx_driver_url="https://download.01.org/intel-sgx/dcap-1.0.1/dcap_installer/ubuntuServer1604/sgx_linux_x64_driver_dcap_4f32b98.bin"
       ;;
     "*")
       error_exit "Version $version is not supported"
       ;;
   esac
+  sgx_driver=$(basename $sgx_driver_url)
 
   release=$(lsb_release -cs)
 
@@ -59,7 +56,7 @@ function setup_ubuntu() {
   fi
 
   # Add public packages:
-  PACKAGES="make gcc gdb g++ libssl-dev pkg-config"
+  PACKAGES="make gcc gdb g++ libssl-dev pkg-config dkms"
 
   # Add clang-7 packages:
   PACKAGES="$PACKAGES clang-7 lldb-7 lld-7"
@@ -81,12 +78,6 @@ function setup_ubuntu() {
     error_exit "failed to install SGX driver"
   fi
 
-  # Save kernel version for SGX driver
-  uname -r > /opt/azure/acc/sgx_kernel_version
-
-  # Enable cron job to rebuild SGX driver if needed
-  echo "@reboot root /opt/azure/acc/reinstall_sgx_driver.sh" >> /etc/crontab
-
   # Add Intel packages
   PACKAGES="libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev"
 
@@ -100,7 +91,7 @@ function setup_ubuntu() {
 
   case $version in
     "18.04")
-      retrycmd_if_failure 10 10 120 curl -fsSL -O "${OE_PKG_BASE}/open-enclave-0.4.0-Linux.deb"
+      retrycmd_if_failure 10 10 120 curl -fsSL -O "open-enclave-0.4.0-Linux.deb"
       if [ $? -ne 0  ]; then
         error_exit "apt-get install failed"
       fi
