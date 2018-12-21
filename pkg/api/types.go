@@ -3,9 +3,8 @@ package api
 // OpenEnclave complies with the ARM model of
 // resource definition in a JSON template.
 type OpenEnclave struct {
-	Location       string      `json:"location"`
-	PackageBaseURL string      `json:"packageBaseURL"`
-	Properties     *Properties `json:"properties,omitempty"`
+	Location   string      `json:"location"`
+	Properties *Properties `json:"properties,omitempty"`
 }
 
 // OSType represents OS types of agents

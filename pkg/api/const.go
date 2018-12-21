@@ -16,8 +16,6 @@ const (
 	DefaultSubnet = "10.0.0.0/24"
 	// DefaultOsDiskType specifies default OS disk type
 	DefaultOsDiskType = "Premium_LRS"
-	// DefaultPackageBaseURL specifies default package base URL
-	DefaultPackageBaseURL = "https://oe.azureedge.net/data"
 )
 
 const (

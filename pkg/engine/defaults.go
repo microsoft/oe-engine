@@ -12,9 +12,6 @@ import (
 
 // setPropertiesDefaults for the container Properties, returns true if certs are generated
 func setPropertiesDefaults(oe *api.OpenEnclave, isUpgrade bool) {
-	if len(oe.PackageBaseURL) == 0 {
-		oe.PackageBaseURL = api.DefaultPackageBaseURL
-	}
 	for i, p := range oe.Properties.VMProfiles {
 		if len(p.Name) == 0 {
 			log.Warnf("Missing Name for VM pool #%d. Assuming %s", i, api.DefaultVMName)
