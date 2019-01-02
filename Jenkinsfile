@@ -34,11 +34,20 @@ pipeline {
         }
       }
     }
-    stage('Linux') {
+    stage('Ubuntu 16.04') {
       steps {
         dir('gopath/src/github.com/Microsoft/oe-engine') {
           withCredentials([usernamePassword(credentialsId: 'SERVICE_PRINCIPAL_OSTCLAB', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
-            sh 'AZURE_CONFIG_DIR=$(pwd) test/acc-pr-test.sh oe-lnx.json'
+            sh 'AZURE_CONFIG_DIR=$(pwd) test/acc-pr-test.sh oe-ub1604.json'
+          }
+        }
+      }
+    }
+    stage('Ubuntu 18.04') {
+      steps {
+        dir('gopath/src/github.com/Microsoft/oe-engine') {
+          withCredentials([usernamePassword(credentialsId: 'SERVICE_PRINCIPAL_OSTCLAB', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
+            sh 'AZURE_CONFIG_DIR=$(pwd) test/acc-pr-test.sh oe-ub1804.json'
           }
         }
       }
