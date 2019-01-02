@@ -19,6 +19,7 @@ az login --service-principal -u ${SERVICE_PRINCIPAL_ID} -p ${SERVICE_PRINCIPAL_P
 az account set --subscription ${SUBSCRIPTION_ID}
 
 if [ -z "${OE_ENGINE_BIN}" ]; then
+  echo "Download oe-engine binary from the cloud"
   wget -q https://oejenkinsciartifacts.blob.core.windows.net/oe-engine/latest/bin/oe-engine
   chmod 755 oe-engine
   OE_ENGINE_BIN="./oe-engine"
