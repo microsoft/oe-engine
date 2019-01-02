@@ -18,21 +18,24 @@ if [[ -z "${KV_SECRET_WIN_PWD:-}" ]]; then echo "Must specify KV_SECRET_WIN_PWD"
 az login --service-principal -u ${SERVICE_PRINCIPAL_ID} -p ${SERVICE_PRINCIPAL_PASSWORD} --tenant $TENANT
 az account set --subscription ${SUBSCRIPTION_ID}
 
-wget -q https://oejenkinsciartifacts.blob.core.windows.net/oe-engine/latest/bin/oe-engine
-chmod 755 oe-engine
+if [ -z "${OE_ENGINE_BIN}" ]; then
+  wget -q https://oejenkinsciartifacts.blob.core.windows.net/oe-engine/latest/bin/oe-engine
+  chmod 755 oe-engine
+  OE_ENGINE_BIN="./oe-engine"
+fi
 
 if [ "$IMAGE" = "Ubuntu16.04" ]; then
   SSH_PUB_KEY=$(az keyvault secret show --vault-name ${KV_NAME} --name ${KV_SECRET_SSH_PUB} | jq -r .value | base64 -d)
   sed -i "/\"keyData\":/c \"keyData\": \"${SSH_PUB_KEY}\"" oe-ub1604.json
-  ./oe-engine generate --api-model oe-ub1604.json
+  ${OE_ENGINE_BIN} generate --api-model oe-ub1604.json
 elif [ "$IMAGE" = "Ubuntu18.04" ]; then
   SSH_PUB_KEY=$(az keyvault secret show --vault-name ${KV_NAME} --name ${KV_SECRET_SSH_PUB} | jq -r .value | base64 -d)
   sed -i "/\"keyData\":/c \"keyData\": \"${SSH_PUB_KEY}\"" oe-ub1804.json
-  ./oe-engine generate --api-model oe-ub1804.json
+  ${OE_ENGINE_BIN} generate --api-model oe-ub1804.json
 elif [ "$IMAGE" = "Windows" ]; then
   ADMIN_PASSWORD=$(az keyvault secret show --vault-name ${KV_NAME} --name ${KV_SECRET_WIN_PWD} | jq -r .value)
   sed -i "/\"adminPassword\":/c \"adminPassword\": \"${ADMIN_PASSWORD}\"" oe-win.json
-  ./oe-engine generate --api-model oe-win.json
+  ${OE_ENGINE_BIN} generate --api-model oe-win.json
 else
   echo "Unsupported IMAGE $IMAGE"
   exit 1
