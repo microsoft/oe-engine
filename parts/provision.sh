@@ -21,7 +21,7 @@ function setup_ubuntu() {
 
   case $version in
     "18.04")
-      sgx_driver_url="https://download.01.org/intel-sgx/dcap-1.0/sgx_linux_x64_driver_dcap_36594a7.bin"
+      sgx_driver_url="https://download.01.org/intel-sgx/dcap-1.0.1/dcap_installer/ubuntuServer1804/sgx_linux_x64_driver_dcap_4f32b98.bin"
       ;;
     "16.04")
       sgx_driver_url="https://download.01.org/intel-sgx/dcap-1.0.1/dcap_installer/ubuntuServer1604/sgx_linux_x64_driver_dcap_4f32b98.bin"
@@ -91,11 +91,11 @@ function setup_ubuntu() {
 
   case $version in
     "18.04")
-      retrycmd_if_failure 10 10 120 curl -fsSL -O "open-enclave-0.4.0-Linux.deb"
+      retrycmd_if_failure 10 10 120 curl -fsSL -O "https://oeenginetest.blob.core.windows.net/oe-engine/1804/open-enclave-0.4.1-Linux.deb"
       if [ $? -ne 0  ]; then
         error_exit "apt-get install failed"
       fi
-      retrycmd_if_failure 10 10 120 dpkg -i open-enclave-0.4.0-Linux.deb
+      retrycmd_if_failure 10 10 120 dpkg -i open-enclave-0.4.1-Linux.deb
       if [ $? -ne 0  ]; then
         error_exit "dpkg install failed"
       fi
