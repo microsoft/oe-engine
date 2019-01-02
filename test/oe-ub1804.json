@@ -1,0 +1,27 @@
+{
+  "properties": {
+    "vmProfiles": [
+      {
+        "name": "acc-ub1804",
+        "osType": "Linux",
+        "vmSize": "Standard_DC2s",
+        "ports": [22],
+        "hasDNSName": false
+      }
+    ],
+    "linuxProfile": {
+      "adminUsername": "azureuser",
+      "osImage": {
+        "publisher": "Canonical",
+        "offer": "UbuntuServer",
+        "sku": "18.04-LTS",
+        "version": "latest"
+      },
+      "sshPublicKeys": [
+        {
+          "keyData": ""
+        }
+      ]
+    }
+  }
+}

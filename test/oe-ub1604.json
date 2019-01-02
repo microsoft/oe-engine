@@ -2,14 +2,21 @@
   "properties": {
     "vmProfiles": [
       {
-        "name": "acclnx",
+        "name": "acc-ub1604",
         "osType": "Linux",
         "vmSize": "Standard_DC2s",
-        "ports": [22]
+        "ports": [22],
+        "hasDNSName": false
       }
     ],
     "linuxProfile": {
       "adminUsername": "azureuser",
+      "osImage": {
+        "publisher": "Canonical",
+        "offer": "confidential-compute-preview",
+        "sku": "16.04-LTS",
+        "version": "latest"
+      },
       "sshPublicKeys": [
         {
           "keyData": ""
