@@ -36,7 +36,7 @@ trap "rm -rf \"${TEMPDIR}\"" EXIT
 case "$OS" in
 Linux)
   cp parameters-lnx.json $TEMPDIR/parameters.json
-  SSH_PUB_KEY=$(az keyvault secret show --vault-name oe-ci-test-kv --name id-rsa-oe-test-pub | jq -r .value | base64 -d)
+  SSH_PUB_KEY=$(az keyvault secret show --vault-name ostc-test-kv --name id-rsa-ostc-jenkins-pub | jq -r .value)
   echo ${SSH_PUB_KEY}
   sed -i "s%SSH_PUB_KEY%${SSH_PUB_KEY}%" $TEMPDIR/parameters.json
   case "$OE_SDK_INCLUDED" in
@@ -54,7 +54,7 @@ Linux)
   ;;
 Windows)
   cp parameters-win.json $TEMPDIR/parameters.json
-  PASSWORD=$(az keyvault secret show --vault-name oe-ci-test-kv --name windows-pwd | jq -r .value)
+  PASSWORD=$(az keyvault secret show --vault-name ostc-test-kv --name windows-password | jq -r .value)
   sed -i "s/PASSWORD/${PASSWORD}/" $TEMPDIR/parameters.json
   ;;
 *)
