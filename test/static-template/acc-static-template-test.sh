@@ -30,6 +30,9 @@ if [ -z "${TENANT_ID:-}" ]; then echo "Must specify TENANT_ID"; exit 1; fi
 if [ -z "${SERVICE_PRINCIPAL_ID:-}" ]; then echo "Must specify SERVICE_PRINCIPAL_ID"; exit 1; fi
 if [ -z "${SERVICE_PRINCIPAL_PASSWORD:-}" ]; then echo "Must specify SERVICE_PRINCIPAL_PASSWORD"; exit 1; fi
 
+az login --service-principal -u ${SERVICE_PRINCIPAL_ID} -p ${SERVICE_PRINCIPAL_PASSWORD} --tenant ${TENANT_ID}
+az account set --subscription ${SUBSCRIPTION_ID}
+
 TEMPDIR="$(mktemp -d)"
 trap "rm -rf \"${TEMPDIR}\"" EXIT
 
@@ -61,9 +64,6 @@ Windows)
   UsageExit $0
   ;;
 esac
-
-az login --service-principal -u ${SERVICE_PRINCIPAL_ID} -p ${SERVICE_PRINCIPAL_PASSWORD} --tenant ${TENANT_ID}
-az account set --subscription ${SUBSCRIPTION_ID}
 
 ID=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 6)
 RGNAME="oe-stat-${BUILD_NUMBER}-$ID"
