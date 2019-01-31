@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-
+set -x
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -37,11 +37,11 @@ case "$OS" in
 Linux)
   cp parameters-lnx.json $TEMPDIR/parameters.json
   SSH_PUB_KEY=$(az keyvault secret show --vault-name oe-ci-test-kv --name id-rsa-oe-test-pub | jq -r .value | base64 -d)
+  echo ${SSH_PUB_KEY}
   sed -i "s%SSH_PUB_KEY%${SSH_PUB_KEY}%" $TEMPDIR/parameters.json
   case "$OE_SDK_INCLUDED" in
   no)
     echo "Skipping OE-SDK installation"
-
     ;;
   yes)
     echo "Installing OE-SDK"
