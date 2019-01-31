@@ -1,0 +1,57 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "osImageName": {
+            "value": "UbuntuServer_16.04"
+        },
+        "location": {
+            "value": "LOCATION"
+        },
+        "vmName": {
+            "value": "acc-lnx"
+        },
+        "adminUsername": {
+            "value": "azureuser"
+        },
+        "authenticationType": {
+            "value": "sshPublicKey"
+        },
+        "adminPasswordOrKey": {
+            "value": "SSH_PUB_KEY"
+        },
+        "oeSDKIncluded": {
+            "value": "OE_SDK_INCLUDED"
+        },
+        "vmSize": {
+            "value": "Standard_DC2s"
+        },
+        "osDiskType": {
+            "value": "Premium_LRS"
+        },
+        "bootDiagnostics": {
+            "value": "disable"
+        },
+        "vnetNewOrExisting": {
+            "value": "new"
+        },
+        "vnetName": {
+            "value": "VirtualNetwork"
+        },
+        "vnetAddress": {
+            "value": "172.18.0.0/16"
+        },
+        "vnetResourceGroupName": {
+            "value": "RGNAME"
+        },
+        "subnetName": {
+            "value": "Subnet-1"
+        },
+        "subnetAddress": {
+            "value": "172.18.0.0/24"
+        },
+        "publicInboundPorts": {
+            "value": "enable"
+        }
+    }
+}

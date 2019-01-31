@@ -1,0 +1,439 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminPasswordOrKey": {
+            "metadata": {
+                "description": "Password or ssh key value."
+            },
+            "type": "securestring"
+        },
+        "adminUsername": {
+            "metadata": {
+                "description": "User name for the Virtual Machines (SSH or Password)."
+            },
+            "type": "string"
+        },
+        "authenticationType": {
+            "allowedValues": [
+                "password",
+                "sshPublicKey"
+            ],
+            "defaultValue": "password",
+            "metadata": {
+                "description": "Type of authentication to use on the virtual machine."
+            },
+            "type": "string"
+        },
+        "bootDiagnostics": {
+            "allowedValues": [
+                "enable",
+                "disable"
+            ],
+            "defaultValue": "enable",
+            "metadata": {
+                "description": "Type of authentication to use on the virtual machine."
+            },
+            "type": "string"
+        },
+        "diagnosticsStorageAccountKind": {
+            "allowedValues": [
+                "Storage",
+                "StorageV2"
+            ],
+            "defaultValue": "Storage",
+            "metadata": {
+                "description": "Type of storage account."
+            },
+            "type": "string"
+        },
+        "diagnosticsStorageAccountName": {
+            "defaultValue": "none",
+            "metadata": {
+                "description": "Name of the storage account for diagnostics data."
+            },
+            "type": "string"
+        },
+        "diagnosticsStorageAccountNewOrExisting": {
+            "allowedValues": [
+                "new",
+                "existing"
+            ],
+            "defaultValue": "new",
+            "metadata": {
+                "description": "Determines whether or not a new storage account should be provisioned."
+            },
+            "type": "string"
+        },
+        "diagnosticsStorageAccountResourceGroupName": {
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Name of the resource group for the existing diagnostics storage account."
+            },
+            "type": "string"
+        },
+        "diagnosticsStorageAccountType": {
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS"
+            ],
+            "defaultValue": "Standard_LRS",
+            "metadata": {
+                "description": "Type of storage account."
+            },
+            "type": "string"
+        },
+        "location": {
+            "allowedValues": [
+                "eastus",
+                "westeurope"
+            ],
+            "metadata": {
+                "description": "Sets the location for all resources in the cluster"
+            },
+            "type": "string"
+        },
+        "oeSDKIncluded": {
+            "allowedValues": [
+                "yes",
+                "no"
+            ],
+            "defaultValue": "yes",
+            "metadata": {
+                "description": "Flag to install OE SDK."
+            },
+            "type": "string"
+        },
+        "osDiskType": {
+            "allowedValues": [
+                "Premium_LRS",
+                "StandardSSD_LRS",
+                "Standard_LRS"
+            ],
+            "defaultValue": "Premium_LRS",
+            "metadata": {
+                "description": "Type of managed disk to create"
+            },
+            "type": "string"
+        },
+        "osImageName": {
+            "allowedValues": [
+                "UbuntuServer_16.04",
+                "WindowsServer_2016"
+            ],
+            "metadata": {
+                "description": "OS image name"
+            },
+            "type": "string"
+        },
+        "publicInboundPorts": {
+            "allowedValues": [
+                "enable",
+                "disable"
+            ],
+            "defaultValue": "disable",
+            "metadata": {
+                "description": "Determines whether inbound SSH/RDP connection is enabled in NSG"
+            },
+            "type": "string"
+        },
+        "subnetAddress": {
+            "defaultValue": "10.0.0.0/24",
+            "metadata": {
+                "description": "Sets the subnet of the VM."
+            },
+            "type": "string"
+        },
+        "subnetName": {
+            "defaultValue": "[concat(parameters('vmName'), '-subnet')]",
+            "metadata": {
+                "description": "Name of the subnet."
+            },
+            "type": "string"
+        },
+        "vmName": {
+            "metadata": {
+                "description": "The name of the Virtual Machine."
+            },
+            "type": "string"
+        },
+        "vmSize": {
+            "allowedValues": [
+                "Standard_DC2s",
+                "Standard_DC4s"
+            ],
+            "metadata": {
+                "description": "The size of the Virtual Machine."
+            },
+            "type": "string"
+        },
+        "vnetAddress": {
+            "defaultValue": "10.0.0.0/16",
+            "metadata": {
+                "description": "VNET address space"
+            },
+            "type": "string"
+        },
+        "vnetName": {
+            "defaultValue": "[concat(resourceGroup().name, '-vnet')]",
+            "maxLength": 64,
+            "metadata": {
+                "description": "Name of the virtual network (alphanumeric, hyphen, underscore, period)."
+            },
+            "minLength": 2,
+            "type": "string"
+        },
+        "vnetNewOrExisting": {
+            "allowedValues": [
+                "new",
+                "existing"
+            ],
+            "defaultValue": "new",
+            "metadata": {
+                "description": "Determines whether or not a new virtual network should be provisioned"
+            },
+            "type": "string"
+        },
+        "vnetResourceGroupName": {
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Name of the resource group for the existing virtual network."
+            },
+            "type": "string"
+        }
+    },
+    "variables": {
+        "adminUsername": "[parameters('adminUsername')]",
+        "diagnosticsStorageAction": "[if(equals(parameters('bootDiagnostics'), 'disable'), 'nop', parameters('diagnosticsStorageAccountNewOrExisting'))]",
+        "imageReference": {
+            "UbuntuServer_16.04": {
+                "offer": "confidential-compute-preview",
+                "publisher": "Canonical",
+                "sku": "16.04-LTS",
+                "version": "latest"
+            },
+            "WindowsServer_2016": {
+                "offer": "confidential-compute-preview",
+                "publisher": "MicrosoftWindowsServer",
+                "sku": "acc-windows-server-2016-datacenter",
+                "version": "latest"
+            }
+        },
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": "true",
+            "ssh": {
+                "publicKeys": [
+                    {
+                        "keyData": "[parameters('adminPasswordOrKey')]",
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]"
+                    }
+                ]
+            }
+        },
+        "linuxExtCommand": "[if(equals(parameters('oeSDKIncluded'), 'yes'), '/bin/bash -c \"secs=600; SECONDS=0; while (( SECONDS < secs )); do if [ -e /opt/azure/acc/completed ]; then if [ $(cat /opt/azure/acc/completed) == ok ]; then /opt/azure/acc/validate.sh; exit $? ; else echo provision failed; exit 1; fi; fi; sleep 20; done; echo validation timeout; exit 1; \"', '/bin/bash -c \"exit 0\"')]",
+        "linuxSecurityRules": [
+            {
+                "name": "ssh",
+                "properties": {
+                    "access": "Allow",
+                    "description": "Allow SSH",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRange": "22",
+                    "direction": "Inbound",
+                    "priority": 200,
+                    "protocol": "Tcp",
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*"
+                }
+            }
+        ],
+        "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
+        "nsgName": "[concat(parameters('vmName'), '-nsg')]",
+        "publicIPAddressName": "[concat(parameters('vmName'), '-ip')]",
+        "securityRules": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsSecurityRules'), variables('linuxSecurityRules'))]",
+        "vnetSubnetID": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('vnetName'), parameters('subnetName'))]",
+        "windowsConfiguration": {
+            "provisionVmAgent": "true"
+        },
+        "windowsSecurityRules": [
+            {
+                "name": "rdp",
+                "properties": {
+                    "access": "Allow",
+                    "description": "Allow RDP",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRange": "3389",
+                    "direction": "Inbound",
+                    "priority": 200,
+                    "protocol": "Tcp",
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*"
+                }
+            }
+        ]
+    },
+    "resources": [
+        {
+            "apiVersion": "2018-02-01",
+            "name": "pid-daeec781-52c2-488a-85a6-7945b7831056",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": []
+                }
+            }
+        },
+        {
+            "apiVersion": "2018-02-01",
+            "condition": "[equals(variables('diagnosticsStorageAction'), 'new')]",
+            "kind": "[parameters('diagnosticsStorageAccountKind')]",
+            "location": "[parameters('location')]",
+            "name": "[parameters('diagnosticsStorageAccountName')]",
+            "sku": {
+                "name": "[parameters('diagnosticsStorageAccountType')]"
+            },
+            "type": "Microsoft.Storage/storageAccounts"
+        },
+        {
+            "apiVersion": "2018-06-01",
+            "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+            "location": "[parameters('location')]",
+            "name": "[parameters('vnetName')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('vnetAddress')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetAddress')]"
+                        }
+                    }
+                ]
+            },
+            "type": "Microsoft.Network/virtualNetworks"
+        },
+        {
+            "apiVersion": "2018-06-01",
+            "location": "[parameters('location')]",
+            "name": "[variables('publicIPAddressName')]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic"
+            },
+            "type": "Microsoft.Network/publicIPAddresses"
+        },
+        {
+            "apiVersion": "2018-06-01",
+            "location": "[parameters('location')]",
+            "name": "[variables('nsgName')]",
+            "properties": {
+                "securityRules": "[if(equals(parameters('publicInboundPorts'), 'enable'), variables('securityRules'), json('null'))]"
+            },
+            "type": "Microsoft.Network/networkSecurityGroups"
+        },
+        {
+            "apiVersion": "2018-06-01",
+            "dependsOn": [
+                "[variables('publicIPAddressName')]",
+                "[parameters('vnetName')]",
+                "[variables('nsgID')]"
+            ],
+            "location": "[parameters('location')]",
+            "name": "[concat(parameters('vmName'), '-nic')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfigNode",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+                            },
+                            "subnet": {
+                                "id": "[variables('vnetSubnetID')]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[variables('nsgID')]"
+                }
+            },
+            "type": "Microsoft.Network/networkInterfaces"
+        },
+        {
+            "apiVersion": "2018-06-01",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', parameters('vmName'), '-nic')]"
+            ],
+            "location": "[parameters('location')]",
+            "name": "[parameters('vmName')]",
+            "properties": {
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": "[equals(parameters('bootDiagnostics'), 'enable')]",
+                        "storageUri": "[if(equals(parameters('bootDiagnostics'), 'enable'), reference(resourceId(parameters('diagnosticsStorageAccountResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), '2018-02-01').primaryEndpoints['blob'], json('null'))]"
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('vmName'), '-nic'))]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "adminPassword": "[parameters('adminPasswordOrKey')]",
+                    "adminUsername": "[variables('adminUsername')]",
+                    "computername": "[parameters('vmName')]",
+                    "customData": "[if(equals(parameters('oeSDKIncluded'), 'no'), json('null'), base64(concat('#cloud-config\n\n', '{\"runcmd\":[\"/opt/azure/acc/provision.sh\"],\"write_files\":[{\"content\":\"function retry_download() {\\nretries=$1; wait_sleep=$2; timeout=$3; url=$4; path=$5 checksum=$6\\nfor i in $(seq 1 $retries); do\\nrm -f $path\\ntimeout $timeout curl -fsSL $url -o $path\\nif [ $? -ne 0 ]; then\\necho \\\"retry_download[$i] Error: Failed to execute curl -fsSL $url -o $path\\\"\\nsleep $wait_sleep\\ncontinue\\nfi\\nif [ ! -z \\\"${checksum:-}\\\" ]; then\\nactual=$(sha1sum -b $path | cut -f 1 -d \\\" \\\")\\nif [ $? -ne 0 ]; then\\necho \\\"retry_download[$i] Error: Failed to execute sha1sum -b $path (per $url)\\\"\\nsleep $wait_sleep\\ncontinue\\nfi\\nif [ \\\"$checksum\\\" != \\\"$actual\\\" ]; then\\necho \\\"retry_download[$i] Error: sha1sum mismatch for $url\\\"\\nsleep $wait_sleep\\ncontinue\\nfi\\nfi\\necho \\\"Successfully downloaded $url ($checksum) after $i attempts\\\"\\nreturn 0\\ndone\\necho \\\"Failed to download $url ($checksum) after $retries attempts\\\"\\nreturn 1\\n}\\n\\n\\nfunction retrycmd_if_failure() {\\nretries=$1; wait_sleep=$2; timeout=$3; shift \\u0026\\u0026 shift \\u0026\\u0026 shift\\nfor i in $(seq 1 $retries); do\\ntimeout $timeout ${@}\\n[ $? -eq 0 ] \\u0026\\u0026 break || \\\\\\nif [ $i -eq $retries ]; then\\necho \\\"Error: Failed to execute \\\\\\\"$@\\\\\\\" after $i attempts\\\"\\nreturn 1\\nelse\\nsleep $wait_sleep\\nfi\\ndone\\necho Executed \\\\\\\"$@\\\\\\\" $i times;\\n}\\n\\n\\nfunction retry_get_install_deb() {\\nretries=$1; wait_sleep=$2; timeout=$3; url=$4; checksum=$5\\ndeb=$(mktemp)\\ntrap \\\"rm -f $deb\\\" RETURN\\nretry_download $retries $wait_sleep $timeout $url $deb $checksum\\nif [ $? -ne 0 ]; then\\necho \\\"Error: Failed to download $url\\\"\\nreturn 1\\nfi\\nretrycmd_if_failure $retries $wait_sleep $timeout dpkg -i $deb\\nif [ $? -ne 0 ]; then\\necho \\\"Error: Failed to install $url\\\"\\nreturn 1\\nfi\\n}\\n\",\"owner\":\"root\",\"path\":\"/opt/azure/acc/utils.sh\",\"permissions\":\"0744\"},{\"content\":\"#!/bin/bash\\n\\n\\n# Copyright (c) Microsoft Corporation. All rights reserved.\\n# Licensed under the MIT License.\\n\\n\\n# Install required packages.\\n#\\n\\n\\nsource /opt/azure/acc/utils.sh\\n\\n\\ncd /opt/azure/acc/\\n\\n\\nfunction error_exit() {\\necho $1\\necho \\\"failed\\\" \\u003e /opt/azure/acc/completed\\nexit 1\\n}\\n\\n\\nfunction setup_ubuntu() {\\nversion=`grep DISTRIB_RELEASE /etc/*-release| cut -f 2 -d \\\"=\\\"`\\n\\n\\ncase $version in\\n\\\"18.04\\\")\\nsgx_driver_url=\\\"https://download.01.org/intel-sgx/dcap-1.0.1/dcap_installer/ubuntuServer1804/sgx_linux_x64_driver_dcap_4f32b98.bin\\\"\\n;;\\n\\\"16.04\\\")\\nsgx_driver_url=\\\"https://download.01.org/intel-sgx/dcap-1.0.1/dcap_installer/ubuntuServer1604/sgx_linux_x64_driver_dcap_4f32b98.bin\\\"\\n;;\\n\\\"*\\\")\\nerror_exit \\\"Version $version is not supported\\\"\\n;;\\nesac\\nsgx_driver=$(basename $sgx_driver_url)\\n\\n\\nrelease=$(lsb_release -cs)\\n\\n\\n# Configure apt to use clang-7\\necho \\\"deb http://apt.llvm.org/$release/ llvm-toolchain-$release-7 main\\\" | tee /etc/apt/sources.list.d/llvm-toolchain-xenial-7.list\\necho \\\"deb-src http://apt.llvm.org/$release/ llvm-toolchain-$release-7 main\\\" | tee -a /etc/apt/sources.list.d/llvm-toolchain-xenial-7.list\\nwget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -\\n\\n\\n# Configure apt to use packages.microsoft.com repo\\necho \\\"deb [arch=amd64] https://packages.microsoft.com/ubuntu/$version/prod $release main\\\" | tee /etc/apt/sources.list.d/msprod.list\\nwget -qO - https://packages.microsoft.com/keys/microsoft.asc | apt-key add -\\n\\n\\n# Configure apt to use Intel 01.org repo\\necho \\\"deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu $release main\\\" | tee /etc/apt/sources.list.d/intel-sgx.list\\nwget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add -\\n\\n\\nexport DEBIAN_FRONTEND=noninteractive\\n\\n\\n# Update pkg repository\\nretrycmd_if_failure 10 10 120 apt update\\nif [ $? -ne 0  ]; then\\nerror_exit \\\"apt update failed\\\"\\nfi\\n\\n\\n# Add public packages:\\nPACKAGES=\\\"make gcc gdb g++ libssl-dev pkg-config dkms\\\"\\n\\n\\n# Add clang-7 packages:\\nPACKAGES=\\\"$PACKAGES clang-7 lldb-7 lld-7\\\"\\n\\n\\nretrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES\\nif [ $? -ne 0  ]; then\\nerror_exit \\\"apt-get install failed\\\"\\nfi\\n\\n\\n# Install SGX driver\\n\\n\\nretrycmd_if_failure 10 10 120 curl -fsSL -O ${sgx_driver_url}\\nif [ $? -ne 0  ]; then\\nerror_exit \\\"failed to download SGX driver\\\"\\nfi\\nchmod a+x ./${sgx_driver}\\n./${sgx_driver}\\nif [ $? -ne 0  ]; then\\nerror_exit \\\"failed to install SGX driver\\\"\\nfi\\n\\n\\n# Add Intel packages\\nPACKAGES=\\\"libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev\\\"\\n\\n\\n# Add Microsoft packages (temporarily skip open-enclave until 18.04 is added)\\nPACKAGES=\\\"$PACKAGES az-dcap-client\\\"\\n\\n\\nretrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES\\nif [ $? -ne 0  ]; then\\nerror_exit \\\"apt-get install failed\\\"\\nfi\\n\\n\\ncase $version in\\n\\\"18.04\\\")\\nretrycmd_if_failure 10 10 120 curl -fsSL -O \\\"https://oeenginetest.blob.core.windows.net/oe-engine/1804/open-enclave-0.4.1-Linux.deb\\\"\\nif [ $? -ne 0  ]; then\\nerror_exit \\\"apt-get install failed\\\"\\nfi\\nretrycmd_if_failure 10 10 120 dpkg -i open-enclave-0.4.1-Linux.deb\\nif [ $? -ne 0  ]; then\\nerror_exit \\\"dpkg install failed\\\"\\nfi\\n;;\\n\\\"16.04\\\")\\nretrycmd_if_failure 10 10 120 apt-get -y install open-enclave\\nif [ $? -ne 0  ]; then\\nerror_exit \\\"apt-get install failed\\\"\\nfi\\n;;\\nesac\\n\\n\\nsystemctl disable aesmd\\nsystemctl stop aesmd\\n}\\n\\n\\ndistro=`grep DISTRIB_ID /etc/*-release | cut -f 2 -d \\\"=\\\"`\\n\\n\\ncase $distro in\\n\\\"Ubuntu\\\")\\nsetup_ubuntu\\n;;\\n*)\\nerror_exit \\\"Distro $distro is not currently supported\\\"\\n;;\\nesac\\n\\n\\n\\n\\n# Check to see this is an openenclave supporting hardware environment\\n/opt/openenclave/bin/oesgx | grep \\\"does not support\\\"\\nif [ $? -eq 0 ] ; then\\nerror_exit \\\"This hardware does not support open enclave\\\"\\nfi\\n\\n\\n# Indicate readiness\\necho \\\"ok\\\" \\u003e /opt/azure/acc/completed\\n\",\"owner\":\"root\",\"path\":\"/opt/azure/acc/provision.sh\",\"permissions\":\"0744\"},{\"content\":\"#!/bin/bash\\n\\n\\n# Copyright (c) Microsoft Corporation. All rights reserved.\\n# Licensed under the MIT License.\\n\\n\\nsource /opt/azure/acc/utils.sh\\n\\n\\n# validate open-enclave package installation\\nstatus=$(dpkg -s open-enclave | grep \\\"Status: install ok installed\\\")\\nif [ $? -ne 0  ] || [ -z \\\"$status\\\" ]; then\\necho \\\"open-enclave is not installed\\\"\\nexit 1\\nfi\\n\\n\\n# exit on error from this point\\nset -e\\n\\n\\n# copy samples\\ntempdir=\\\"$(mktemp -d)\\\"\\ntrap \\\"rm -rf \\\\\\\"${tempdir}\\\\\\\"\\\" EXIT\\ncp -r /opt/openenclave/share/openenclave/samples/ $tempdir\\n\\n\\n# build and run samples\\ncd $tempdir/samples\\nif [ -e /opt/openenclave/share/openenclave/openenclaverc ]; then\\nsource /opt/openenclave/share/openenclave/openenclaverc\\nelse\\nsource /opt/openenclave/share/openenclaverc\\nfi\\nmake\\nmake run\\n\\n\\necho \\\"open-enclave validation succedded\\\"\\n\",\"owner\":\"root\",\"path\":\"/opt/azure/acc/validate.sh\",\"permissions\":\"0744\"},{\"content\":\"#!/bin/bash\\n\\n\\nset -e\\n\\n\\ncurrent_kernel_ver=$(uname -r)\\nlast_kernel_ver=\\nif [ -e /opt/azure/acc/sgx_kernel_version ];  then\\nlast_kernel_ver=$(cat /opt/azure/acc/sgx_kernel_version)\\nfi\\n\\n\\necho \\\"current_kernel_ver=${current_kernel_ver} last_kernel_ver=${last_kernel_ver}\\\"\\n\\n\\nif [ \\\"${current_kernel_ver}\\\" = \\\"${last_kernel_ver}\\\" ]; then\\necho \\\"kernel has not updated. skipping SGX driver update\\\"\\nexit 0\\nfi\\n\\n\\n/opt/azure/acc/sgx_linux_x64_driver_dcap_a06cb75.bin\\n\\n\\necho ${current_kernel_ver} \\u003e /opt/azure/acc/sgx_kernel_version\\n\\n\\necho \\\"SGX driver has been updated for ${current_kernel_ver}\\\"\\n\",\"owner\":\"root\",\"path\":\"/opt/azure/acc/reinstall_sgx_driver.sh\",\"permissions\":\"0744\"}]}')))]",
+                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
+                    "windowsConfiguration": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsConfiguration'), json('null'))]"
+                },
+                "storageProfile": {
+                    "imageReference": "[variables('imageReference')[parameters('osImageName')]]",
+                    "osDisk": {
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[parameters('osDiskType')]"
+                        }
+                    }
+                }
+            },
+            "tags": {
+                "creationSource": "[concat('oe-engine-', parameters('vmName'))]"
+            },
+            "type": "Microsoft.Compute/virtualMachines"
+        },
+        {
+            "apiVersion": "2018-06-01",
+            "condition": "[equals(parameters('osImageName'), 'UbuntuServer_16.04')]",
+            "dependsOn": [
+                "[parameters('vmName')]"
+            ],
+            "location": "[parameters('location')]",
+            "name": "[concat(parameters('vmName'), '/validate')]",
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.OSTCExtensions",
+                "settings": {
+                    "commandToExecute": "[variables('linuxExtCommand')]"
+                },
+                "type": "CustomScriptForLinux",
+                "typeHandlerVersion": "1.4"
+            },
+            "type": "Microsoft.Compute/virtualMachines/extensions"
+        }
+    ],
+    "outputs": {}
+}
