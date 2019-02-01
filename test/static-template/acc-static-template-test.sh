@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-set -x
+
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -40,7 +40,6 @@ case "$OS" in
 Linux)
   cp parameters-lnx.json $TEMPDIR/parameters.json
   SSH_PUB_KEY=$(az keyvault secret show --vault-name ostc-test-kv --name id-rsa-ostc-jenkins-pub | jq -r .value)
-  echo ${SSH_PUB_KEY}
   sed -i "s%SSH_PUB_KEY%${SSH_PUB_KEY}%" $TEMPDIR/parameters.json
   case "$OE_SDK_INCLUDED" in
   no)
@@ -66,7 +65,7 @@ Windows)
 esac
 
 ID=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 6)
-RGNAME="oe-stat-${BUILD_NUMBER}-$ID"
+RGNAME="acc-marketplace-${BUILD_NUMBER}-$ID"
 
 az group create --name $RGNAME --location $LOCATION
 trap 'az group delete --name $RGNAME --yes --no-wait; rm -rf $TEMPDIR' EXIT

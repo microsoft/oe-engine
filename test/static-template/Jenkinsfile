@@ -19,7 +19,7 @@ pipeline {
         }
       }
     }
-    stage('Linux with OE SDK') {
+    stage('Linux OE SDK') {
       steps {
         dir('gopath/src/github.com/Microsoft/oe-engine') {
           withCredentials([usernamePassword(credentialsId: 'SERVICE_PRINCIPAL_OSTCLAB', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
