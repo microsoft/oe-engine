@@ -21,7 +21,7 @@ function UsageExit
 
 OS=$1
 OE_SDK_INCLUDED=$2
-LOCATION=eastus
+LOCATION=${LOCATION:-eastus}
 
 if [ -z "${OS:-}" ] || [ -z "${OE_SDK_INCLUDED:-}" ]; then UsageExit $0; fi
 if [ -z "${SUBSCRIPTION_ID:-}" ]; then echo "Must specify SUBSCRIPTION_ID"; exit 1; fi
@@ -65,7 +65,7 @@ Windows)
 esac
 
 ID=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 6)
-RGNAME="acc-marketplace-${BUILD_NUMBER}-$ID"
+RGNAME="acc-marketplace-${LOCATION}-${BUILD_NUMBER}-$ID"
 
 az group create --name $RGNAME --location $LOCATION
 trap 'az group delete --name $RGNAME --yes --no-wait; rm -rf $TEMPDIR' EXIT
