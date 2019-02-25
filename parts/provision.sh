@@ -18,62 +18,114 @@ function error_exit() {
   exit 1
 }
 
-# Configure apt to use clang-7
-echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main" >> /etc/apt/sources.list
-echo "deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main" >> /etc/apt/sources.list
-wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+function setup_ubuntu() {
+  version=`grep DISTRIB_RELEASE /etc/*-release| cut -f 2 -d "="`
 
-# Configure apt to use packages.microsoft.com repo
-echo "deb [arch=amd64] https://packages.microsoft.com/ubuntu/16.04/prod xenial main" | sudo tee /etc/apt/sources.list.d/msprod.list
-wget -qO - https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+  case $version in
+    "18.04")
+      sgx_driver_url="${OE_PKG_BASE}/1804/sgx_linux_x64_driver_dcap_4f32b98.bin"
+      sgx_pkgs="1804/libsgx-enclave-common_2.4.100.48163-bionic1_amd64.deb 1804/libsgx-enclave-common-dev_2.4.100.48163-bionic1_amd64.deb 1804/libsgx-dcap-ql_1.0.101.48192-bionic1_amd64.deb 1804/libsgx-dcap-ql-dev_1.0.101.48192-bionic1_amd64.deb"
+      ;;
+    "16.04")
+      sgx_driver_url="${OE_PKG_BASE}/1604/sgx_linux_x64_driver_dcap_4f32b98.bin"
+      sgx_pkgs="1604/libsgx-enclave-common_2.4.100.48163-xenial1_amd64.deb 1604/libsgx-enclave-common-dev_2.4.100.48163-xenial1_amd64.deb 1604/libsgx-dcap-ql_1.0.101.48192-xenial1_amd64.deb 1604/libsgx-dcap-ql-dev_1.0.101.48192-xenial1_amd64.deb"
+      ;;
+    "*")
+      error_exit "Version $version is not supported"
+      ;;
+  esac
+  sgx_driver=$(basename $sgx_driver_url)
 
-# Configure apt to use Intel 01.org repo
-echo "deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu xenial main" | sudo tee /etc/apt/sources.list.d/intel-sgx.list
-wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo apt-key add -
+  release=$(lsb_release -cs)
 
-export DEBIAN_FRONTEND=noninteractive
+  # Configure apt to use clang-7
+  echo "deb http://apt.llvm.org/$release/ llvm-toolchain-$release-7 main" | tee /etc/apt/sources.list.d/llvm-toolchain-xenial-7.list
+  wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 
-# Update pkg repository
-retrycmd_if_failure 10 10 120 apt update
-if [ $? -ne 0  ]; then
-  error_exit "apt update failed"
-fi
+  # Configure apt to use packages.microsoft.com repo
+  echo "deb [arch=amd64] https://packages.microsoft.com/ubuntu/$version/prod $release main" | tee /etc/apt/sources.list.d/msprod.list
+  wget -qO - https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 
-# Add public packages:
-PACKAGES="make gcc gdb g++ libssl-dev pkg-config"
+  # Configure apt to use Intel 01.org repo
+  echo "deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu $release main" | tee /etc/apt/sources.list.d/intel-sgx.list
+  wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add -
 
-# Add clang-7 packages:
-PACKAGES="$PACKAGES clang-7 lldb-7 lld-7"
+  export DEBIAN_FRONTEND=noninteractive
 
-retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
-if [ $? -ne 0  ]; then
-  error_exit "apt-get install failed"
-fi
+  # Update pkg repository
+  retrycmd_if_failure 10 10 120 apt update
+  if [ $? -ne 0  ]; then
+    error_exit "apt update failed"
+  fi
 
-# Install SGX driver
-retrycmd_if_failure 10 10 120 curl -fsSL -O https://download.01.org/intel-sgx/dcap-1.0/sgx_linux_x64_driver_dcap_36594a7.bin
-if [ $? -ne 0  ]; then
-  error_exit "failed to download SGX driver"
-fi
-chmod a+x ./sgx_linux_x64_driver_dcap_36594a7.bin
-./sgx_linux_x64_driver_dcap_36594a7.bin
-if [ $? -ne 0  ]; then
-  error_exit "failed to install SGX driver"
-fi
+  # Add public packages:
+  PACKAGES="make gcc gdb g++ libssl-dev pkg-config dkms libcurl3 libprotobuf9v5"
 
-# Add Intel packages
-PACKAGES="libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev"
+  # Add clang-7 packages:
+  PACKAGES="$PACKAGES clang-7 lldb-7 lld-7"
 
-# Add Microsoft packages
-PACKAGES="$PACKAGES az-dcap-client open-enclave"
+  retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
+  if [ $? -ne 0  ]; then
+    error_exit "apt-get install failed"
+  fi
 
-retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
-if [ $? -ne 0  ]; then
-  error_exit "apt-get install failed"
-fi
+  # Install SGX driver
+  for pkg in $sgx_pkgs; do
+    retry_get_install_deb 3 10 30 "${OE_PKG_BASE}/$pkg"
+  done
 
-systemctl disable aesmd
-systemctl stop aesmd
+  retrycmd_if_failure 10 10 120 curl -fsSL -O ${sgx_driver_url}
+  if [ $? -ne 0  ]; then
+    error_exit "failed to download SGX driver"
+  fi
+  chmod a+x ./${sgx_driver}
+  ./${sgx_driver}
+  if [ $? -ne 0  ]; then
+    error_exit "failed to install SGX driver"
+  fi
+
+  # Add Microsoft packages (temporarily skip open-enclave until 18.04 is added)
+  PACKAGES="$PACKAGES az-dcap-client"
+
+  retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
+  if [ $? -ne 0  ]; then
+    error_exit "apt-get install failed"
+  fi
+
+  case $version in
+    "18.04")
+      retrycmd_if_failure 10 10 120 curl -fsSL -O "https://oeenginetest.blob.core.windows.net/oe-engine/1804/open-enclave-0.4.1-Linux.deb"
+      if [ $? -ne 0  ]; then
+        error_exit "apt-get install failed"
+      fi
+      retrycmd_if_failure 10 10 120 dpkg -i open-enclave-0.4.1-Linux.deb
+      if [ $? -ne 0  ]; then
+        error_exit "dpkg install failed"
+      fi
+      ;;
+    "16.04")
+      retrycmd_if_failure 10 10 120 apt-get -y install open-enclave
+      if [ $? -ne 0  ]; then
+        error_exit "apt-get install failed"
+      fi
+      ;;
+  esac
+
+  systemctl disable aesmd
+  systemctl stop aesmd
+}
+
+distro=`grep DISTRIB_ID /etc/*-release | cut -f 2 -d "="`
+
+case $distro in
+  "Ubuntu")
+    setup_ubuntu
+    ;;
+  *)
+    error_exit "Distro $distro is not currently supported"
+  ;;
+esac
+
 
 # Check to see this is an openenclave supporting hardware environment
 /opt/openenclave/bin/oesgx | grep "does not support"
