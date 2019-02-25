@@ -135,11 +135,7 @@
           "computername": "[parameters('vmName')]",
           "adminUsername": "[variables('adminUsername')]",
           "adminPassword": "[parameters('adminPasswordOrKey')]",
-{{if .IsLinux}}
-          "customData": "[if(equals(parameters('oeSDKIncluded'), 'no'), json('null'), {{GetLinuxCustomData}})]",
-{{else}}
-          "customData": "{{GetWindowsCustomData}}",
-{{end}}
+          "customData": "[if(equals(parameters('oeSDKIncluded'), 'no'), json('null'), {{GetCustomData}})]",
           "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
           "windowsConfiguration": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsConfiguration'), json('null'))]"
           {{if .IsLinux}}{{if .LinuxProfile.HasSecrets}}
@@ -172,7 +168,6 @@
       },
       "type": "Microsoft.Compute/virtualMachines"
     },
-{{if .IsLinux}}
     {
       "condition": "[equals(parameters('osImageName'), 'UbuntuServer_16.04')]",
       "apiVersion": "2018-06-01",
@@ -192,24 +187,3 @@
       },
       "type": "Microsoft.Compute/virtualMachines/extensions"
     }{{WriteLinkedTemplatesForExtensions}}
-{{else}}
-    {
-      "apiVersion": "2018-06-01",
-      "dependsOn": [
-        "[parameters('vmName')]"
-      ],
-      "location": "[parameters('location')]",
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(parameters('vmName'), '/validate')]",
-      "properties": {
-        "publisher": "Microsoft.Compute",
-        "type": "CustomScriptExtension",
-        "typeHandlerVersion": "1.8",
-        "autoUpgradeMinorVersion": true,
-        "settings": {},
-        "protectedSettings": {
-          "commandToExecute": "[variables('windowsExtScript')]"
-        }
-      }
-    }
-{{end}}

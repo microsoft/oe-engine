@@ -14,16 +14,33 @@ fi
 
 # exit on error from this point
 set -e
+set -o errexit
+
+# set logfile
+readonly LOG_FILE="/opt/azure/acc/validation.log"
+touch $LOG_FILE
+exec 1>$LOG_FILE
+exec 2>&1
 
 # copy samples
 tempdir="$(mktemp -d)"
 trap "rm -rf \"${tempdir}\"" EXIT
 cp -r /opt/openenclave/share/openenclave/samples/ $tempdir
 
-# build and run samples
+# build and run all samples except remote_attestation
+if [ -e /opt/openenclave/share/openenclave/openenclaverc ]; then
+  source /opt/openenclave/share/openenclave/openenclaverc
+else
+  source /opt/openenclave/share/openenclaverc
+fi
 cd $tempdir/samples
-source /opt/openenclave/share/openenclaverc
-make
-make run
 
-echo "open-enclave validation succedded"
+find . -maxdepth 1 -type d -not -path "*remote_attestation" -not -path "." -exec sh -c "echo Running {}; cd {} && make && make run" \;
+
+# build and run remote_attestation sample. Ignore run-time errors
+cd remote_attestation
+msg=""
+make
+make run || msg="WITH ERRORS"
+
+echo "open-enclave validation completed $msg"

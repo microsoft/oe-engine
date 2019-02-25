@@ -1,0 +1,50 @@
+#!/usr/bin/env groovy
+
+pipeline {
+  agent {
+    docker {
+      image 'ubuntu18.04-dev'
+      label 'nonSGX'
+    }
+  }
+  environment {
+    SUBSCRIPTION_ID = credentials('OSCTLabSubID')
+    TENANT_ID = credentials('TenantID')
+  }
+  stages {
+    stage('Checkout') {
+      steps {
+        dir('gopath/src/github.com/Microsoft/oe-engine') {
+          checkout scm
+        }
+      }
+    }
+    stage('Linux OE SDK') {
+      steps {
+        dir('gopath/src/github.com/Microsoft/oe-engine') {
+          withCredentials([usernamePassword(credentialsId: 'SERVICE_PRINCIPAL_OSTCLAB', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
+            sh 'AZURE_CONFIG_DIR=$(pwd) test/static-template/acc-static-template-test.sh Linux yes'
+          }
+        }
+      }
+    }
+    stage('Linux vanilla') {
+      steps {
+        dir('gopath/src/github.com/Microsoft/oe-engine') {
+          withCredentials([usernamePassword(credentialsId: 'SERVICE_PRINCIPAL_OSTCLAB', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
+            sh 'AZURE_CONFIG_DIR=$(pwd) test/static-template/acc-static-template-test.sh Linux no'
+          }
+        }
+      }
+    }
+    stage('Windows') {
+      steps {
+        dir('gopath/src/github.com/Microsoft/oe-engine') {
+          withCredentials([usernamePassword(credentialsId: 'SERVICE_PRINCIPAL_OSTCLAB', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
+            sh 'AZURE_CONFIG_DIR=$(pwd) test/static-template/acc-static-template-test.sh Windows no'
+          }
+        }
+      }
+    }
+  }
+}
