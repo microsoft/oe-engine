@@ -121,7 +121,7 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"GetSecurityRules": func(ports []int) string {
 			return getSecurityRules(ports)
 		},
-		"GetLinuxCustomData": func() string {
+		"GetCustomData": func() string {
 			str := getSingleLineCustomData(
 				customdata,
 				map[string]string{
@@ -130,17 +130,6 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 					"VALIDATION_STR": getProvisionScript(validationScript, nil),
 				})
 			return fmt.Sprintf("base64(concat('#cloud-config\\n\\n', '%s'))", str)
-		},
-		"GetWindowsCustomData": func() string {
-			b, err := Asset(windowsProvision)
-			if err != nil {
-				// this should never happen and this is a bug
-				panic(fmt.Sprintf("BUG: %s", err.Error()))
-			} else {
-                //fmt.Printf(" get windows custom data from asset %s\n", b);
-            }
-			csStr := string(b)
-            return getBase64CustomScriptFromStr(csStr)
 		},
 		"GetAllowedVMSizes": func() string {
 			return api.GetAllowedVMSizes()
