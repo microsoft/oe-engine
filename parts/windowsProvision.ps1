@@ -2,68 +2,6 @@
 mkdir c:/tmp
 cd c:/tmp
 
-function InstallOpenSSH()
-{
-    $sshPubKey = "SSH_PUB_KEY"
-    if (!$sshPubKey) {
-        Write-Output "SSH public key is omitted. Skipping OpenSSH installation."
-        return
-    }
-    Write-Output "Installing OpenSSH"
-
-    try {
-        $rslt = ( get-service | where { $_.name -like "sshd" } )
-        if ($rslt.count -eq 0) {
-            $list = (Get-WindowsCapability -Online | ? Name -like 'OpenSSH.Server*')
-            if ($list) {
-                Add-WindowsCapability -Online -Name $list.Name
-                Install-Module -Force OpenSSHUtils
-            } else {
-                $open_ssh_uri = "https://github.com/PowerShell/Win32-OpenSSH/releases/download/v7.7.2.0p1-Beta/OpenSSH-Win64.zip"
-                $open_ssh_file = "C:/tmp/OpenSSH-Win64.zip"
-                & curl.exe -L -o $open_ssh_file $open_ssh_uri
-                & 7z x $open_ssh_file -oC:/tmp
-                c:/tmp/OpenSSH-Win64/install-sshd.ps1
-            }
-        }
-        Start-Service sshd
-        & netsh advfirewall firewall add rule name="SSH TCP Port 22" dir=in action=allow protocol=TCP localport=22
-
-        Write-Output "Creating authorized key"
-        $path = "C:\AzureData\authorized_keys"
-        Set-Content -Path $path -Value $sshPubKey -Encoding Ascii
-
-        (Get-Content C:\ProgramData\ssh\sshd_config) -replace "AuthorizedKeysFile(\s+).ssh/authorized_keys", "AuthorizedKeysFile $path" | Set-Content C:\ProgramData\ssh\sshd_config
-        $acl = Get-Acl -Path $path
-        $acl.SetAccessRuleProtection($True, $True)
-        $acl | Set-Acl -Path $path
-
-        $acl = Get-Acl -Path $path
-        $rules = $acl.Access
-        $usersToRemove = @("Everyone","BUILTIN\Users","NT AUTHORITY\Authenticated Users")
-        foreach ($u in $usersToRemove) {
-            $targetrule = $rules | where IdentityReference -eq $u
-            if ($targetrule) {
-                $acl.RemoveAccessRule($targetrule)
-            }
-        }
-        $acl | Set-Acl -Path $path
-
-        Restart-Service sshd
-
-        $sshStartCmd = "C:\AzureData\OpenSSHStart.ps1"
-        Set-Content -Path $sshStartCmd -Value "Start-Service sshd"
-
-        & schtasks.exe /CREATE /F /SC ONSTART /RU SYSTEM /RL HIGHEST /TN "SSH start" /TR "powershell.exe -ExecutionPolicy Bypass -File $sshStartCmd"
-        if ($LASTEXITCODE -ne 0) {
-            throw "Failed to add scheduled task $sshStartCmd"
-        }
-    }
-    catch {
-       Write-Output "OpenSSH install failed: $_"
-    }
-}
-
 ##
 #  Install git not only for git but also mingw64 including curl
 #
@@ -85,9 +23,6 @@ $seven_zip_uri = "https://www.7-zip.org/a/7z1805-x64.msi"
 $seven_zip_file = "c:/tmp/7z1805-x64.msi"
 & curl.exe -o $seven_zip_file  $seven_zip_uri 
 Start-Process -Wait -FilePath $seven_zip_file -ArgumentList " /quiet /passive"
-
-#  Install OpenSSH
-InstallOpenSSH
 
 # Install the intel sgx drivers
 & curl.exe  -o "c:/tmp/sgx_base.cab" "http://download.windowsupdate.com/d/msdownload/update/driver/drvs/2018/01/af564f2c-2bc5-43be-a863-437a5a0008cb_61e7ba0c2e17c87caf4d5d3cdf1f35f6be462b38.cab"
@@ -152,3 +87,5 @@ $ocaml_uri  = "http://www.ocamlpro.com/pub/ocpwin/ocpwin-builds/ocpwin64/2016011
 & 7z x $ocaml_file -o"c:/Program Files/ocpwin64"
 pushd "C:\Program Files\ocpwin64\4.02.1+ocp1-msvc64-20160113\bin"
 & ./ocpwin -in
+
+

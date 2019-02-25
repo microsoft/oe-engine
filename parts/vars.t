@@ -70,20 +70,6 @@
           "sourceAddressPrefix": "*"
         },
         "name": "rdp"
-      },
-      {
-        "properties": {
-          "priority": 210,
-          "access": "Allow",
-          "direction": "Inbound",
-          "destinationPortRange": "22",
-          "sourcePortRange": "*",
-          "destinationAddressPrefix": "*",
-          "protocol": "Tcp",
-          "description": "Allow SSH",
-          "sourceAddressPrefix": "*"
-        },
-        "name": "ssh"
       }
     ],
     "securityRules": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsSecurityRules'), variables('linuxSecurityRules'))]",

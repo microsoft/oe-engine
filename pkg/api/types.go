@@ -51,7 +51,6 @@ type CustomNodesDNS struct {
 type WindowsProfile struct {
 	AdminUsername         string            `json:"adminUsername"`
 	AdminPassword         string            `json:"adminPassword"`
-	SSHPubKey             string            `json:"sshPublicKey"`
 	ImageVersion          string            `json:"imageVersion"`
 	WindowsImageSourceURL string            `json:"windowsImageSourceURL"`
 	WindowsPublisher      string            `json:"windowsPublisher"`
