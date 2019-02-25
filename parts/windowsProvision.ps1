@@ -12,9 +12,8 @@ $git_file = "c:/tmp/git-2.19.1-64-bit.exe"
 Invoke-WebRequest -Uri $git_uri -Outfile $git_file
 Start-Process -Wait -FilePath $git_file -ArgumentList "/silent /log:c:/tmp/git-install.log"
 
-[Environment]::SetEnvironmentVariable("PATH", "$env:PATH;c:/program files/git/mingw64/bin;c:/program files/git/bin;c:/program files/git;c:/program files/7-zip;c:\program files\cmake\bin;C:\Program Files\ocpwin64\4.02.1+ocp1-msvc64-20160113\bin", "Machine")
+[Environment]::SetEnvironmentVariable("PATH", "$env:PATH;c:/program files/git/mingw64/bin;c:/program files/git/bin;c:/program files/git;c:/program files/7-zip", "Machine")
 [Environment]::SetEnvironmentVariable("PATH", "$env:PATH;c:/program files/git/mingw64/bin;c:/program files/git/bin;c:/program files/git;c:/program files/7-zip", "Process")
-[Environment]::SetEnvironmentVariable("VS150COMNTOOLS", "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools", "Machine")
 
 ##
 #  Install 7zip for unpacking zip and tar files
@@ -85,7 +84,4 @@ $ocaml_install_dir = "c:/Program Files/ocpwin64"
 $ocaml_uri  = "http://www.ocamlpro.com/pub/ocpwin/ocpwin-builds/ocpwin64/20160113/ocpwin64-20160113-4.02.1+ocp1-msvc64.zip"
 & curl.exe -o $ocaml_file $ocaml_uri
 & 7z x $ocaml_file -o"c:/Program Files/ocpwin64"
-pushd "C:\Program Files\ocpwin64\4.02.1+ocp1-msvc64-20160113\bin"
-& ./ocpwin -in
-
 
