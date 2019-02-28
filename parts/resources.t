@@ -167,9 +167,9 @@
         }
       },
       "type": "Microsoft.Compute/virtualMachines"
-    },
+    }
+{{if .IsLinux}},
     {
-      "condition": "[equals(parameters('osImageName'), 'UbuntuServer_16.04')]",
       "apiVersion": "2018-06-01",
       "dependsOn": [
         "[parameters('vmName')]"
@@ -186,4 +186,4 @@
         }
       },
       "type": "Microsoft.Compute/virtualMachines/extensions"
-    }{{WriteLinkedTemplatesForExtensions}}
+    }{{end}}{{WriteLinkedTemplatesForExtensions}}
