@@ -21,14 +21,19 @@ function error_exit() {
 function setup_ubuntu() {
   version=`grep DISTRIB_RELEASE /etc/*-release| cut -f 2 -d "="`
 
+  # Add public packages:
+  PACKAGES="make gcc gdb g++ libssl-dev pkg-config dkms"
+
   case $version in
     "18.04")
       sgx_driver_url="${OE_PKG_BASE}/1804/sgx_linux_x64_driver_dcap_4f32b98.bin"
       sgx_pkgs="1804/libsgx-enclave-common_2.4.100.48163-bionic1_amd64.deb 1804/libsgx-enclave-common-dev_2.4.100.48163-bionic1_amd64.deb 1804/libsgx-dcap-ql_1.0.101.48192-bionic1_amd64.deb 1804/libsgx-dcap-ql-dev_1.0.101.48192-bionic1_amd64.deb"
+      PACKAGES="$PACKAGES curl libcurl4 libprotobuf10"
       ;;
     "16.04")
       sgx_driver_url="${OE_PKG_BASE}/1604/sgx_linux_x64_driver_dcap_4f32b98.bin"
       sgx_pkgs="1604/libsgx-enclave-common_2.4.100.48163-xenial1_amd64.deb 1604/libsgx-enclave-common-dev_2.4.100.48163-xenial1_amd64.deb 1604/libsgx-dcap-ql_1.0.101.48192-xenial1_amd64.deb 1604/libsgx-dcap-ql-dev_1.0.101.48192-xenial1_amd64.deb"
+      PACKAGES="$PACKAGES libcurl3 libprotobuf9v5"
       ;;
     "*")
       error_exit "Version $version is not supported"
@@ -57,9 +62,6 @@ function setup_ubuntu() {
   if [ $? -ne 0  ]; then
     error_exit "apt update failed"
   fi
-
-  # Add public packages:
-  PACKAGES="make gcc gdb g++ libssl-dev pkg-config dkms libcurl3 libprotobuf9v5"
 
   # Add clang-7 packages:
   PACKAGES="$PACKAGES clang-7 lldb-7 lld-7"
