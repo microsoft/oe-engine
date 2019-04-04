@@ -8,6 +8,8 @@ import (
 const (
 	// OsUbuntu1604 image
 	OsUbuntu1604 = "UbuntuServer_16.04"
+	// OsUbuntu1804 image
+	OsUbuntu1804 = "UbuntuServer_18.04"
 	// OsWindows2016 image
 	OsWindows2016 = "WindowsServer_2016"
 )
@@ -46,6 +48,13 @@ var OsImageMap = map[string]OSImage{
 		Publisher: "Canonical",
 		Offer:     "confidential-compute-preview",
 		SKU:       "16.04-LTS",
+		Version:   "latest",
+		IsWindows: false,
+	},
+	OsUbuntu1804: {
+		Publisher: "Canonical",
+		Offer:     "UbuntuServer",
+		SKU:       "18.04-LTS",
 		Version:   "latest",
 		IsWindows: false,
 	},

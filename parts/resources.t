@@ -169,7 +169,7 @@
       "type": "Microsoft.Compute/virtualMachines"
     },
     {
-      "condition": "[equals(parameters('osImageName'), 'UbuntuServer_16.04')]",
+      "condition": "[not(equals(parameters('osImageName'), 'WindowsServer_2016'))]",
       "apiVersion": "2018-06-01",
       "dependsOn": [
         "[parameters('vmName')]"
