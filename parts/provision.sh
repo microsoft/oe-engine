@@ -26,13 +26,15 @@ function setup_ubuntu() {
 
   case $version in
     "18.04")
-      sgx_driver_url="${OE_PKG_BASE}/1804/sgx_linux_x64_driver_dcap_4f32b98.bin"
-      sgx_pkgs="1804/libsgx-enclave-common_2.4.100.48163-bionic1_amd64.deb 1804/libsgx-enclave-common-dev_2.4.100.48163-bionic1_amd64.deb 1804/libsgx-dcap-ql_1.0.101.48192-bionic1_amd64.deb 1804/libsgx-dcap-ql-dev_1.0.101.48192-bionic1_amd64.deb"
+      OE_PKG_BASE=${OE_PKG_BASE}/v05x/1804
+      sgx_driver_url="${OE_PKG_BASE}/sgx_linux_x64_driver_dcap.bin"
+      sgx_pkgs="libsgx-enclave-common.deb libsgx-enclave-common-dev.deb libsgx-dcap-ql.deb libsgx-dcap-ql-dev.deb az-dcap-client.deb open-enclave.deb"
       PACKAGES="$PACKAGES curl libcurl4 libprotobuf10"
       ;;
     "16.04")
-      sgx_driver_url="${OE_PKG_BASE}/1604/sgx_linux_x64_driver_dcap_4f32b98.bin"
-      sgx_pkgs="1604/libsgx-enclave-common_2.4.100.48163-xenial1_amd64.deb 1604/libsgx-enclave-common-dev_2.4.100.48163-xenial1_amd64.deb 1604/libsgx-dcap-ql_1.0.101.48192-xenial1_amd64.deb 1604/libsgx-dcap-ql-dev_1.0.101.48192-xenial1_amd64.deb"
+      OE_PKG_BASE=${OE_PKG_BASE}/v05x/1604
+      sgx_driver_url="${OE_PKG_BASE}/sgx_linux_x64_driver_dcap.bin"
+      sgx_pkgs="libsgx-enclave-common.deb libsgx-enclave-common-dev.deb libsgx-dcap-ql.deb libsgx-dcap-ql-dev.deb az-dcap-client.deb open-enclave.deb"
       PACKAGES="$PACKAGES libcurl3 libprotobuf9v5"
       ;;
     "*")
@@ -44,7 +46,7 @@ function setup_ubuntu() {
   release=$(lsb_release -cs)
 
   # Configure apt to use clang-7
-  echo "deb http://apt.llvm.org/$release/ llvm-toolchain-$release-7 main" | tee /etc/apt/sources.list.d/llvm-toolchain-xenial-7.list
+  echo "deb http://apt.llvm.org/$release/ llvm-toolchain-$release-7 main" | tee /etc/apt/sources.list.d/llvm-toolchain-$release-7.list
   wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 
   # Configure apt to use packages.microsoft.com repo
@@ -93,25 +95,6 @@ function setup_ubuntu() {
   if [ $? -ne 0  ]; then
     error_exit "apt-get install failed"
   fi
-
-  case $version in
-    "18.04")
-      retrycmd_if_failure 10 10 120 curl -fsSL -O "https://oeenginetest.blob.core.windows.net/oe-engine/1804/open-enclave-0.4.1-Linux.deb"
-      if [ $? -ne 0  ]; then
-        error_exit "apt-get install failed"
-      fi
-      retrycmd_if_failure 10 10 120 dpkg -i open-enclave-0.4.1-Linux.deb
-      if [ $? -ne 0  ]; then
-        error_exit "dpkg install failed"
-      fi
-      ;;
-    "16.04")
-      retrycmd_if_failure 10 10 120 apt-get -y install open-enclave
-      if [ $? -ne 0  ]; then
-        error_exit "apt-get install failed"
-      fi
-      ;;
-  esac
 
   systemctl disable aesmd
   systemctl stop aesmd
