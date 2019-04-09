@@ -88,9 +88,6 @@ function setup_ubuntu() {
     error_exit "failed to install SGX driver"
   fi
 
-  # Add Microsoft packages (temporarily skip open-enclave until 18.04 is added)
-  PACKAGES="$PACKAGES az-dcap-client"
-
   retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
   if [ $? -ne 0  ]; then
     error_exit "apt-get install failed"
