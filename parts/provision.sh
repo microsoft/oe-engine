@@ -19,12 +19,17 @@ function error_exit() {
 function setup_ubuntu() {
   version=`grep DISTRIB_RELEASE /etc/*-release| cut -f 2 -d "="`
 
+  # Add public packages:
+  PACKAGES="make gcc gdb g++ libssl-dev pkg-config dkms"
+
   case $version in
     "18.04")
       sgx_driver_url="https://download.01.org/intel-sgx/dcap-1.0.1/dcap_installer/ubuntuServer1804/sgx_linux_x64_driver_dcap_4f32b98.bin"
+      PACKAGES="$PACKAGES curl libcurl4 libprotobuf10"
       ;;
     "16.04")
       sgx_driver_url="https://download.01.org/intel-sgx/dcap-1.0.1/dcap_installer/ubuntuServer1604/sgx_linux_x64_driver_dcap_4f32b98.bin"
+      PACKAGES="$PACKAGES libcurl3 libprotobuf9v5"
       ;;
     "*")
       error_exit "Version $version is not supported"
@@ -55,9 +60,6 @@ function setup_ubuntu() {
     error_exit "apt update failed"
   fi
 
-  # Add public packages:
-  PACKAGES="make gcc gdb g++ libssl-dev pkg-config dkms"
-
   # Add clang-7 packages:
   PACKAGES="$PACKAGES clang-7 lldb-7 lld-7"
 
@@ -81,32 +83,13 @@ function setup_ubuntu() {
   # Add Intel packages
   PACKAGES="libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev"
 
-  # Add Microsoft packages (temporarily skip open-enclave until 18.04 is added)
-  PACKAGES="$PACKAGES az-dcap-client"
+  # Add Microsoft packages
+  PACKAGES="$PACKAGES az-dcap-client open-enclave"
 
   retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
   if [ $? -ne 0  ]; then
     error_exit "apt-get install failed"
   fi
-
-  case $version in
-    "18.04")
-      retrycmd_if_failure 10 10 120 curl -fsSL -O "https://oeenginetest.blob.core.windows.net/oe-engine/1804/open-enclave-0.4.1-Linux.deb"
-      if [ $? -ne 0  ]; then
-        error_exit "apt-get install failed"
-      fi
-      retrycmd_if_failure 10 10 120 dpkg -i open-enclave-0.4.1-Linux.deb
-      if [ $? -ne 0  ]; then
-        error_exit "dpkg install failed"
-      fi
-      ;;
-    "16.04")
-      retrycmd_if_failure 10 10 120 apt-get -y install open-enclave
-      if [ $? -ne 0  ]; then
-        error_exit "apt-get install failed"
-      fi
-      ;;
-  esac
 
   systemctl disable aesmd
   systemctl stop aesmd
