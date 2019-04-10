@@ -88,11 +88,6 @@ function setup_ubuntu() {
     error_exit "failed to install SGX driver"
   fi
 
-  retrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES
-  if [ $? -ne 0  ]; then
-    error_exit "apt-get install failed"
-  fi
-
   systemctl disable aesmd
   systemctl stop aesmd
 }
