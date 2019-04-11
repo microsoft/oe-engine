@@ -173,6 +173,9 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 		"GetOsDiskTypes": func() string {
 			return api.GetOsDiskTypes()
 		},
+		"GetDataDisks": func(profile *api.VMProfile) string {
+			return getDataDisks(profile)
+		},
 		"Base64": func(s string) string {
 			return base64.StdEncoding.EncodeToString([]byte(s))
 		},

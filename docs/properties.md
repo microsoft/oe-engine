@@ -37,6 +37,12 @@ Specifies VM compute characteristics
 
 Refer to the [VM sizes in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes) for more details.
 
+### Data disks
+Specifies sizes of attached data disks.
+
+* Path: `properties/vmProfiles[]/diskSizesGB`
+* Values: comma-separated array of disk sizes in GB
+
 ### Open ports
 Specifies open ports in the Network Security Group (NSG)
 
