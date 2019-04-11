@@ -21,6 +21,7 @@
         "version": "[parameters('linuxImageVersion')]"
 {{end}}
       },
+      {{GetDataDisks .}}
       "osDisk": {
         "caching": "ReadWrite",
         "createOption": "FromImage",
@@ -49,6 +50,7 @@
         "version": "[parameters('windowsImageVersion')]"
 {{end}}
       },
+      {{GetDataDisks .}}
       "osDisk": {
         "caching": "ReadWrite",
         "createOption": "FromImage",

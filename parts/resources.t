@@ -30,6 +30,7 @@
       "location": "[parameters('location')]",
       "properties": {
         "storageProfile": {
+          {{GetDataDisks .}}
           "osDisk": {
             "osType": "Windows",
             "osState": "Generalized",
@@ -48,6 +49,7 @@
       "location": "[parameters('location')]",
       "properties": {
         "storageProfile": {
+          {{GetDataDisks .}}
           "osDisk": {
             "osType": "Linux",
             "osState": "Generalized",

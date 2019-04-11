@@ -134,6 +134,28 @@ func getSecurityRule(port int, portIndex int) string {
           }`, port, port, port, BaseLBPriority+portIndex)
 }
 
+func getDataDisks(a *api.VMProfile) string {
+	if !a.HasDisks() {
+		return ""
+	}
+	var buf bytes.Buffer
+	buf.WriteString("\"dataDisks\": [\n")
+	managedDataDisks := `            {
+		  "diskSizeGB": "%d",
+		  "lun": %d,
+		  "caching": "ReadOnly",
+		  "createOption": "Empty"
+		}`
+	for i, diskSize := range a.DiskSizesGB {
+		if i > 0 {
+			buf.WriteString(",\n")
+		}
+		buf.WriteString(fmt.Sprintf(managedDataDisks, diskSize, i))
+	}
+	buf.WriteString("\n          ],")
+	return buf.String()
+}
+
 func getSecurityRules(ports []int) string {
 	var buf bytes.Buffer
 	for index, port := range ports {

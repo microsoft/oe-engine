@@ -12,13 +12,14 @@ type OSType string
 
 // VMProfile represents the definition of a VM
 type VMProfile struct {
-	Name       string `json:"name"`
-	OSType     OSType `json:"osType"`
-	OSDiskType string `json:"osDiskType"`
-	VMSize     string `json:"vmSize"`
-	Ports      []int  `json:"ports,omitempty" validate:"dive,min=1,max=65535"`
-	IsVanilla  bool   `json:"isVanilla"`
-	HasDNSName bool   `json:"hasDNSName"`
+	Name        string `json:"name"`
+	OSType      OSType `json:"osType"`
+	OSDiskType  string `json:"osDiskType"`
+	DiskSizesGB []int  `json:"diskSizesGB,omitempty"`
+	VMSize      string `json:"vmSize"`
+	Ports       []int  `json:"ports,omitempty" validate:"dive,min=1,max=65535"`
+	IsVanilla   bool   `json:"isVanilla"`
+	HasDNSName  bool   `json:"hasDNSName"`
 }
 
 // Properties represents the ACS cluster definition
@@ -95,4 +96,9 @@ func (p *LinuxProfile) HasCustomImage() bool {
 // HasCustomImage returns true if there is a custom Windows OS image url specified
 func (p *WindowsProfile) HasCustomImage() bool {
 	return p.OSImage != nil && len(p.OSImage.URL) > 0
+}
+
+// HasDisks returns true if the customer specified disks
+func (a *VMProfile) HasDisks() bool {
+	return len(a.DiskSizesGB) > 0
 }
