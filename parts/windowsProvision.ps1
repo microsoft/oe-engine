@@ -1,11 +1,243 @@
 ﻿# Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-mkdir c:/bin
-mkdir c:/tmp
-cd c:/tmp
+$ErrorActionPreference = "Stop"
 
-function InstallOpenSSH()
+$IS_VANILLA = "IS_VANILLA_VM"
+$AZUREDATA_DIRECTORY = Join-Path ${env:SystemDrive} "AzureData"
+$AZUREDATA_BIN_DIRECTORY = Join-Path $AZUREDATA_DIRECTORY "bin"
+$PACKAGES_DIRECTORY = Join-Path $env:TEMP "packages"
+$PACKAGES_NAMES_VANILLA = @("7z", "git", "openssh")
+$PACKAGES = @{
+    "openssh" = @{
+        "url" = "https://github.com/PowerShell/Win32-OpenSSH/releases/download/v7.7.2.0p1-Beta/OpenSSH-Win64.zip"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "OpenSSH-Win64.zip"
+    }
+    "git" = @{
+        "url" = "https://github.com/git-for-windows/git/releases/download/v2.19.1.windows.1/Git-2.19.1-64-bit.exe"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "git-2.19.1-64-bit.exe"
+    }
+    "7z" = @{
+        "url" = "https://www.7-zip.org/a/7z1805-x64.msi"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "7z1805-x64.msi"
+    }
+    "vs_buildtools" = @{
+        "url" = "https://aka.ms/vs/15/release/vs_buildtools.exe"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "vs_buildtools.exe"
+    }
+    "cmake" = @{
+        "url" = "https://cmake.org/files/v3.13/cmake-3.13.0-rc1-win64-x64.msi"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "cmake-3.13.0-rc1-win64-x64.msi"
+    }
+    "ocaml" = @{
+        "url" = "http://www.ocamlpro.com/pub/ocpwin/ocpwin-builds/ocpwin64/20160113/ocpwin64-20160113-4.02.1+ocp1-msvc64.zip"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "ocpwin64.zip"
+    }
+    "sgx_drivers" = @{
+        "url" = "http://download.windowsupdate.com/d/msdownload/update/driver/drvs/2018/01/af564f2c-2bc5-43be-a863-437a5a0008cb_61e7ba0c2e17c87caf4d5d3cdf1f35f6be462b38.cab"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "sgx_base.cab"
+    }
+    "psw" = @{
+        "url" = "http://registrationcenter-download.intel.com/akdlm/irc_nas/13688/Intel SGX PSW for Windows v2.1.100.46245.exe"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "Intel SGX PSW for Windows v2.1.100.46245.exe"
+    }
+    "nuget" = @{
+        "url" = "https://dist.nuget.org/win-x86-commandline/v4.1.0/nuget.exe"
+        "local_file" = Join-Path ${PACKAGES_DIRECTORY} "nuget.exe"
+    }
+}
+
+
+filter Timestamp { "[$(Get-Date -Format o)] $_" }
+
+
+function Write-Log {
+    Param(
+        [string]$Message
+    )
+    $msg = $Message | Timestamp
+    Write-Output $msg
+}
+
+
+function New-Directory {
+    Param(
+        [Parameter(Mandatory=$true)]
+        [string]$Path,
+        [Parameter(Mandatory=$false)]
+        [switch]$RemoveExisting
+    )
+    if(Test-Path $Path) {
+        if($RemoveExisting) {
+            # Remove if it already exist
+            Remove-Item -Recurse -Force $Path
+        } else {
+            return
+        }
+    }
+    return (New-Item -ItemType Directory -Path $Path)
+}
+
+
+function Start-LocalPackagesDownload {
+    Write-Output "Downloading all the packages to local directory: $PACKAGES_DIRECTORY"
+    New-Directory ${PACKAGES_DIRECTORY}
+    foreach($pkg in $PACKAGES.Keys) {
+        if(!($pkg -in $PACKAGES_NAMES_VANILLA) -and ($IS_VANILLA -eq "true")) {
+            Write-Output "Skipping $PACKAGES[$pkg]["local_file"] on Vanilla VM"
+            continue
+        }
+        Write-Output "Downloading: $($PACKAGES[$pkg]["url"])"
+        Start-FileDownload -URL $PACKAGES[$pkg]["url"] `
+                           -Destination $PACKAGES[$pkg]["local_file"]
+    }
+    Write-Output "Finished downloading all the packages"
+}
+
+
+function Start-ExecuteWithRetry {
+    Param(
+        [Parameter(Mandatory=$true)]
+        [ScriptBlock]$ScriptBlock,
+        [int]$MaxRetryCount=10,
+        [int]$RetryInterval=3,
+        [string]$RetryMessage,
+        [array]$ArgumentList=@()
+    )
+    $currentErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    $retryCount = 0
+    while ($true) {
+        Write-Log "Start-ExecuteWithRetry attempt $retryCount"
+        try {
+            $res = Invoke-Command -ScriptBlock $ScriptBlock `
+                                  -ArgumentList $ArgumentList
+            $ErrorActionPreference = $currentErrorActionPreference
+            Write-Log "Start-ExecuteWithRetry terminated"
+            return $res
+        } catch [System.Exception] {
+            $retryCount++
+            if ($retryCount -gt $MaxRetryCount) {
+                $ErrorActionPreference = $currentErrorActionPreference
+                Write-Log "Start-ExecuteWithRetry exception thrown"
+                throw
+            } else {
+                if($RetryMessage) {
+                    Write-Log "Start-ExecuteWithRetry RetryMessage: $RetryMessage"
+                } elseif($_) {
+                    Write-Log "Start-ExecuteWithRetry Retry: $_.ToString()"
+                }
+                Start-Sleep $RetryInterval
+            }
+        }
+    }
+}
+
+
+function Start-FileDownload {
+    Param(
+        [Parameter(Mandatory=$true)]
+        [string]$URL,
+        [Parameter(Mandatory=$true)]
+        [string]$Destination,
+        [Parameter(Mandatory=$false)]
+        [int]$RetryCount=10
+    )
+    Start-ExecuteWithRetry -ScriptBlock {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        $wc = New-Object System.Net.WebClient
+        $wc.DownloadFile($URL,$Destination)
+    } -MaxRetryCount $RetryCount -RetryInterval 3 -RetryMessage "Failed to download ${URL}. Retrying"
+}
+
+
+function Add-ToSystemPath {
+    Param(
+        [Parameter(Mandatory=$false)]
+        [string[]]$Path
+    )
+    if(!$Path) {
+        return
+    }
+    $systemPath = [System.Environment]::GetEnvironmentVariable('Path', 'Machine').Split(';')
+    $currentPath = $env:PATH.Split(';')
+    foreach($p in $Path) {
+        if($p -notin $systemPath) {
+            $systemPath += $p
+        }
+        if($p -notin $currentPath) {
+            $currentPath += $p
+        }
+    }
+    $env:PATH = $currentPath -join ';'
+    setx.exe /M PATH ($systemPath -join ';')
+    if($LASTEXITCODE) {
+        Throw "Failed to set the new system path"
+    }
+}
+
+function Install-Tool {
+    Param(
+        [Parameter(Mandatory=$true)]
+        [string]$InstallerPath,
+        [Parameter(Mandatory=$false)]
+        [string]$InstallDirectory,
+        [Parameter(Mandatory=$false)]
+        [string[]]$ArgumentList,
+        [Parameter(Mandatory=$false)]
+        [string[]]$EnvironmentPath
+    )
+    if($InstallDirectory -and (Test-Path $InstallDirectory)) {
+        Write-Output "$InstallerPath is already installed."
+        Add-ToSystemPath -Path $EnvironmentPath
+        return
+    }
+    $parameters = @{
+        'FilePath' = $InstallerPath
+        'Wait' = $true
+        'PassThru' = $true
+    }
+    if($ArgumentList) {
+        $parameters['ArgumentList'] = $ArgumentList
+    }
+    if($InstallerPath.EndsWith('.msi')) {
+        $parameters['FilePath'] = 'msiexec.exe'
+        $parameters['ArgumentList'] = @("/i", $InstallerPath) + $ArgumentList
+    }
+    Write-Output "Installing $InstallerPath"
+    $p = Start-Process @parameters
+    if($p.ExitCode -ne 0) {
+        Throw "Failed to install: $InstallerPath"
+    }
+    Add-ToSystemPath -Path $EnvironmentPath
+    Write-Output "Successfully installed: $InstallerPath"
+}
+
+
+function Install-ZipTool {
+    Param(
+        [Parameter(Mandatory=$true)]
+        [string]$ZipPath,
+        [Parameter(Mandatory=$true)]
+        [string]$InstallDirectory,
+        [Parameter(Mandatory=$false)]
+        [string[]]$EnvironmentPath
+    )
+    if(Test-Path $InstallDirectory) {
+        Write-Output "$ZipPath is already installed."
+        Add-ToSystemPath -Path $EnvironmentPath
+        return
+    }
+    New-Item -ItemType "Directory" -Path $InstallDirectory
+    7z.exe x $ZipPath -o"$InstallDirectory" -y
+    if($LASTEXITCODE) {
+        Throw "ERROR: Failed to extract $ZipPath to $InstallDirectory"
+    }
+    Add-ToSystemPath $EnvironmentPath
+}
+
+
+function Install-OpenSSH()
 {
     $sshPubKey = "SSH_PUB_KEY"
     if (!$sshPubKey) {
@@ -20,28 +252,36 @@ function InstallOpenSSH()
             $list = (Get-WindowsCapability -Online | ? Name -like 'OpenSSH.Server*')
             if ($list) {
                 Add-WindowsCapability -Online -Name $list.Name
+                Install-PackageProvider -Name "NuGet" -Force
                 Install-Module -Force OpenSSHUtils
             } else {
-                $open_ssh_uri = "https://github.com/PowerShell/Win32-OpenSSH/releases/download/v7.7.2.0p1-Beta/OpenSSH-Win64.zip"
-                $open_ssh_file = "C:/tmp/OpenSSH-Win64.zip"
-                & curl.exe -L -o $open_ssh_file $open_ssh_uri
-                & 7z x $open_ssh_file -oC:/tmp
-                c:/tmp/OpenSSH-Win64/install-sshd.ps1
+                $installDir = Join-Path $PACKAGES_DIRECTORY "OpenSSH"
+                Install-ZipTool -ZipPath $PACKAGES["openssh"]["local_file"] `
+                                -InstallDirectory $installDir
+                & "$installDir/OpenSSH-Win64/install-sshd.ps1"
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Failed to install OpenSSH"
+                }
             }
         }
+
         Start-Service sshd
-        & netsh advfirewall firewall add rule name="SSH TCP Port 22" dir=in action=allow protocol=TCP localport=22
+        New-NetFirewallRule -Name "ssh-tcp-rule" -DisplayName "SSH TCP Port 22" `
+                            -LocalPort 22 -Action Allow -Enabled True `
+                            -Direction Inbound -Protocol TCP -Profile Any
 
         Write-Output "Creating authorized key"
-        $path = "C:\AzureData\authorized_keys"
-        Set-Content -Path $path -Value $sshPubKey -Encoding Ascii
+        $publicKeysFile = Join-Path $AZUREDATA_DIRECTORY "authorized_keys"
+        Set-Content -Path $publicKeysFile -Value $sshPubKey -Encoding Ascii
 
-        (Get-Content C:\ProgramData\ssh\sshd_config) -replace "AuthorizedKeysFile(\s+).ssh/authorized_keys", "AuthorizedKeysFile $path" | Set-Content C:\ProgramData\ssh\sshd_config
-        $acl = Get-Acl -Path $path
+        $sshdConfigFile = Join-Path $env:ProgramData "ssh\sshd_config"
+        $newSshdConfig = (Get-Content $sshdConfigFile) -replace "AuthorizedKeysFile(\s+).*$", "AuthorizedKeysFile $publicKeysFile"
+        Set-Content -Path $sshdConfigFile -Value $newSshdConfig -Encoding ascii
+        $acl = Get-Acl -Path $publicKeysFile
         $acl.SetAccessRuleProtection($True, $True)
-        $acl | Set-Acl -Path $path
+        $acl | Set-Acl -Path $publicKeysFile
 
-        $acl = Get-Acl -Path $path
+        $acl = Get-Acl -Path $publicKeysFile
         $rules = $acl.Access
         $usersToRemove = @("Everyone","BUILTIN\Users","NT AUTHORITY\Authenticated Users")
         foreach ($u in $usersToRemove) {
@@ -50,115 +290,134 @@ function InstallOpenSSH()
                 $acl.RemoveAccessRule($targetrule)
             }
         }
-        $acl | Set-Acl -Path $path
+        $acl | Set-Acl -Path $publicKeysFile
 
         Restart-Service sshd
-
-        $sshStartCmd = "C:\AzureData\OpenSSHStart.ps1"
-        Set-Content -Path $sshStartCmd -Value "Start-Service sshd"
-
-        & schtasks.exe /CREATE /F /SC ONSTART /RU SYSTEM /RL HIGHEST /TN "SSH start" /TR "powershell.exe -ExecutionPolicy Bypass -File $sshStartCmd"
-        if ($LASTEXITCODE -ne 0) {
-            throw "Failed to add scheduled task $sshStartCmd"
-        }
+        Set-Service -Name "sshd" -StartupType Automatic
     }
     catch {
        Write-Output "OpenSSH install failed: $_"
     }
 }
 
-##
-#  Install git not only for git but also mingw64 including curl
-#
 
-$git_uri = "https://github.com/git-for-windows/git/releases/download/v2.19.1.windows.1/Git-2.19.1-64-bit.exe"
-$git_file = "c:/tmp/git-2.19.1-64-bit.exe"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Invoke-WebRequest -Uri $git_uri -Outfile $git_file
-Start-Process -Wait -FilePath $git_file -ArgumentList "/silent /log:c:/tmp/git-install.log"
+function Install-Git {
+    $installDir = Join-Path $env:ProgramFiles "Git"
+    Install-Tool -InstallerPath $PACKAGES["git"]["local_file"] `
+                 -InstallDirectory $installDir `
+                 -ArgumentList @("/SILENT") `
+                 -EnvironmentPath @("$installDir\cmd", "$installDir\bin", "installDir\mingw64\bin")
 
-[Environment]::SetEnvironmentVariable("PATH", "$env:PATH;c:/program files/git/mingw64/bin;c:/program files/git/bin;c:/program files/git;c:/program files/7-zip;c:\program files\cmake\bin;C:\Program Files\ocpwin64\4.02.1+ocp1-msvc64-20160113\bin", "Machine")
-[Environment]::SetEnvironmentVariable("PATH", "$env:PATH;c:/program files/git/mingw64/bin;c:/program files/git/bin;c:/program files/git;c:/program files/7-zip", "Process")
-[Environment]::SetEnvironmentVariable("VS150COMNTOOLS", "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools", "Machine")
-
-##
-#  Install 7zip for unpacking zip and tar files
-#
-$seven_zip_uri = "https://www.7-zip.org/a/7z1805-x64.msi"
-$seven_zip_file = "c:/tmp/7z1805-x64.msi"
-& curl.exe -o $seven_zip_file  $seven_zip_uri 
-Start-Process -Wait -FilePath $seven_zip_file -ArgumentList " /quiet /passive"
-
-#  Install OpenSSH
-InstallOpenSSH
-
-$is_vanilla = "IS_VANILLA_VM"
-if ($is_vanilla -eq "true") {
-    Write-Output "Skipping Open Enclave installation."
-    exit 0
 }
-Write-Output "Installing Open Enclave"
 
-# Install the intel sgx drivers
-& curl.exe  -o "c:/tmp/sgx_base.cab" "http://download.windowsupdate.com/d/msdownload/update/driver/drvs/2018/01/af564f2c-2bc5-43be-a863-437a5a0008cb_61e7ba0c2e17c87caf4d5d3cdf1f35f6be462b38.cab"
-& 7z x c:/tmp/sgx_base.cab -o"c:/tmp/sgx_base" -y
-&pnputil /add-driver c:/tmp/sgx_base/sgx_base.inf
 
-$psw_uri = "http://registrationcenter-download.intel.com/akdlm/irc_nas/13688/Intel%20SGX%20PSW%20for%20Windows%20v2.1.100.46245.exe"
-$psw_file = "c:/tmp/Intel%20SGX%20PSW%20for%20Windows%20v2.1.100.46245.exe"
+function Install-7Zip {
+    $installDir = Join-Path $env:ProgramFiles "7-Zip"
+    Install-Tool -InstallerPath $PACKAGES["7z"]["local_file"] `
+                 -InstallDirectory $installDir `
+                 -ArgumentList @("/quiet", "/passive") `
+                 -EnvironmentPath @($installDir)
+}
 
-& curl.exe -o $psw_file $psw_uri
 
-& 7z x $psw_file -y
-$psw_installer = " C:\tmp\Intel SGX PSW for Windows v2.1.100.46245\PSW\Intel(R)_SGX_Windows_x64_PSW_2.1.100.46245.exe"
-Start-Process -Wait -FilePath $psw_installer -ArgumentList "--extract-folder c:/tmp/intel_psw_install --x"
-Start-Process -Wait -FilePath "c:/tmp/intel_psw_install/setup" -ArgumentList "install --eula=accept --output=c:/tmp/intel_install.log --components=all"
+function Install-SGX {
+    $installDir = Join-Path $PACKAGES_DIRECTORY "sgx_base"
+    Install-ZipTool -ZipPath $PACKAGES["sgx_drivers"]["local_file"] `
+                    -InstallDirectory $installDir
+    pnputil /add-driver "$installDir\sgx_base.inf"
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to install SGX Drivers"
+    }
+}
 
-sleep 5
+
+function Install-PSW {
+    $installDir = Join-Path $PACKAGES_DIRECTORY "intel_psw_install"
+    Install-ZipTool -ZipPath $PACKAGES["psw"]["local_file"] `
+                    -InstallDirectory $installDir
+
+    $psw_installer = Join-Path $installDir "Intel SGX PSW for Windows v2.1.100.46245\PSW\Intel(R)_SGX_Windows_x64_PSW_2.1.100.46245.exe"
+    Start-Process -Wait -FilePath ${psw_installer} -ArgumentList "--extract-folder $installDir --x"
+    Start-Process -Wait -FilePath "$installDir\setup.exe" -ArgumentList "install --eula=accept --output=$installDir\intel_install.log --components=all"
+}
+
+
+function Install-VisualStudio {
+    $installerArguments = @(
+        "-q", "--wait", "--norestart", "--nocache",
+        "--add Microsoft.VisualStudio.Workload.MSBuildTools",
+        "--add Microsoft.VisualStudio.Workload.VCTools",
+        "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+        "--add Microsoft.VisualStudio.Component.VC.140",
+        "--add Microsoft.VisualStudio.Component.Windows10SDK.16299.Desktop",
+        "--add Microsoft.VisualStudio.Component.Windows81SDK",
+        "--add Microsoft.VisualStudio.Component.VC.ATL"
+    )
+    # VisualStudio install sometimes is throwing errors on first try.
+    Start-ExecuteWithRetry -ScriptBlock {
+       Install-Tool -InstallerPath $PACKAGES["vs_buildtools"]["local_file"] `
+                    -ArgumentList $installerArguments
+    } -RetryMessage "Failed to install Visual Studio. Retrying"
+
+    [Environment]::SetEnvironmentVariable("VS150COMNTOOLS", "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\BuildTools\Common7\Tools", "Machine")
+}
+
+function Install-Cmake {
+    $installDir = Join-Path $env:ProgramFiles "CMake"
+
+    Install-Tool -InstallerPath $PACKAGES["cmake"]["local_file"] `
+                 -InstallDirectory $installDir `
+                 -ArgumentList @("/quiet", "/passive") `
+                 -EnvironmentPath @("$installDir\bin")
+
+}
+
+function Install-Ocaml {
+    $installDir = Join-Path $env:ProgramFiles "ocpwin64"
+    $tmpDir = Join-Path $PACKAGES_DIRECTORY "ocpwin64"
+    Install-ZipTool -ZipPath $PACKAGES["ocaml"]["local_file"] `
+                    -InstallDirectory $tmpDir `
+                    -EnvironmentPath @("$installDir\bin")
+    New-Directory -Path $installDir -RemoveExisting
+    Move-Item -Path "$tmpDir\*\*" -Destination $installDir
+    Push-Location $installDir
+    ocpwin -in
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to install ocaml"
+    }
+    Pop-Location
+}
+
 
 try {
-   Start-Service "AESMService"
+    New-Directory -Path ${AZUREDATA_DIRECTORY}
+    New-Directory -Path ${AZUREDATA_BIN_DIRECTORY}
+
+    Start-LocalPackagesDownload
+    Install-Git
+    Install-7Zip
+    Install-OpenSSH
+
+    if ($IS_VANILLA -eq "true") {
+        Write-Output "Skipping Open Enclave installation."
+        exit 0
+    }
+    Write-Output "Installing Open Enclave"
+    Install-SGX
+    Install-PSW
+
+    Start-ExecuteWithRetry -ScriptBlock {
+        Start-Service "AESMService" -ErrorAction Stop
+    } -RetryMessage "Failed to start AESMService. Retrying"
+
+    Copy-Item -Path $PACKAGES["nuget"]["local_file"] -Destination "${AZUREDATA_BIN_DIRECTORY}\nuget.exe"
+
+    Install-VisualStudio
+    Install-Cmake
+    Install-Ocaml
+}catch {
+    Write-Output $_.ToString()
+    Write-Output $_.ScriptStackTrace
+    exit 1
 }
-catch {
-    Write-Output "Could not start service: $_"
-}
-
-# Download useful tools to C:\Bin.
-Write-Output "get nuget"
-& curl.exe https://dist.nuget.org/win-x86-commandline/v4.1.0/nuget.exe -o C:\bin\nuget.exe
-
-# Download the Build Tools bootstrapper outside of the PATH.
-Write-Output "get visual stdio"
-& curl.exe -L -o "C:\TMP\vs_buildtools.exe"  "https://aka.ms/vs/15/release/vs_buildtools.exe" 
-
-Write-Output "install visual stdio"
-$argslist = " -q --wait --norestart --nocache "
-$argslist += "    --add Microsoft.VisualStudio.Workload.MSBuildTools "
-$argslist += "    --add Microsoft.VisualStudio.Workload.VCTools "
-$argslist += "    --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 "
-$argslist += "    --add Microsoft.VisualStudio.Component.VC.140 "
-$argslist += "    --add Microsoft.VisualStudio.Component.Windows10SDK.16299.Desktop "
-$argslist += "    --add Microsoft.VisualStudio.Component.Windows81SDK "
-$argslist += "    --add Microsoft.VisualStudio.Component.VC.ATL "
-
-Start-Process -Wait -FilePath "C:\TMP\vs_buildtools.exe" -ArgumentList $argslist
-
-$env:PATH += ";c:/program files/7-zip"
-
-Write-Output "get cmake"
-$cmake_uri = "https://cmake.org/files/v3.13/cmake-3.13.0-rc1-win64-x64.msi"
-$cmake_file = "c:/tmp/cmake-3.13.0-rc1-win64-x64.msi"
-& curl.exe -L -o $cmake_file $cmake_uri
-Start-Process -Wait -FilePath $cmake_file -ArgumentList " /quiet /passive"
-
-#
-# ocaml for building oeedgr8r
-#
-Write-Output "get ocaml"
-$ocaml_file = "c:/tmp/ocpwin64.zip"
-$ocaml_install_dir = "c:/Program Files/ocpwin64"
-$ocaml_uri  = "http://www.ocamlpro.com/pub/ocpwin/ocpwin-builds/ocpwin64/20160113/ocpwin64-20160113-4.02.1+ocp1-msvc64.zip"
-& curl.exe -o $ocaml_file $ocaml_uri
-& 7z x $ocaml_file -o"c:/Program Files/ocpwin64"
-pushd "C:\Program Files\ocpwin64\4.02.1+ocp1-msvc64-20160113\bin"
-& ./ocpwin -in
+exit 0
