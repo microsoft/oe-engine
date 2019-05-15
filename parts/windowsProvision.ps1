@@ -306,7 +306,7 @@ function Install-Git {
     Install-Tool -InstallerPath $PACKAGES["git"]["local_file"] `
                  -InstallDirectory $installDir `
                  -ArgumentList @("/SILENT") `
-                 -EnvironmentPath @("$installDir\cmd", "$installDir\bin", "installDir\mingw64\bin")
+                 -EnvironmentPath @("$installDir\cmd", "$installDir\bin", "$installDir\mingw64\bin")
 
 }
 
