@@ -40,7 +40,9 @@ find . -maxdepth 1 -type d -not -path "*remote_attestation" -not -path "." -exec
 # build and run remote_attestation sample. Ignore run-time errors
 cd remote_attestation
 msg=""
+set +e
 make
 make run || msg="WITH ERRORS"
+set -e
 
 echo "open-enclave validation completed $msg"
