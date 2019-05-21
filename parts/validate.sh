@@ -18,6 +18,7 @@ set -o errexit
 
 # set logfile
 readonly LOG_FILE="/opt/azure/acc/validation.log"
+set -x
 touch $LOG_FILE
 exec 1>$LOG_FILE
 exec 2>&1
@@ -36,11 +37,5 @@ fi
 cd $tempdir/samples
 
 find . -maxdepth 1 -type d -not -path "*remote_attestation" -not -path "." -exec sh -c "echo Running {}; cd {} && make && make run" \;
-
-# build and run remote_attestation sample. Ignore run-time errors
-cd remote_attestation
-msg=""
-make
-make run || msg="WITH ERRORS"
 
 echo "open-enclave validation completed $msg"
