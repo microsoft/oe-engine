@@ -35,6 +35,7 @@ else
 fi
 cd $tempdir/samples
 
+export OE_LOG_LEVEL=INFO
 find . -maxdepth 1 -type d -not -path "*remote_attestation" -not -path "." -exec sh -c "echo Running {}; cd {} && make && make run" \;
 
 # build and run remote_attestation sample. Ignore run-time errors
