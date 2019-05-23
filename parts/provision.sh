@@ -12,6 +12,12 @@ cd /opt/azure/acc/
 
 OE_PKG_BASE="PACKAGE_BASE_URL"
 
+readonly LOG_FILE="/opt/azure/acc/deployment.log"
+set -x
+touch $LOG_FILE
+exec 1>$LOG_FILE
+exec 2>&1
+
 function error_exit() {
   echo $1
   echo "failed" > /opt/azure/acc/completed
