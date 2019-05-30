@@ -38,8 +38,8 @@ $PACKAGES = @{
         "local_file" = Join-Path $PACKAGES_DIRECTORY "sgx_base.cab"
     }
     "psw" = @{
-        "url" = "http://registrationcenter-download.intel.com/akdlm/irc_nas/13688/Intel SGX PSW for Windows v2.1.100.46245.exe"
-        "local_file" = Join-Path $PACKAGES_DIRECTORY "Intel SGX PSW for Windows v2.1.100.46245.exe"
+        "url" = "https://oejenkins.blob.core.windows.net/oejenkins/Intel_SGX_PSW_for_Windows_v2.3.100.49777.exe"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "Intel_SGX_PSW_for_Windows_v2.3.100.49777.exe"
     }
     "nuget" = @{
         "url" = "https://dist.nuget.org/win-x86-commandline/v4.1.0/nuget.exe"
@@ -336,9 +336,17 @@ function Install-PSW {
     Install-ZipTool -ZipPath $PACKAGES["psw"]["local_file"] `
                     -InstallDirectory $installDir
 
-    $psw_installer = Join-Path $installDir "Intel SGX PSW for Windows v2.1.100.46245\PSW\Intel(R)_SGX_Windows_x64_PSW_2.1.100.46245.exe"
-    Start-Process -Wait -FilePath ${psw_installer} -ArgumentList "--extract-folder $installDir --x"
-    Start-Process -Wait -FilePath "$installDir\setup.exe" -ArgumentList "install --eula=accept --output=$installDir\intel_install.log --components=all"
+    $pswInstaller = Join-Path $installDir "Intel SGX PSW for Windows v2.3.100.49777\PSW_EXE_RS2_and_before\Intel(R)_SGX_Windows_x64_PSW_2.3.100.49777.exe"
+    $p = Start-Process -Wait -NoNewWindow -PassThru -FilePath $pswInstaller `
+                       -ArgumentList @("--extract-folder", "$installDir", "--x")
+    if($p.ExitCode -ne 0) {
+        Throw "Failed to extract the Intel SGX PSW bundle: $pswInstaller"
+    }
+    $p = Start-Process -Wait -NoNewWindow -PassThru -FilePath "$installDir\install.exe" `
+                       -ArgumentList @("install", "--eula=accept", "--output=$installDir\intel_install.log", "--components=all")
+    if($p.ExitCode -ne 0) {
+        Throw "Failed to install the Intel SGX PSW software"
+    }
 }
 
 
