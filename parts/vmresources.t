@@ -106,7 +106,7 @@
         "typeHandlerVersion": "1.4",
         "autoUpgradeMinorVersion": true,
         "settings": {
-          "commandToExecute": "/bin/bash -c \"secs=600; SECONDS=0; while (( SECONDS < secs )); do if [ -e /opt/azure/acc/completed ]; then if [ $(cat /opt/azure/acc/completed) == ok ]; then /opt/azure/acc/validate.sh; exit $? ; else echo provision failed; exit 1; fi; fi; sleep 20; done; echo validation timeout; exit 1; \""
+          "commandToExecute": "/bin/bash -c \"secs=600; SECONDS=0; while (( SECONDS < secs )); do if [ -e /opt/azure/acc/completed ]; then if [ $(cat /opt/azure/acc/completed) == ok ]; then /opt/azure/acc/validate.sh; exit $? ; else echo provision failed; cat /opt/azure/acc/deployment.log; exit 1; fi; fi; sleep 20; done; echo validation timeout; exit 1; \""
         }
       },
       "type": "Microsoft.Compute/virtualMachines/extensions"

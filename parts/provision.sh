@@ -10,6 +10,12 @@ source /opt/azure/acc/utils.sh
 
 cd /opt/azure/acc/
 
+readonly LOG_FILE="/opt/azure/acc/deployment.log"
+set -x
+touch $LOG_FILE
+exec 1>$LOG_FILE
+exec 2>&1
+
 function error_exit() {
   echo $1
   echo "failed" > /opt/azure/acc/completed
