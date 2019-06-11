@@ -255,7 +255,7 @@ function Install-OpenSSH()
                 Install-PackageProvider -Name "NuGet" -Force
                 Install-Module -Force OpenSSHUtils
             } else {
-                $installDir = Join-Path $PACKAGES_DIRECTORY "OpenSSH"
+                $installDir = Join-Path $env:ProgramFiles "OpenSSH"
                 Install-ZipTool -ZipPath $PACKAGES["openssh"]["local_file"] `
                                 -InstallDirectory $installDir
                 & "$installDir/OpenSSH-Win64/install-sshd.ps1"
