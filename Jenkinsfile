@@ -1,65 +1,48 @@
 #!/usr/bin/env groovy
-
-pipeline {
-  agent {
-    docker {
-      image 'ubuntu18.04-dev'
-      label 'nonSGX'
-      args  '-e GOPATH=$WORKSPACE/gopath -e GOROOT=/usr/local/go -e PATH=$PATH:/usr/local/go/bin:$WORKSPACE/gopath/bin -e GOCACHE=$WORKSPACE/gopath/.cache'
-    }
-  }
-  environment {
-    SUBSCRIPTION_ID = credentials('OSCTLabSubID')
-    TENANT_ID = credentials('TenantID')
-  }
-  stages {
-    stage('Checkout') {
-      steps {
-        dir('gopath/src/github.com/Microsoft/oe-engine') {
-          checkout scm
+node("nonSGX") {
+    try {
+        cleanWs()
+        withCredentials([usernamePassword(credentialsId: 'SERVICE_PRINCIPAL_OSTCLAB',
+                                          passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD',
+                                          usernameVariable: 'SERVICE_PRINCIPAL_ID'),
+                         string(credentialsId: 'OSCTLabSubID', variable: 'SUBSCRIPTION_ID'),
+                         string(credentialsId: 'TenantID', variable: 'TENANT_ID')]) {
+            withEnv(["AZURE_CONFIG_DIR=${WORKSPACE}/gopath/src/github.com/Microsoft/oe-engine)",
+                     "GOPATH=${WORKSPACE}/gopath",
+                     "GOROOT=/usr/local/go",
+                     "GOCACHE=${WORKSPACE}/gopath/.cache"]) {
+                docker.withRegistry("https://oejenkinscidockerregistry.azurecr.io", "oejenkinscidockerregistry") {
+                    def image = docker.image("oe-engine:latest")
+                    image.pull()
+                    image.inside('-e PATH=$PATH:/usr/local/go/bin:$WORKSPACE/gopath/bin') {
+                        dir('gopath/src/github.com/Microsoft/oe-engine')  {
+                            stage('Checkout') {
+                                checkout scm
+                            }
+                            stage('Unit test') {
+                                sh "echo \$PATH"
+                            }
+                            stage('Build') {
+                                sh 'make build'
+                            }
+                            stage('Ubuntu 16.04') {
+                                sh 'test/acc-pr-test.sh oe-ub1604.json'
+                            }
+                            stage('Ubuntu 18.04') {
+                                sh 'test/acc-pr-test.sh oe-ub1804.json'
+                            }
+                            stage('Windows') {
+                                sh 'test/acc-pr-test.sh oe-win.json'
+                            }
+                        }
+                    }
+                }
+            }
         }
-      }
+    } catch (err) {
+        echo err.getMessage
+        currentBuild.result = 'FAILURE'
+    } finally {
+        archiveArtifacts artifacts: 'gopath/src/github.com/Microsoft/oe-engine/test/agent_logs/**/*.log', fingerprint: true, allowEmptyArchive: true
     }
-	stage('Unit-test') {
-	  steps {
-        dir('gopath/src/github.com/Microsoft/oe-engine') {
-	      sh 'echo make test'
-        }
-      }
-    }
-    stage('Build') {
-      steps {
-        dir('gopath/src/github.com/Microsoft/oe-engine') {
-          sh 'make build'
-        }
-      }
-    }
-    stage('Ubuntu 16.04') {
-      steps {
-        dir('gopath/src/github.com/Microsoft/oe-engine') {
-          withCredentials([usernamePassword(credentialsId: 'SERVICE_PRINCIPAL_OSTCLAB', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
-            sh 'AZURE_CONFIG_DIR=$(pwd) test/acc-pr-test.sh oe-ub1604.json'
-          }
-        }
-      }
-    }
-    stage('Ubuntu 18.04') {
-      steps {
-        dir('gopath/src/github.com/Microsoft/oe-engine') {
-          withCredentials([usernamePassword(credentialsId: 'SERVICE_PRINCIPAL_OSTCLAB', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
-            sh 'AZURE_CONFIG_DIR=$(pwd) test/acc-pr-test.sh oe-ub1804.json'
-          }
-        }
-      }
-    }
-    stage('Windows') {
-      steps {
-        dir('gopath/src/github.com/Microsoft/oe-engine') {
-          withCredentials([usernamePassword(credentialsId: 'SERVICE_PRINCIPAL_OSTCLAB', passwordVariable: 'SERVICE_PRINCIPAL_PASSWORD', usernameVariable: 'SERVICE_PRINCIPAL_ID')]) {
-            sh 'AZURE_CONFIG_DIR=$(pwd) test/acc-pr-test.sh oe-win.json'
-          }
-        }
-      }
-    }
-  }
 }
