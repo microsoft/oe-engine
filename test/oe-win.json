@@ -5,12 +5,13 @@
         "name": "accwin",
         "osType": "Windows",
         "vmSize": "Standard_DC2s",
-        "ports": [3389]
+        "ports": [22,3389]
       }
     ],
     "windowsProfile": {
       "adminUsername": "azureuser",
-      "adminPassword": ""
+      "adminPassword": "",
+      "sshPublicKey": ""
     }
   }
 }
