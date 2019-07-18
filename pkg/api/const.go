@@ -12,6 +12,8 @@ const (
 	OsUbuntu1804 = "UbuntuServer_18.04"
 	// OsWindows2016 image
 	OsWindows2016 = "WindowsServer_2016"
+	// OSWindows2019 image
+	OsWindows2019 = "WindowsServer_2019"
 )
 
 const (
@@ -65,6 +67,14 @@ var OsImageMap = map[string]OSImage{
 		Version:   "latest",
 		IsWindows: true,
 	},
+	OsWindows2019: {
+		Publisher: "MicrosoftWindowsServer",
+		Offer:     "windowsserver-gen2preview",
+		SKU:       "2019-datacenter-gen2",
+		Version:   "latest",
+		IsWindows: true,
+	},
+	
 }
 
 // AllowedLocations provides supported azure regions
