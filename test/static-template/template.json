@@ -121,7 +121,7 @@
         "UbuntuServer_16.04",
         "UbuntuServer_18.04",
         "WindowsServer_2016",
-	"WindowsServer_2019"
+        "WindowsServer_2019"
       ],
       "metadata": {
         "description": "OS image name"
