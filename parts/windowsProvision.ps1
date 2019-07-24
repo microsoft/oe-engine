@@ -361,7 +361,18 @@ function Install-AzureDCAP{
     Install-ZipTool $PACKAGES["AzureDCAP"]["renamed_file"] `
                     -InstallDirectory $installDir
     $p = Start-Process powershell -Wait -NoNewWindow -PassThru -argument "$installDir\script\InstallAzureDCAP.ps1"
+    if($p.ExitCode -ne 0) {
+        Throw "Failed to Add Azure-DCAPLibrary. Please Add it manually."
+    }
 
+}
+
+function Add-RegistrySettings {
+    $ScriptPath = Join-Path $PACKAGES_DIRECTORY "AddRegistryForWindows.cmd"
+    $p = Start-Process FilePath "$ScriptPath" -Wait -NoNewWindow -PassThru
+    if($p.ExitCode -ne 0) {
+            Throw "Failed to Add Opt-in Registry settings. Please Add it manually."
+        }
 }
 
 function Install-VisualStudio {
@@ -427,7 +438,9 @@ try {
     Write-Output "Installing Open Enclave"
     Install-SGX
     Install-PSW
-
+    Install-AzureDCAP
+    Add-RegistrySettings
+    
     Start-ExecuteWithRetry -ScriptBlock {
         Start-Service "AESMService" -ErrorAction Stop
     } -RetryMessage "Failed to start AESMService. Retrying"
