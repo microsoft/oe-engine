@@ -13,6 +13,12 @@ $PACKAGES = @{
         "url" = "https://github.com/PowerShell/Win32-OpenSSH/releases/download/v7.7.2.0p1-Beta/OpenSSH-Win64.zip"
         "local_file" = Join-Path $PACKAGES_DIRECTORY "OpenSSH-Win64.zip"
     }
+    "AzureDCAP" = @{
+        "url" = "https://www.nuget.org/api/v2/package/Azure.DCAP.Windows/0.0.1"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.1.nupkg"
+        "renamed_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.1.zip"
+    }
+    
     "git" = @{
         "url" = "https://github.com/git-for-windows/git/releases/download/v2.19.1.windows.1/Git-2.19.1-64-bit.exe"
         "local_file" = Join-Path $PACKAGES_DIRECTORY "git-2.19.1-64-bit.exe"
@@ -349,6 +355,14 @@ function Install-PSW {
     }
 }
 
+function Install-AzureDCAP{
+    $installDir = Join-Path $PACKAGES_DIRECTORY "AzureDCAP"
+    Rename-item -Path $PACKAGES["AzureDCAP"]["local_file"] -NewName $PACKAGES["AzureDCAP"]["renamed_file"]
+    Install-ZipTool $PACKAGES["AzureDCAP"]["renamed_file"] `
+                    -InstallDirectory $installDir
+    $p = Start-Process powershell -Wait -NoNewWindow -PassThru -argument "$installDir\script\InstallAzureDCAP.ps1"
+
+}
 
 function Install-VisualStudio {
     $installerArguments = @(
