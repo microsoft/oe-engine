@@ -120,7 +120,8 @@
       "allowedValues": [
         "UbuntuServer_16.04",
         "UbuntuServer_18.04",
-        "WindowsServer_2016"
+        "WindowsServer_2016",
+        "WindowsServer_2019"
       ],
       "metadata": {
         "description": "OS image name"
@@ -224,6 +225,12 @@
         "publisher": "MicrosoftWindowsServer",
         "sku": "acc-windows-server-2016-datacenter",
         "version": "latest"
+      },
+      "WindowsServer_2019": {
+        "offer": "windowsserver-gen2preview",
+        "publisher": "MicrosoftWindowsServer",
+        "sku": "2019-datacenter-gen2",
+        "version": "latest"
       }
     },
     "linuxConfiguration": {
@@ -257,7 +264,7 @@
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]",
     "nsgName": "[concat(parameters('vmName'), '-nsg')]",
     "publicIPAddressName": "[concat(parameters('vmName'), '-ip')]",
-    "securityRules": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsSecurityRules'), variables('linuxSecurityRules'))]",
+    "securityRules": "[if(contains(parameters('osImageName'), 'Windows'), variables('windowsSecurityRules'), variables('linuxSecurityRules'))]",
     "vnetSubnetID": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('vnetName'), parameters('subnetName'))]",
     "windowsConfiguration": {
       "provisionVmAgent": "true"
@@ -404,7 +411,7 @@
           "computername": "[parameters('vmName')]",
           "customData": "[if(equals(parameters('oeSDKIncluded'), 'no'), json('null'), base64(concat('#cloud-config\n\n', '{\"runcmd\":[\"/opt/azure/acc/provision.sh\"],\"write_files\":[{\"content\":\"function retry_download() {\\nretries=$1; wait_sleep=$2; timeout=$3; url=$4; path=$5 checksum=$6\\nfor i in $(seq 1 $retries); do\\nrm -f $path\\ntimeout $timeout curl -fsSL $url -o $path\\nif [ $? -ne 0 ]; then\\necho \\\"retry_download[$i] Error: Failed to execute curl -fsSL $url -o $path\\\"\\nsleep $wait_sleep\\ncontinue\\nfi\\nif [ ! -z \\\"${checksum:-}\\\" ]; then\\nactual=$(sha1sum -b $path | cut -f 1 -d \\\" \\\")\\nif [ $? -ne 0 ]; then\\necho \\\"retry_download[$i] Error: Failed to execute sha1sum -b $path (per $url)\\\"\\nsleep $wait_sleep\\ncontinue\\nfi\\nif [ \\\"$checksum\\\" != \\\"$actual\\\" ]; then\\necho \\\"retry_download[$i] Error: sha1sum mismatch for $url\\\"\\nsleep $wait_sleep\\ncontinue\\nfi\\nfi\\necho \\\"Successfully downloaded $url ($checksum) after $i attempts\\\"\\nreturn 0\\ndone\\necho \\\"Failed to download $url ($checksum) after $retries attempts\\\"\\nreturn 1\\n}\\n\\n\\nfunction retrycmd_if_failure() {\\nretries=$1; wait_sleep=$2; timeout=$3; shift \\u0026\\u0026 shift \\u0026\\u0026 shift\\nfor i in $(seq 1 $retries); do\\ntimeout $timeout ${@}\\n[ $? -eq 0 ] \\u0026\\u0026 break || \\\\\\nif [ $i -eq $retries ]; then\\necho \\\"Error: Failed to execute \\\\\\\"$@\\\\\\\" after $i attempts\\\"\\nreturn 1\\nelse\\nsleep $wait_sleep\\nfi\\ndone\\necho Executed \\\\\\\"$@\\\\\\\" $i times;\\n}\\n\\n\\nfunction retry_get_install_deb() {\\nretries=$1; wait_sleep=$2; timeout=$3; url=$4; checksum=$5\\ndeb=$(mktemp)\\ntrap \\\"rm -f $deb\\\" RETURN\\nretry_download $retries $wait_sleep $timeout $url $deb $checksum\\nif [ $? -ne 0 ]; then\\necho \\\"Error: Failed to download $url\\\"\\nreturn 1\\nfi\\nretrycmd_if_failure $retries $wait_sleep $timeout dpkg -i $deb\\nif [ $? -ne 0 ]; then\\necho \\\"Error: Failed to install $url\\\"\\nreturn 1\\nfi\\n}\\n\",\"owner\":\"root\",\"path\":\"/opt/azure/acc/utils.sh\",\"permissions\":\"0744\"},{\"content\":\"#!/bin/bash\\n\\n\\n# Copyright (c) Microsoft Corporation. All rights reserved.\\n# Licensed under the MIT License.\\n\\n\\n# Install required packages.\\n#\\n\\n\\nsource /opt/azure/acc/utils.sh\\n\\n\\ncd /opt/azure/acc/\\n\\n\\nOE_PKG_BASE=\\\"https://oe.azureedge.net/data\\\"\\n\\n\\nreadonly LOG_FILE=\\\"/opt/azure/acc/deployment.log\\\"\\nset -x\\ntouch $LOG_FILE\\nexec 1\\u003e$LOG_FILE\\nexec 2\\u003e\\u00261\\n\\n\\nfunction error_exit() {\\necho $1\\necho \\\"failed\\\" \\u003e /opt/azure/acc/completed\\nexit 1\\n}\\n\\n\\nfunction setup_ubuntu() {\\nversion=`grep DISTRIB_RELEASE /etc/*-release| cut -f 2 -d \\\"=\\\"`\\n\\n\\n# Add public packages:\\nPACKAGES=\\\"make gcc gdb g++ libssl-dev pkg-config dkms\\\"\\n\\n\\ncase $version in\\n\\\"18.04\\\")\\nOE_PKG_BASE=${OE_PKG_BASE}/v05x/1804\\nsgx_driver_url=\\\"${OE_PKG_BASE}/sgx_linux_x64_driver_dcap.bin\\\"\\nsgx_pkgs=\\\"libsgx-enclave-common.deb libsgx-enclave-common-dev.deb libsgx-dcap-ql.deb libsgx-dcap-ql-dev.deb az-dcap-client.deb open-enclave.deb\\\"\\nPACKAGES=\\\"$PACKAGES curl libcurl4 libprotobuf10\\\"\\n;;\\n\\\"16.04\\\")\\nOE_PKG_BASE=${OE_PKG_BASE}/v05x/1604\\nsgx_driver_url=\\\"${OE_PKG_BASE}/sgx_linux_x64_driver_dcap.bin\\\"\\nsgx_pkgs=\\\"libsgx-enclave-common.deb libsgx-enclave-common-dev.deb libsgx-dcap-ql.deb libsgx-dcap-ql-dev.deb az-dcap-client.deb open-enclave.deb\\\"\\nPACKAGES=\\\"$PACKAGES libcurl3 libprotobuf9v5\\\"\\n;;\\n\\\"*\\\")\\nerror_exit \\\"Version $version is not supported\\\"\\n;;\\nesac\\nsgx_driver=$(basename $sgx_driver_url)\\n\\n\\nrelease=$(lsb_release -cs)\\n\\n\\n# Configure apt to use clang-7\\necho \\\"deb http://apt.llvm.org/$release/ llvm-toolchain-$release-7 main\\\" | tee /etc/apt/sources.list.d/llvm-toolchain-$release-7.list\\nwget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -\\n\\n\\n# Configure apt to use packages.microsoft.com repo\\necho \\\"deb [arch=amd64] https://packages.microsoft.com/ubuntu/$version/prod $release main\\\" | tee /etc/apt/sources.list.d/msprod.list\\nwget -qO - https://packages.microsoft.com/keys/microsoft.asc | apt-key add -\\n\\n\\n# Configure apt to use Intel 01.org repo\\necho \\\"deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu $release main\\\" | tee /etc/apt/sources.list.d/intel-sgx.list\\nwget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add -\\n\\n\\nexport DEBIAN_FRONTEND=noninteractive\\n\\n\\n# Update pkg repository\\nretrycmd_if_failure 10 10 120 apt update\\nif [ $? -ne 0  ]; then\\nerror_exit \\\"apt update failed\\\"\\nfi\\n\\n\\n# Add clang-7 packages:\\nPACKAGES=\\\"$PACKAGES clang-7 lldb-7 lld-7\\\"\\n\\n\\nretrycmd_if_failure 10 10 120 apt-get -y install $PACKAGES\\nif [ $? -ne 0  ]; then\\nerror_exit \\\"apt-get install failed\\\"\\nfi\\n\\n\\n# Install SGX driver\\nfor pkg in $sgx_pkgs; do\\nretry_get_install_deb 3 10 30 \\\"${OE_PKG_BASE}/$pkg\\\"\\ndone\\n\\n\\nretrycmd_if_failure 10 10 120 curl -fsSL -O ${sgx_driver_url}\\nif [ $? -ne 0  ]; then\\nerror_exit \\\"failed to download SGX driver\\\"\\nfi\\nchmod a+x ./${sgx_driver}\\n./${sgx_driver}\\nif [ $? -ne 0  ]; then\\nerror_exit \\\"failed to install SGX driver\\\"\\nfi\\n\\n\\nsystemctl disable aesmd\\nsystemctl stop aesmd\\n}\\n\\n\\ndistro=`grep DISTRIB_ID /etc/*-release | cut -f 2 -d \\\"=\\\"`\\n\\n\\ncase $distro in\\n\\\"Ubuntu\\\")\\nsetup_ubuntu\\n;;\\n*)\\nerror_exit \\\"Distro $distro is not currently supported\\\"\\n;;\\nesac\\n\\n\\n\\n\\n# Check to see this is an openenclave supporting hardware environment\\n/opt/openenclave/bin/oesgx | grep \\\"does not support\\\"\\nif [ $? -eq 0 ] ; then\\nerror_exit \\\"This hardware does not support open enclave\\\"\\nfi\\n\\n\\n# Indicate readiness\\necho \\\"ok\\\" \\u003e /opt/azure/acc/completed\\n\",\"owner\":\"root\",\"path\":\"/opt/azure/acc/provision.sh\",\"permissions\":\"0744\"},{\"content\":\"#!/bin/bash\\n\\n\\n# Copyright (c) Microsoft Corporation. All rights reserved.\\n# Licensed under the MIT License.\\n\\n\\nsource /opt/azure/acc/utils.sh\\n\\n\\n# validate open-enclave package installation\\nstatus=$(dpkg -s open-enclave | grep \\\"Status: install ok installed\\\")\\nif [ $? -ne 0  ] || [ -z \\\"$status\\\" ]; then\\necho \\\"open-enclave is not installed\\\"\\nexit 1\\nfi\\n\\n\\n# exit on error from this point\\nset -e\\nset -o errexit\\n\\n\\n# set logfile\\nreadonly LOG_FILE=\\\"/opt/azure/acc/validation.log\\\"\\nset -x\\ntouch $LOG_FILE\\nexec 1\\u003e$LOG_FILE\\nexec 2\\u003e\\u00261\\n\\n\\n# copy samples\\ntempdir=\\\"$(mktemp -d)\\\"\\ntrap \\\"rm -rf \\\\\\\"${tempdir}\\\\\\\"\\\" EXIT\\ncp -r /opt/openenclave/share/openenclave/samples/ $tempdir\\n\\n\\n# build and run all samples except remote_attestation\\nif [ -e /opt/openenclave/share/openenclave/openenclaverc ]; then\\nsource /opt/openenclave/share/openenclave/openenclaverc\\nelse\\nsource /opt/openenclave/share/openenclaverc\\nfi\\ncd $tempdir/samples\\n\\n\\nexport OE_LOG_LEVEL=INFO\\nfind . -maxdepth 1 -type d -not -path \\\"*remote_attestation\\\" -not -path \\\".\\\" -exec sh -c \\\"echo Running {}; cd {} \\u0026\\u0026 make \\u0026\\u0026 make run\\\" \\\\;\\n\\n\\necho \\\"open-enclave validation completed $msg\\\"\\n\",\"owner\":\"root\",\"path\":\"/opt/azure/acc/validate.sh\",\"permissions\":\"0744\"}]}')))]",
           "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
-          "windowsConfiguration": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsConfiguration'), json('null'))]"
+          "windowsConfiguration": "[if(contains(parameters('osImageName'), 'Windows'), variables('windowsConfiguration'), json('null'))]"
         },
         "storageProfile": {
           "imageReference": "[variables('imageReference')[parameters('osImageName')]]",
@@ -424,7 +431,7 @@
     },
     {
       "apiVersion": "2018-06-01",
-      "condition": "[not(equals(parameters('osImageName'), 'WindowsServer_2016'))]",
+      "condition": "[not(contains(parameters('osImageName'), 'Windows'))]",
       "dependsOn": [
         "[parameters('vmName')]"
       ],

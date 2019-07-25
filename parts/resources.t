@@ -137,7 +137,7 @@
           "adminPassword": "[parameters('adminPasswordOrKey')]",
           "customData": "[if(equals(parameters('oeSDKIncluded'), 'no'), json('null'), {{GetCustomData}})]",
           "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]",
-          "windowsConfiguration": "[if(equals(parameters('osImageName'), 'WindowsServer_2016'), variables('windowsConfiguration'), json('null'))]"
+          "windowsConfiguration": "[if(contains(parameters('osImageName'), 'Windows'), variables('windowsConfiguration'), json('null'))]"
           {{if .IsLinux}}{{if .LinuxProfile.HasSecrets}}
           ,
           "secrets": "[variables('linuxProfileSecrets')]"
@@ -169,7 +169,7 @@
       "type": "Microsoft.Compute/virtualMachines"
     },
     {
-      "condition": "[not(equals(parameters('osImageName'), 'WindowsServer_2016'))]",
+      "condition": "[not(contains(parameters('osImageName'), 'Windows'))]",
       "apiVersion": "2018-06-01",
       "dependsOn": [
         "[parameters('vmName')]"
