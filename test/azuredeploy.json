@@ -1,0 +1,533 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "accwinHasDNSName": {
+      "allowedValues": [
+        "false",
+        "true"
+      ],
+      "defaultValue": "false",
+      "metadata": {
+        "description": "Flag to configure VM DNS name."
+      },
+      "type": "string"
+    },
+    "accwinIsVanilla": {
+      "allowedValues": [
+        "false",
+        "true"
+      ],
+      "defaultValue": "false",
+      "metadata": {
+        "description": "Flag to provision vanilla VM or install OE SDK."
+      },
+      "type": "string"
+    },
+    "accwinOSDiskType": {
+      "allowedValues": [
+        "Premium_LRS",
+        "StandardSSD_LRS",
+        "Standard_LRS"
+      ],
+      "defaultValue": "Premium_LRS",
+      "metadata": {
+        "description": "Type of managed disk to create."
+      },
+      "type": "string"
+    },
+    "accwinOSType": {
+      "allowedValues": [
+        "Linux",
+        "Windows"
+      ],
+      "metadata": {
+        "description": "OS type"
+      },
+      "type": "string"
+    },
+    "accwinVMSize": {
+      "allowedValues": [
+        "Standard_DC2s",
+        "Standard_DC4s"
+      ],
+      "metadata": {
+        "description": "The size of the Virtual Machine."
+      },
+      "type": "string"
+    },
+    "authenticationType": {
+      "allowedValues": [
+        "password",
+        "sshPublicKey"
+      ],
+      "defaultValue": "password",
+      "metadata": {
+        "description": "Type of authentication to use on Linux virtual machine."
+      },
+      "type": "string"
+    },
+    "bootDiagnostics": {
+      "allowedValues": [
+        "enable",
+        "disable"
+      ],
+      "defaultValue": "enable",
+      "metadata": {
+        "description": "Type of authentication to use on the virtual machine."
+      },
+      "type": "string"
+    },
+    "diagnosticsStorageAccountKind": {
+      "allowedValues": [
+        "Storage",
+        "StorageV2"
+      ],
+      "defaultValue": "Storage",
+      "metadata": {
+        "description": "Type of storage account."
+      },
+      "type": "string"
+    },
+    "diagnosticsStorageAccountName": {
+      "defaultValue": "none",
+      "metadata": {
+        "description": "Name of the storage account for diagnostics data."
+      },
+      "type": "string"
+    },
+    "diagnosticsStorageAccountNewOrExisting": {
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "defaultValue": "new",
+      "metadata": {
+        "description": "Determines whether or not a new storage account should be provisioned."
+      },
+      "type": "string"
+    },
+    "diagnosticsStorageAccountResourceGroupName": {
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Name of the resource group for the existing diagnostics storage account."
+      },
+      "type": "string"
+    },
+    "diagnosticsStorageAccountType": {
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS"
+      ],
+      "defaultValue": "Standard_LRS",
+      "metadata": {
+        "description": "Type of storage account."
+      },
+      "type": "string"
+    },
+    "linuxAdminPassword": {
+      "defaultValue": "",
+      "metadata": {
+        "description": "Linux password."
+      },
+      "type": "securestring"
+    },
+    "linuxAdminUsername": {
+      "defaultValue": "azureuser",
+      "metadata": {
+        "description": "User name for the Linux Virtual Machines."
+      },
+      "type": "string"
+    },
+    "linuxImageOffer": {
+      "defaultValue": "",
+      "metadata": {
+        "description": "Linux image offer."
+      },
+      "type": "string"
+    },
+    "linuxImagePublisher": {
+      "defaultValue": "",
+      "metadata": {
+        "description": "Linux image publisher."
+      },
+      "type": "string"
+    },
+    "linuxImageSKU": {
+      "defaultValue": "",
+      "metadata": {
+        "description": "Linux image SKU."
+      },
+      "type": "string"
+    },
+    "linuxImageSourceUrl": {
+      "defaultValue": "",
+      "metadata": {
+        "description": "Linux image source URL."
+      },
+      "type": "string"
+    },
+    "linuxImageVersion": {
+      "defaultValue": "latest",
+      "metadata": {
+        "description": "Linux image version."
+      },
+      "type": "string"
+    },
+    "location": {
+      "allowedValues": [
+        "eastus",
+        "westeurope"
+      ],
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Sets the location for all resources in the cluster"
+      },
+      "type": "string"
+    },
+    "subnetAddress": {
+      "defaultValue": "10.0.0.0/24",
+      "metadata": {
+        "description": "Sets the subnet of the VM."
+      },
+      "type": "string"
+    },
+    "subnetName": {
+      "defaultValue": "[concat(resourceGroup().name, '-subnet')]",
+      "metadata": {
+        "description": "Name of the subnet."
+      },
+      "type": "string"
+    },
+    "vnetAddress": {
+      "defaultValue": "10.0.0.0/16",
+      "metadata": {
+        "description": "VNET address space"
+      },
+      "type": "string"
+    },
+    "vnetName": {
+      "defaultValue": "[concat(resourceGroup().name, '-vnet')]",
+      "maxLength": 64,
+      "metadata": {
+        "description": "Name of the virtual network (alphanumeric, hyphen, underscore, period)."
+      },
+      "minLength": 2,
+      "type": "string"
+    },
+    "vnetNewOrExisting": {
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "defaultValue": "new",
+      "metadata": {
+        "description": "Determines whether or not a new virtual network should be provisioned"
+      },
+      "type": "string"
+    },
+    "vnetResourceGroupName": {
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Name of the resource group for the existing virtual network."
+      },
+      "type": "string"
+    },
+    "windowsAdminPassword": {
+      "defaultValue": "",
+      "metadata": {
+        "description": "Windows password."
+      },
+      "type": "securestring"
+    },
+    "windowsAdminUsername": {
+      "defaultValue": "azureuser",
+      "metadata": {
+        "description": "User name for the Windows Virtual Machines."
+      },
+      "type": "string"
+    },
+    "windowsImageOffer": {
+      "defaultValue": "",
+      "metadata": {
+        "description": "Windows image offer."
+      },
+      "type": "string"
+    },
+    "windowsImagePublisher": {
+      "defaultValue": "",
+      "metadata": {
+        "description": "Windows image publisher."
+      },
+      "type": "string"
+    },
+    "windowsImageSKU": {
+      "defaultValue": "",
+      "metadata": {
+        "description": "Windows image SKU."
+      },
+      "type": "string"
+    },
+    "windowsImageSourceUrl": {
+      "defaultValue": "",
+      "metadata": {
+        "description": "Windows image source URL."
+      },
+      "type": "string"
+    },
+    "windowsImageVersion": {
+      "defaultValue": "latest",
+      "metadata": {
+        "description": "Windows image version."
+      },
+      "type": "string"
+    }
+  },
+  "variables": {
+    "accwinIndex": 0,
+    "accwinNSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('accwinNSGName'))]",
+    "accwinNSGName": "[concat('accwin', '-nsg')]",
+    "accwinOSProfile": {
+      "adminPassword": "[parameters('windowsAdminPassword')]",
+      "adminUsername": "[parameters('windowsAdminUsername')]",
+      "computername": "accwin",
+      "customData": "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",
+      "windowsConfiguration": "[variables('windowsConfiguration')]"
+    },
+    "accwinPublicIPAddressName": "[concat('accwin', '-ip')]",
+    "accwinStorageProfile": {
+      "imageReference": {
+        "offer": "[parameters('windowsImageOffer')]",
+        "publisher": "[parameters('windowsImagePublisher')]",
+        "sku": "[parameters('windowsImageSKU')]",
+        "version": "[parameters('windowsImageVersion')]"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "managedDisk": {
+          "storageAccountType": "[parameters('accwinOSDiskType')]"
+        }
+      }
+    },
+    "diagnosticsStorageAction": "[if(equals(parameters('bootDiagnostics'), 'disable'), 'nop', parameters('diagnosticsStorageAccountNewOrExisting'))]",
+    "linuxConfiguration": {
+      "disablePasswordAuthentication": "true",
+      "ssh": "json('null')"
+    },
+    "singleQuote": "'",
+    "vnetSubnetID": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('vnetName'), parameters('subnetName'))]",
+    "winScriptArguments": "[concat('$arguments = ', variables('singleQuote'),' ',variables('singleQuote'), ' ; ')]",
+    "winScriptSuffix": " $inputFile = '\\AzureData\\CustomData.bin' ; $outputFile = '\\AzureData\\oeWindowsProvision.ps1' ; $inputStream = New-Object System.IO.FileStream $inputFile, ([IO.FileMode]::Open), ([IO.FileAccess]::Read), ([IO.FileShare]::Read) ; $sr = New-Object System.IO.StreamReader(New-Object System.IO.Compression.GZipStream($inputStream, [System.IO.Compression.CompressionMode]::Decompress)) ; $sr.ReadToEnd() | Out-File($outputFile) ; &$outputFile ; ",
+    "windowsConfiguration": {
+      "provisionVmAgent": "true"
+    },
+    "windowsExtScript": "[concat('powershell.exe -ExecutionPolicy Unrestricted -command \"', variables('winScriptSuffix'), '\" > \\AzureData\\provisionScript.log 2>&1; exit $LASTEXITCODE')]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2018-06-01",
+      "location": "[parameters('location')]",
+      "name": "[variables('accwinPublicIPAddressName')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic"
+      },
+      "type": "Microsoft.Network/publicIPAddresses"
+    },
+    {
+      "apiVersion": "2018-06-01",
+      "location": "[parameters('location')]",
+      "name": "[variables('accwinNSGName')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "Allow_22",
+            "properties": {
+              "access": "Allow",
+              "description": "Allow traffic from the Internet to port 22",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22",
+              "direction": "Inbound",
+              "priority": 200,
+              "protocol": "*",
+              "sourceAddressPrefix": "Internet",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "Allow_3389",
+            "properties": {
+              "access": "Allow",
+              "description": "Allow traffic from the Internet to port 3389",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3389",
+              "direction": "Inbound",
+              "priority": 201,
+              "protocol": "*",
+              "sourceAddressPrefix": "Internet",
+              "sourcePortRange": "*"
+            }
+          }
+        ]
+      },
+      "type": "Microsoft.Network/networkSecurityGroups"
+    },
+    {
+      "apiVersion": "2018-06-01",
+      "dependsOn": [
+        "[variables('accwinPublicIPAddressName')]",
+        "[parameters('vnetName')]",
+        "[variables('accwinNSGID')]"
+      ],
+      "location": "[parameters('location')]",
+      "name": "[concat('accwin', '-nic')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipConfigNode",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('accwinPublicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('vnetSubnetID')]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[variables('accwinNSGID')]"
+        }
+      },
+      "type": "Microsoft.Network/networkInterfaces"
+    },
+    {
+      "apiVersion": "2018-06-01",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', 'accwin', '-nic')]"
+      ],
+      "location": "[parameters('location')]",
+      "name": "accwin",
+      "properties": {
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "[equals(parameters('bootDiagnostics'), 'enable')]",
+            "storageUri": "[if(equals(parameters('bootDiagnostics'), 'enable'), reference(resourceId(parameters('diagnosticsStorageAccountResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), '2018-02-01').primaryEndpoints['blob'], json('null'))]"
+          }
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('accwinVMSize')]"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('accwin', '-nic'))]"
+            }
+          ]
+        },
+        "osProfile": "[variables('accwinOSProfile')]",
+        "storageProfile": "[variables('accwinStorageProfile')]"
+      },
+      "tags": {
+        "creationSource": "[concat('oe-engine-', 'accwin')]"
+      },
+      "type": "Microsoft.Compute/virtualMachines"
+    },
+    {
+      "apiVersion": "2018-06-01",
+      "condition": "[and(equals(parameters('accwinIsVanilla'), 'false'), equals(parameters('accwinOSType'), 'Linux'))]",
+      "dependsOn": [
+        "accwin"
+      ],
+      "location": "[parameters('location')]",
+      "name": "[concat('accwin', '/validateLnx')]",
+      "properties": {
+        "autoUpgradeMinorVersion": true,
+        "publisher": "Microsoft.OSTCExtensions",
+        "settings": {
+          "commandToExecute": "/bin/bash -c \"secs=600; SECONDS=0; while (( SECONDS < secs )); do if [ -e /opt/azure/acc/completed ]; then if [ $(cat /opt/azure/acc/completed) == ok ]; then /opt/azure/acc/validate.sh; exit $? ; else echo provision failed; cat /opt/azure/acc/deployment.log; exit 1; fi; fi; sleep 20; done; echo validation timeout; exit 1; \""
+        },
+        "type": "CustomScriptForLinux",
+        "typeHandlerVersion": "1.4"
+      },
+      "type": "Microsoft.Compute/virtualMachines/extensions"
+    },
+    {
+      "apiVersion": "2018-06-01",
+      "condition": "[equals(parameters('accwinOSType'), 'Windows')]",
+      "dependsOn": [
+        "accwin"
+      ],
+      "location": "[parameters('location')]",
+      "name": "[concat('accwin', '/validateWin')]",
+      "properties": {
+        "autoUpgradeMinorVersion": true,
+        "protectedSettings": {
+          "commandToExecute": "[variables('windowsExtScript')]"
+        },
+        "publisher": "Microsoft.Compute",
+        "settings": {},
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.8"
+      },
+      "type": "Microsoft.Compute/virtualMachines/extensions"
+    },
+    {
+      "apiVersion": "2018-02-01",
+      "name": "pid-daeec781-52c2-488a-85a6-7945b7831056",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
+        }
+      },
+      "type": "Microsoft.Resources/deployments"
+    },
+    {
+      "apiVersion": "2018-02-01",
+      "condition": "[equals(variables('diagnosticsStorageAction'), 'new')]",
+      "kind": "[parameters('diagnosticsStorageAccountKind')]",
+      "location": "[parameters('location')]",
+      "name": "[parameters('diagnosticsStorageAccountName')]",
+      "sku": {
+        "name": "[parameters('diagnosticsStorageAccountType')]"
+      },
+      "type": "Microsoft.Storage/storageAccounts"
+    },
+    {
+      "apiVersion": "2018-06-01",
+      "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+      "location": "[parameters('location')]",
+      "name": "[parameters('vnetName')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('vnetAddress')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('subnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnetAddress')]"
+            }
+          }
+        ]
+      },
+      "type": "Microsoft.Network/virtualNetworks"
+    }
+  ],
+  "outputs": {
+    "accwinFQDN": {
+      "type": "string",
+      "value": ""
+    },
+    "status": {
+      "type": "string",
+      "value": ""
+    }
+  }
+}

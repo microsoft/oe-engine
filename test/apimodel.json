@@ -1,0 +1,32 @@
+{
+  "location": "",
+  "properties": {
+    "vnetProfile": {
+      "vnetAddress": "10.0.0.0/16",
+      "subnetAddress": "10.0.0.0/24"
+    },
+    "vmProfiles": [
+      {
+        "name": "accwin",
+        "osType": "Windows",
+        "osDiskType": "",
+        "vmSize": "Standard_DC2s",
+        "ports": [
+          22,
+          3389
+        ],
+        "isVanilla": false,
+        "hasDNSName": false
+      }
+    ],
+    "windowsProfile": {
+      "adminUsername": "azureuser",
+      "adminPassword": "azpassword",
+      "osImage": {
+        "publisher": "MicrosoftWindowsServer",
+        "offer": "windowsserver-gen2preview",
+        "sku": "2019-datacenter-gen2"
+      }
+    }
+  }
+}
