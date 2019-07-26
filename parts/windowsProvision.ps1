@@ -368,8 +368,19 @@ function Install-AzureDCAP{
 }
 
 function Add-RegistrySettings {
-    $ScriptPath = Join-Path $PACKAGES_DIRECTORY "AddRegistryForWindows.cmd"
-    $p = Start-Process FilePath "$ScriptPath" -Wait -NoNewWindow -PassThru
+    $AddingRegistryCMD = @"
+    reg query HKLM\SYSTEM\CurrentControlSet\Services\sgx_lc_msr\Parameters /v SGX_Launch_Config_Optin
+    if %ERRORLEVEL% EQU 1 goto SETUP
+    goto:eof
+    :SETUP
+    reg add HKLM\SYSTEM\CurrentControlSet\Services\sgx_lc_msr\Parameters /v SGX_Launch_Config_Optin /t REG_DWORD /d 0x01
+    SHUTDOWN -r -t 10
+    "@
+    $CurrentDir = (Get-Location).Path
+    $CMDFileName = "$CurrentDir\AddRegistry.cmd"
+    $AddingRegistryCMD | Out-File -FilePath $CMDFileName -Encoding ASCII
+    $p = Start-Process 'cmd' -ArgumentList "/c $CMDFileName" -Verb RunAs -PassThru -Wait -WarningAction SilentlyContinue
+    Remove-Item -Path $CMDFileName
     if($p.ExitCode -ne 0) {
             Throw "Failed to Add Opt-in Registry settings. Please Add it manually."
         }
