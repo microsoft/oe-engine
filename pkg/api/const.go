@@ -35,8 +35,8 @@ var DefaultLinuxImage = OSImage{
 // DefaultWindowsImage specifies default Windows OS image
 var DefaultWindowsImage = OSImage{
 	Publisher: "MicrosoftWindowsServer",
-	Offer:     "confidential-compute-preview",
-	SKU:       "acc-windows-server-2016-datacenter",
+	Offer:     "windowsserver-gen2preview",
+	SKU:       "2019-datacenter-gen2",
 }
 
 // AllowedLocations provides supported azure regions
