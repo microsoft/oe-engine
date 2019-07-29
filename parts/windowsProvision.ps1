@@ -357,10 +357,11 @@ function Install-PSW {
 
 function Install-AzureDCAP{
     $installDir = Join-Path $PACKAGES_DIRECTORY "AzureDCAP"
+    $DCAPlocation =  "$env:windir\System32"
     Rename-item -Path $PACKAGES["AzureDCAP"]["local_file"] -NewName $PACKAGES["AzureDCAP"]["renamed_file"]
     Install-ZipTool $PACKAGES["AzureDCAP"]["renamed_file"] `
                     -InstallDirectory $installDir
-    $p = Start-Process powershell -Wait -NoNewWindow -PassThru -argument "$installDir\script\InstallAzureDCAP.ps1"
+    $p = Start-Process powershell -Wait -NoNewWindow -PassThru -argument "$installDir\script\InstallAzureDCAP.ps1 $DCAPlocation" -WorkingDirectory "$installDir\script"
     if($p.ExitCode -ne 0) {
         Throw "Failed to Add Azure-DCAPLibrary. Please Add it manually."
     }
@@ -371,11 +372,13 @@ function Add-RegistrySettings {
     $AddingRegistryCMD = @"
     reg query HKLM\SYSTEM\CurrentControlSet\Services\sgx_lc_msr\Parameters /v SGX_Launch_Config_Optin
     if %ERRORLEVEL% EQU 1 goto SETUP
+    REG QUERY HKLM\SYSTEM\CurrentControlSet\Services\sgx_lc_msr\Parameters\ /t REG_DWORD /f 1
+    if %ERRORLEVEL% EQU 1 goto SETUP
     goto:eof
     :SETUP
-    reg add HKLM\SYSTEM\CurrentControlSet\Services\sgx_lc_msr\Parameters /v SGX_Launch_Config_Optin /t REG_DWORD /d 0x01
+    reg add HKLM\SYSTEM\CurrentControlSet\Services\sgx_lc_msr\Parameters /f /v SGX_Launch_Config_Optin /t REG_DWORD /d 0x01
     SHUTDOWN -r -t 10
-    "@
+"@
     $CurrentDir = (Get-Location).Path
     $CMDFileName = "$CurrentDir\AddRegistry.cmd"
     $AddingRegistryCMD | Out-File -FilePath $CMDFileName -Encoding ASCII
@@ -447,8 +450,6 @@ try {
         exit 0
     }
     Write-Output "Installing Open Enclave"
-    Install-SGX
-    Install-PSW
     Install-AzureDCAP
     Add-RegistrySettings
     
