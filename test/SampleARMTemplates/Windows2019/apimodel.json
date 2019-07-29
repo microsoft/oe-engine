@@ -21,7 +21,7 @@
     ],
     "windowsProfile": {
       "adminUsername": "azureuser",
-      "adminPassword": "rdPassw0rd123123",
+      "adminPassword": "",
       "osImage": {
         "publisher": "MicrosoftWindowsServer",
         "offer": "windowsserver-gen2preview",
