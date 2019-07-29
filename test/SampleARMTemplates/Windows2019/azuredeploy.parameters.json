@@ -1,0 +1,42 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "accwinHasDNSName": {
+      "value": "false"
+    },
+    "accwinIsVanilla": {
+      "value": "false"
+    },
+    "accwinOSType": {
+      "value": "Windows"
+    },
+    "accwinVMSize": {
+      "value": "Standard_DC2s"
+    },
+    "bootDiagnostics": {
+      "value": "disable"
+    },
+    "subnetAddress": {
+      "value": "10.0.0.0/24"
+    },
+    "vnetNewOrExisting": {
+      "value": "new"
+    },
+    "windowsAdminPassword": {
+      "value": "rdPassw0rd123123"
+    },
+    "windowsAdminUsername": {
+      "value": "azureuser"
+    },
+    "windowsImageOffer": {
+      "value": "windowsserver-gen2preview"
+    },
+    "windowsImagePublisher": {
+      "value": "MicrosoftWindowsServer"
+    },
+    "windowsImageSKU": {
+      "value": "2019-datacenter-gen2"
+    }
+  }
+}
