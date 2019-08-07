@@ -165,6 +165,7 @@ func (t *TemplateGenerator) getTemplateFuncMap(cs *api.OpenEnclave) template.Fun
 			csStr := string(b)
 			csStr = strings.Replace(csStr, "SSH_PUB_KEY", cs.Properties.WindowsProfile.SSHPubKey, -1)
 			csStr = strings.Replace(csStr, "IS_VANILLA_VM", strconv.FormatBool(vm.IsVanilla), -1)
+			csStr = strings.Replace(csStr, "ENABLE_WINRM_VM", strconv.FormatBool(vm.EnableWinRM), -1)
 			return getBase64CustomScriptFromStr(csStr)
 		},
 		"GetAllowedVMSizes": func() string {
