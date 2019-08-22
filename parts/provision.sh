@@ -30,11 +30,11 @@ function setup_ubuntu() {
 
   case $version in
     "18.04")
-      sgx_driver_url="https://download.01.org/intel-sgx/dcap-1.0.1/dcap_installer/ubuntuServer1804/sgx_linux_x64_driver_dcap_4f32b98.bin"
+      sgx_driver_url="https://download.01.org/intel-sgx/dcap-1.2/linux/dcap_installers/ubuntuServer18.04/sgx_linux_x64_driver_1.12_c110012.bin"
       PACKAGES="$PACKAGES curl libcurl4 libprotobuf10"
       ;;
     "16.04")
-      sgx_driver_url="https://download.01.org/intel-sgx/dcap-1.0.1/dcap_installer/ubuntuServer1604/sgx_linux_x64_driver_dcap_4f32b98.bin"
+      sgx_driver_url="https://download.01.org/intel-sgx/dcap-1.2/linux/dcap_installers/ubuntuServer16.04/sgx_linux_x64_driver_1.12_c110012.bin"
       PACKAGES="$PACKAGES libcurl3 libprotobuf9v5"
       ;;
     "*")
