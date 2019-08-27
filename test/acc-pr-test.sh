@@ -24,13 +24,17 @@ function cleanup {
       PUBLIC_IP=$(az vm show -d -g ${RGNAME} -n acc-ub1804 --query publicIps -o tsv)
       echo "Downloading cloud-init logs from Ubuntu 18.04"
       scp -o 'LogLevel=quiet' -o 'PasswordAuthentication=no' -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -i ${SSH_PRIV_KEY} "azureuser@${PUBLIC_IP}:/var/log/cloud-init*.log" "${LOG_DIR}/oe-ub1804"
+      echo "Downloading deployment logs from Ubuntu 18.04"
+      scp -o 'LogLevel=quiet' -o 'PasswordAuthentication=no' -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -i ${SSH_PRIV_KEY} "azureuser@${PUBLIC_IP}:/opt/azure/acc/*.log" "${LOG_DIR}/oe-ub1804"
     fi
     if [ "$API_MODEL" = "oe-ub1604.json" ]; then
       mkdir -p "${LOG_DIR}/oe-ub1604"
       PUBLIC_IP=$(az vm show -d -g ${RGNAME} -n acc-ub1604 --query publicIps -o tsv)
       echo "Downloading cloud-init logs from Ubuntu 16.04"
       scp -o 'LogLevel=quiet' -o 'PasswordAuthentication=no' -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -i ${SSH_PRIV_KEY} "azureuser@${PUBLIC_IP}:/var/log/cloud-init*.log" "${LOG_DIR}/oe-ub1604"
-    fi
+      echo "Downloading deployment logs from Ubuntu 16.04"
+      scp -o 'LogLevel=quiet' -o 'PasswordAuthentication=no' -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -i ${SSH_PRIV_KEY} "azureuser@${PUBLIC_IP}:/opt/azure/acc/*.log" "${LOG_DIR}/oe-ub1604"
+   fi
     set -e
     az group delete --name $RGNAME --yes --no-wait
     if [ -d "$SSH_DIR" ]; then rm -Rf $SSH_DIR; fi

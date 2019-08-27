@@ -67,17 +67,21 @@ function cleanup {
     if [ "$IMAGE" = "Windows" ]; then
       PUBLIC_IP=$(az vm show -d -g ${RGNAME} -n accwin --query publicIps -o tsv)
       echo "Downloading provisionScript.log from Windows Agent"
-      scp -o 'LogLevel=quiet' -o 'PasswordAuthentication=no' -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -i ${SSH_PRIV_KEY} azureuser@${PUBLIC_IP}:/Azuredata/provisionScript.log .
+      scp -o 'LogLevel=quiet' -o 'PasswordAuthentication=no' -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -i ${SSH_PRIV_KEY} "azureuser@${PUBLIC_IP}:/Azuredata/provisionScript.log" .
     fi
     if [ "$IMAGE" = "Ubuntu18.04" ]; then
       PUBLIC_IP=$(az vm show -d -g ${RGNAME} -n acc-ub1804 --query publicIps -o tsv)
       echo "Downloading cloud-init logs from Ubuntu 18.04"
-      scp -o 'LogLevel=quiet' -o 'PasswordAuthentication=no' -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -i ${SSH_PRIV_KEY} azureuser@${PUBLIC_IP}:/var/log/cloud-init*.log .
+      scp -o 'LogLevel=quiet' -o 'PasswordAuthentication=no' -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -i ${SSH_PRIV_KEY} "azureuser@${PUBLIC_IP}:/var/log/cloud-init*.log" .
+      echo "Downloading deployment logs from Ubuntu 18.04"
+      scp -o 'LogLevel=quiet' -o 'PasswordAuthentication=no' -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -i ${SSH_PRIV_KEY} "azureuser@${PUBLIC_IP}:/opt/azure/acc/*.log" .
     fi
     if [ "$IMAGE" = "Ubuntu16.04" ]; then
       PUBLIC_IP=$(az vm show -d -g ${RGNAME} -n acc-ub1604 --query publicIps -o tsv)
       echo "Downloading cloud-init logs from Ubuntu 16.04"
-      scp -o 'LogLevel=quiet' -o 'PasswordAuthentication=no' -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -i ${SSH_PRIV_KEY} azureuser@${PUBLIC_IP}:/var/log/cloud-init*.log .
+      scp -o 'LogLevel=quiet' -o 'PasswordAuthentication=no' -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -i ${SSH_PRIV_KEY} "azureuser@${PUBLIC_IP}:/var/log/cloud-init*.log" .
+      echo "Downloading deployment logs from Ubuntu 16.04"
+      scp -o 'LogLevel=quiet' -o 'PasswordAuthentication=no' -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' -i ${SSH_PRIV_KEY} "azureuser@${PUBLIC_IP}:/opt/azure/acc/*.log" .
     fi
     set -e
     az group delete --name $RGNAME --yes --no-wait
