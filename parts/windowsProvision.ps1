@@ -1,4 +1,4 @@
-﻿# Copyright (c) Microsoft Corporation. All rights reserved.
+# Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
 $ErrorActionPreference = "Stop"
@@ -14,9 +14,9 @@ $PACKAGES = @{
         "local_file" = Join-Path $PACKAGES_DIRECTORY "OpenSSH-Win64.zip"
     }
     "AzureDCAP" = @{
-        "url" = "https://www.nuget.org/api/v2/package/Azure.DCAP.Windows/0.0.1"
-        "local_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.1.nupkg"
-        "renamed_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.1.zip"
+        "url" = "https://www.nuget.org/api/v2/package/Azure.DCAP.Windows/0.0.2"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.2.nupkg"
+        "renamed_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.2.zip"
     }
     
     "git" = @{
@@ -419,23 +419,6 @@ function Install-Cmake {
 
 }
 
-function Install-Ocaml {
-    $installDir = Join-Path $env:ProgramFiles "ocpwin64"
-    $tmpDir = Join-Path $PACKAGES_DIRECTORY "ocpwin64"
-    Install-ZipTool -ZipPath $PACKAGES["ocaml"]["local_file"] `
-                    -InstallDirectory $tmpDir `
-                    -EnvironmentPath @("$installDir\bin")
-    New-Directory -Path $installDir -RemoveExisting
-    Move-Item -Path "$tmpDir\*\*" -Destination $installDir
-    Push-Location $installDir
-    ocpwin -in
-    if ($LASTEXITCODE -ne 0) {
-        throw "Failed to install ocaml"
-    }
-    Pop-Location
-}
-
-
 try {
     New-Directory -Path ${AZUREDATA_DIRECTORY}
     New-Directory -Path ${AZUREDATA_BIN_DIRECTORY}
@@ -461,7 +444,6 @@ try {
 
     Install-VisualStudio
     Install-Cmake
-    Install-Ocaml
 }catch {
     Write-Output $_.ToString()
     Write-Output $_.ScriptStackTrace
