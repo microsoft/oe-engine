@@ -452,7 +452,6 @@ try {
     Install-SGX
     Install-PSW
     Install-AzureDCAP
-    Add-RegistrySettings
 
     Start-ExecuteWithRetry -ScriptBlock {
         Start-Service "AESMService" -ErrorAction Stop
@@ -463,6 +462,7 @@ try {
     Install-VisualStudio
     Install-Cmake
     Install-Ocaml
+    Add-RegistrySettings
 }catch {
     Write-Output $_.ToString()
     Write-Output $_.ScriptStackTrace
