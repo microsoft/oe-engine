@@ -377,7 +377,7 @@ function Add-RegistrySettings {
     goto:eof
     :SETUP
     reg add HKLM\SYSTEM\CurrentControlSet\Services\sgx_lc_msr\Parameters /f /v SGX_Launch_Config_Optin /t REG_DWORD /d 0x01
-    SHUTDOWN -r -t 10
+    SHUTDOWN -r -t 60
 "@
     $CurrentDir = (Get-Location).Path
     $CMDFileName = "$CurrentDir\AddRegistry.cmd"
@@ -434,16 +434,12 @@ try {
     }
     Write-Output "Installing Open Enclave"
     Install-AzureDCAP
-    Add-RegistrySettings
     
-    Start-ExecuteWithRetry -ScriptBlock {
-        Start-Service "AESMService" -ErrorAction Stop
-    } -RetryMessage "Failed to start AESMService. Retrying"
-
     Copy-Item -Path $PACKAGES["nuget"]["local_file"] -Destination "${AZUREDATA_BIN_DIRECTORY}\nuget.exe"
 
     Install-VisualStudio
     Install-Cmake
+    Add-RegistrySettings
 }catch {
     Write-Output $_.ToString()
     Write-Output $_.ScriptStackTrace
