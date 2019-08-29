@@ -376,7 +376,7 @@ function Add-RegistrySettings {
     goto:eof
     :SETUP
     reg add HKLM\SYSTEM\CurrentControlSet\Services\sgx_lc_msr\Parameters /v SGX_Launch_Config_Optin /t REG_DWORD /d 0x01
-    SHUTDOWN -r -t 10
+    SHUTDOWN -r -t 60
 "@
     $CurrentDir = (Get-Location).Path
     $CMDFileName = "$CurrentDir\AddRegistry.cmd"
