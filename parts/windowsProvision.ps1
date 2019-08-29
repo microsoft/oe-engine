@@ -18,7 +18,7 @@ $PACKAGES = @{
         "local_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.1.nupkg"
         "renamed_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.1.zip"
     }
-    
+
     "git" = @{
         "url" = "https://github.com/git-for-windows/git/releases/download/v2.19.1.windows.1/Git-2.19.1-64-bit.exe"
         "local_file" = Join-Path $PACKAGES_DIRECTORY "git-2.19.1-64-bit.exe"
@@ -375,15 +375,15 @@ function Add-RegistrySettings {
     :SETUP
     reg add HKLM\SYSTEM\CurrentControlSet\Services\sgx_lc_msr\Parameters /v SGX_Launch_Config_Optin /t REG_DWORD /d 0x01
     SHUTDOWN -r -t 10
-    "@
+"@
     $CurrentDir = (Get-Location).Path
     $CMDFileName = "$CurrentDir\AddRegistry.cmd"
     $AddingRegistryCMD | Out-File -FilePath $CMDFileName -Encoding ASCII
     $p = Start-Process 'cmd' -ArgumentList "/c $CMDFileName" -Verb RunAs -PassThru -Wait -WarningAction SilentlyContinue
     Remove-Item -Path $CMDFileName
     if($p.ExitCode -ne 0) {
-            Throw "Failed to Add Opt-in Registry settings. Please Add it manually."
-        }
+        Throw "Failed to Add Opt-in Registry settings. Please Add it manually."
+    }
 }
 
 function Install-VisualStudio {
@@ -451,7 +451,7 @@ try {
     Install-PSW
     Install-AzureDCAP
     Add-RegistrySettings
-    
+
     Start-ExecuteWithRetry -ScriptBlock {
         Start-Service "AESMService" -ErrorAction Stop
     } -RetryMessage "Failed to start AESMService. Retrying"
