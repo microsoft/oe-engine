@@ -14,9 +14,9 @@ $PACKAGES = @{
         "local_file" = Join-Path $PACKAGES_DIRECTORY "OpenSSH-Win64.zip"
     }
     "AzureDCAP" = @{
-        "url" = "https://www.nuget.org/api/v2/package/Azure.DCAP.Windows/0.0.1"
-        "local_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.1.nupkg"
-        "renamed_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.1.zip"
+        "url" = "https://www.nuget.org/api/v2/package/Azure.DCAP.Windows/0.0.2"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.2.nupkg"
+        "renamed_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.2.zip"
     }
 
     "git" = @{
