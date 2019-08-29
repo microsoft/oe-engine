@@ -357,10 +357,12 @@ function Install-PSW {
 
 function Install-AzureDCAP{
     $installDir = Join-Path $PACKAGES_DIRECTORY "AzureDCAP"
+    $DCAPLocation = Join-Path $env:WinDir "System32"
+
     Rename-item -Path $PACKAGES["AzureDCAP"]["local_file"] -NewName $PACKAGES["AzureDCAP"]["renamed_file"]
     Install-ZipTool $PACKAGES["AzureDCAP"]["renamed_file"] `
                     -InstallDirectory $installDir
-    $p = Start-Process powershell -Wait -NoNewWindow -PassThru -argument "$installDir\script\InstallAzureDCAP.ps1"
+    $p = Start-Process powershell -Wait -NoNewWindow -PassThru -argument "$installDir\script\InstallAzureDCAP.ps1 -localPath $DCAPLocation"
     if($p.ExitCode -ne 0) {
         Throw "Failed to Add Azure-DCAPLibrary. Please Add it manually."
     }
