@@ -4,48 +4,17 @@
 $ErrorActionPreference = "Stop"
 
 $IS_VANILLA = "IS_VANILLA_VM"
-$AZUREDATA_DIRECTORY = Join-Path ${env:SystemDrive} "AzureData"
-$AZUREDATA_BIN_DIRECTORY = Join-Path $AZUREDATA_DIRECTORY "bin"
 $PACKAGES_DIRECTORY = Join-Path $env:TEMP "packages"
 $PACKAGES_NAMES_VANILLA = @("7z", "git", "openssh")
 $PACKAGES = @{
-    "openssh" = @{
-        "url" = "https://github.com/PowerShell/Win32-OpenSSH/releases/download/v7.7.2.0p1-Beta/OpenSSH-Win64.zip"
-        "local_file" = Join-Path $PACKAGES_DIRECTORY "OpenSSH-Win64.zip"
-    }
     "AzureDCAP" = @{
         "url" = "https://www.nuget.org/api/v2/package/Azure.DCAP.Windows/0.0.2"
         "local_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.2.nupkg"
         "renamed_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.2.zip"
     }
-    
-    "git" = @{
-        "url" = "https://github.com/git-for-windows/git/releases/download/v2.19.1.windows.1/Git-2.19.1-64-bit.exe"
-        "local_file" = Join-Path $PACKAGES_DIRECTORY "git-2.19.1-64-bit.exe"
-    }
     "7z" = @{
         "url" = "https://www.7-zip.org/a/7z1805-x64.msi"
         "local_file" = Join-Path $PACKAGES_DIRECTORY "7z1805-x64.msi"
-    }
-    "vs_buildtools" = @{
-        "url" = "https://aka.ms/vs/15/release/vs_buildtools.exe"
-        "local_file" = Join-Path $PACKAGES_DIRECTORY "vs_buildtools.exe"
-    }
-    "cmake" = @{
-        "url" = "https://cmake.org/files/v3.13/cmake-3.13.0-rc1-win64-x64.msi"
-        "local_file" = Join-Path $PACKAGES_DIRECTORY "cmake-3.13.0-rc1-win64-x64.msi"
-    }
-    "ocaml" = @{
-        "url" = "http://www.ocamlpro.com/pub/ocpwin/ocpwin-builds/ocpwin64/20160113/ocpwin64-20160113-4.02.1+ocp1-msvc64.zip"
-        "local_file" = Join-Path $PACKAGES_DIRECTORY "ocpwin64.zip"
-    }
-    "sgx_drivers" = @{
-        "url" = "http://download.windowsupdate.com/d/msdownload/update/driver/drvs/2018/01/af564f2c-2bc5-43be-a863-437a5a0008cb_61e7ba0c2e17c87caf4d5d3cdf1f35f6be462b38.cab"
-        "local_file" = Join-Path $PACKAGES_DIRECTORY "sgx_base.cab"
-    }
-    "psw" = @{
-        "url" = "https://oejenkins.blob.core.windows.net/oejenkins/Intel_SGX_PSW_for_Windows_v2.3.100.49777.exe"
-        "local_file" = Join-Path $PACKAGES_DIRECTORY "Intel_SGX_PSW_for_Windows_v2.3.100.49777.exe"
     }
     "nuget" = @{
         "url" = "https://dist.nuget.org/win-x86-commandline/v4.1.0/nuget.exe"
@@ -242,117 +211,12 @@ function Install-ZipTool {
     Add-ToSystemPath $EnvironmentPath
 }
 
-
-function Install-OpenSSH()
-{
-    $sshPubKey = "SSH_PUB_KEY"
-    if (!$sshPubKey) {
-        Write-Output "SSH public key is omitted. Skipping OpenSSH installation."
-        return
-    }
-    Write-Output "Installing OpenSSH"
-
-    try {
-        $rslt = ( get-service | where { $_.name -like "sshd" } )
-        if ($rslt.count -eq 0) {
-            $list = (Get-WindowsCapability -Online | ? Name -like 'OpenSSH.Server*')
-            if ($list) {
-                Add-WindowsCapability -Online -Name $list.Name
-                Install-PackageProvider -Name "NuGet" -Force
-                Install-Module -Force OpenSSHUtils
-            } else {
-                $installDir = Join-Path $env:ProgramFiles "OpenSSH"
-                Install-ZipTool -ZipPath $PACKAGES["openssh"]["local_file"] `
-                                -InstallDirectory $installDir
-                & "$installDir/OpenSSH-Win64/install-sshd.ps1"
-                if ($LASTEXITCODE -ne 0) {
-                    throw "Failed to install OpenSSH"
-                }
-            }
-        }
-
-        Start-Service sshd
-        New-NetFirewallRule -Name "ssh-tcp-rule" -DisplayName "SSH TCP Port 22" `
-                            -LocalPort 22 -Action Allow -Enabled True `
-                            -Direction Inbound -Protocol TCP -Profile Any
-
-        Write-Output "Creating authorized key"
-        $publicKeysFile = Join-Path $AZUREDATA_DIRECTORY "authorized_keys"
-        Set-Content -Path $publicKeysFile -Value $sshPubKey -Encoding Ascii
-
-        $sshdConfigFile = Join-Path $env:ProgramData "ssh\sshd_config"
-        $newSshdConfig = (Get-Content $sshdConfigFile) -replace "AuthorizedKeysFile(\s+).*$", "AuthorizedKeysFile $publicKeysFile"
-        Set-Content -Path $sshdConfigFile -Value $newSshdConfig -Encoding ascii
-        $acl = Get-Acl -Path $publicKeysFile
-        $acl.SetAccessRuleProtection($True, $True)
-        $acl | Set-Acl -Path $publicKeysFile
-
-        $acl = Get-Acl -Path $publicKeysFile
-        $rules = $acl.Access
-        $usersToRemove = @("Everyone","BUILTIN\Users","NT AUTHORITY\Authenticated Users")
-        foreach ($u in $usersToRemove) {
-            $targetrule = $rules | where IdentityReference -eq $u
-            if ($targetrule) {
-                $acl.RemoveAccessRule($targetrule)
-            }
-        }
-        $acl | Set-Acl -Path $publicKeysFile
-
-        Restart-Service sshd
-        Set-Service -Name "sshd" -StartupType Automatic
-    }
-    catch {
-       Write-Output "OpenSSH install failed: $_"
-    }
-}
-
-
-function Install-Git {
-    $installDir = Join-Path $env:ProgramFiles "Git"
-    Install-Tool -InstallerPath $PACKAGES["git"]["local_file"] `
-                 -InstallDirectory $installDir `
-                 -ArgumentList @("/SILENT") `
-                 -EnvironmentPath @("$installDir\cmd", "$installDir\bin", "$installDir\mingw64\bin")
-
-}
-
-
 function Install-7Zip {
     $installDir = Join-Path $env:ProgramFiles "7-Zip"
     Install-Tool -InstallerPath $PACKAGES["7z"]["local_file"] `
                  -InstallDirectory $installDir `
                  -ArgumentList @("/quiet", "/passive") `
                  -EnvironmentPath @($installDir)
-}
-
-
-function Install-SGX {
-    $installDir = Join-Path $PACKAGES_DIRECTORY "sgx_base"
-    Install-ZipTool -ZipPath $PACKAGES["sgx_drivers"]["local_file"] `
-                    -InstallDirectory $installDir
-    pnputil /add-driver "$installDir\sgx_base.inf"
-    if ($LASTEXITCODE -ne 0) {
-        throw "Failed to install SGX Drivers"
-    }
-}
-
-
-function Install-PSW {
-    $installDir = Join-Path $PACKAGES_DIRECTORY "intel_psw_install"
-    Install-ZipTool -ZipPath $PACKAGES["psw"]["local_file"] `
-                    -InstallDirectory $installDir
-
-    $pswInstaller = Join-Path $installDir "Intel SGX PSW for Windows v2.3.100.49777\PSW_EXE_RS2_and_before\Intel(R)_SGX_Windows_x64_PSW_2.3.100.49777.exe"
-    $p = Start-Process -Wait -NoNewWindow -PassThru -FilePath $pswInstaller `
-                       -ArgumentList @("--extract-folder", "$installDir", "--x")
-    if($p.ExitCode -ne 0) {
-        Throw "Failed to extract the Intel SGX PSW bundle: $pswInstaller"
-    }
-    $p = Start-Process -Wait -NoNewWindow -PassThru -FilePath "$installDir\install.exe" `
-                       -ArgumentList @("install", "--eula=accept", "--output=$installDir\intel_install.log", "--components=all")
-    if($p.ExitCode -ne 0) {
-        Throw "Failed to install the Intel SGX PSW software"
-    }
 }
 
 function Install-AzureDCAP{
@@ -389,56 +253,10 @@ function Add-RegistrySettings {
         }
 }
 
-function Install-VisualStudio {
-    $installerArguments = @(
-        "-q", "--wait", "--norestart", "--nocache",
-        "--add Microsoft.VisualStudio.Workload.MSBuildTools",
-        "--add Microsoft.VisualStudio.Workload.VCTools",
-        "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
-        "--add Microsoft.VisualStudio.Component.VC.140",
-        "--add Microsoft.VisualStudio.Component.Windows10SDK.16299.Desktop",
-        "--add Microsoft.VisualStudio.Component.Windows81SDK",
-        "--add Microsoft.VisualStudio.Component.VC.ATL"
-    )
-    # VisualStudio install sometimes is throwing errors on first try.
-    Start-ExecuteWithRetry -ScriptBlock {
-       Install-Tool -InstallerPath $PACKAGES["vs_buildtools"]["local_file"] `
-                    -ArgumentList $installerArguments
-    } -RetryMessage "Failed to install Visual Studio. Retrying"
-
-    [Environment]::SetEnvironmentVariable("VS150COMNTOOLS", "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\BuildTools\Common7\Tools", "Machine")
-}
-
-function Install-Cmake {
-    $installDir = Join-Path $env:ProgramFiles "CMake"
-
-    Install-Tool -InstallerPath $PACKAGES["cmake"]["local_file"] `
-                 -InstallDirectory $installDir `
-                 -ArgumentList @("/quiet", "/passive") `
-                 -EnvironmentPath @("$installDir\bin")
-
-}
-
 try {
-    New-Directory -Path ${AZUREDATA_DIRECTORY}
-    New-Directory -Path ${AZUREDATA_BIN_DIRECTORY}
-
     Start-LocalPackagesDownload
-    Install-Git
     Install-7Zip
-    Install-OpenSSH
-
-    if ($IS_VANILLA -eq "true") {
-        Write-Output "Skipping Open Enclave installation."
-        exit 0
-    }
-    Write-Output "Installing Open Enclave"
     Install-AzureDCAP
-    
-    Copy-Item -Path $PACKAGES["nuget"]["local_file"] -Destination "${AZUREDATA_BIN_DIRECTORY}\nuget.exe"
-
-    Install-VisualStudio
-    Install-Cmake
     Add-RegistrySettings
 }catch {
     Write-Output $_.ToString()
