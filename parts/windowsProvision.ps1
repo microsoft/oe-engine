@@ -14,11 +14,11 @@ $PACKAGES = @{
         "local_file" = Join-Path $PACKAGES_DIRECTORY "OpenSSH-Win64.zip"
     }
     "AzureDCAP" = @{
-        "url" = "https://www.nuget.org/api/v2/package/Azure.DCAP.Windows/0.0.1"
-        "local_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.1.nupkg"
-        "renamed_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.1.zip"
+        "url" = "https://www.nuget.org/api/v2/package/Azure.DCAP.Windows/0.0.2"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.2.nupkg"
+        "renamed_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.2.zip"
     }
-    
+
     "git" = @{
         "url" = "https://github.com/git-for-windows/git/releases/download/v2.19.1.windows.1/Git-2.19.1-64-bit.exe"
         "local_file" = Join-Path $PACKAGES_DIRECTORY "git-2.19.1-64-bit.exe"
@@ -355,12 +355,14 @@ function Install-PSW {
     }
 }
 
-function Install-AzureDCAP{
+function Install-AzureDCAP {
     $installDir = Join-Path $PACKAGES_DIRECTORY "AzureDCAP"
+    $DCAPLocation = Join-Path $env:WinDir "System32"
+
     Rename-item -Path $PACKAGES["AzureDCAP"]["local_file"] -NewName $PACKAGES["AzureDCAP"]["renamed_file"]
     Install-ZipTool $PACKAGES["AzureDCAP"]["renamed_file"] `
                     -InstallDirectory $installDir
-    $p = Start-Process powershell -Wait -NoNewWindow -PassThru -argument "$installDir\script\InstallAzureDCAP.ps1"
+    $p = Start-Process powershell -Wait -NoNewWindow -PassThru -argument "$installDir\script\InstallAzureDCAP.ps1 -localPath $DCAPLocation" -WorkingDirectory "$installDir\script"
     if($p.ExitCode -ne 0) {
         Throw "Failed to Add Azure-DCAPLibrary. Please Add it manually."
     }
@@ -374,16 +376,16 @@ function Add-RegistrySettings {
     goto:eof
     :SETUP
     reg add HKLM\SYSTEM\CurrentControlSet\Services\sgx_lc_msr\Parameters /v SGX_Launch_Config_Optin /t REG_DWORD /d 0x01
-    SHUTDOWN -r -t 10
-    "@
+    SHUTDOWN -r -t 60
+"@
     $CurrentDir = (Get-Location).Path
     $CMDFileName = "$CurrentDir\AddRegistry.cmd"
     $AddingRegistryCMD | Out-File -FilePath $CMDFileName -Encoding ASCII
     $p = Start-Process 'cmd' -ArgumentList "/c $CMDFileName" -Verb RunAs -PassThru -Wait -WarningAction SilentlyContinue
     Remove-Item -Path $CMDFileName
     if($p.ExitCode -ne 0) {
-            Throw "Failed to Add Opt-in Registry settings. Please Add it manually."
-        }
+        Throw "Failed to Add Opt-in Registry settings. Please Add it manually."
+    }
 }
 
 function Install-VisualStudio {
@@ -450,8 +452,7 @@ try {
     Install-SGX
     Install-PSW
     Install-AzureDCAP
-    Add-RegistrySettings
-    
+
     Start-ExecuteWithRetry -ScriptBlock {
         Start-Service "AESMService" -ErrorAction Stop
     } -RetryMessage "Failed to start AESMService. Retrying"
@@ -461,6 +462,7 @@ try {
     Install-VisualStudio
     Install-Cmake
     Install-Ocaml
+    Add-RegistrySettings
 }catch {
     Write-Output $_.ToString()
     Write-Output $_.ScriptStackTrace
