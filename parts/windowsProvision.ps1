@@ -4,10 +4,11 @@
 $ErrorActionPreference = "Stop"
 
 $IS_VANILLA = "IS_VANILLA_VM"
+$ENABLE_WINRM = "ENABLE_WINRM_VM"
 $AZUREDATA_DIRECTORY = Join-Path ${env:SystemDrive} "AzureData"
 $AZUREDATA_BIN_DIRECTORY = Join-Path $AZUREDATA_DIRECTORY "bin"
 $PACKAGES_DIRECTORY = Join-Path $env:TEMP "packages"
-$PACKAGES_NAMES_VANILLA = @("7z", "git", "openssh")
+$PACKAGES_NAMES_VANILLA = @("7z", "git", "openssh", "RemotingforAnsible")
 $PACKAGES = @{
     "openssh" = @{
         "url" = "https://github.com/PowerShell/Win32-OpenSSH/releases/download/v7.7.2.0p1-Beta/OpenSSH-Win64.zip"
@@ -18,7 +19,10 @@ $PACKAGES = @{
         "local_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.2.nupkg"
         "renamed_file" = Join-Path $PACKAGES_DIRECTORY "azure.dcap.windows.0.0.2.zip"
     }
-
+    "RemotingforAnsible" = @{
+        "url" = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
+        "local_file" = Join-Path $PACKAGES_DIRECTORY "ConfigureRemotingForAnsible.ps1"
+    }
     "git" = @{
         "url" = "https://github.com/git-for-windows/git/releases/download/v2.19.1.windows.1/Git-2.19.1-64-bit.exe"
         "local_file" = Join-Path $PACKAGES_DIRECTORY "git-2.19.1-64-bit.exe"
@@ -443,6 +447,11 @@ try {
     Install-Git
     Install-7Zip
     Install-OpenSSH
+
+    if ($ENABLE_WINRM -eq "true") {
+        Write-Output "Enable WinRM for Ansible"
+        powershell.exe -ExecutionPolicy ByPass -File $PACKAGES["RemotingforAnsible"]["local_file"] -ForceNewSSLCert
+    }
 
     if ($IS_VANILLA -eq "true") {
         Write-Output "Skipping Open Enclave installation."

@@ -19,6 +19,7 @@ type VMProfile struct {
 	VMSize      string `json:"vmSize"`
 	Ports       []int  `json:"ports,omitempty" validate:"dive,min=1,max=65535"`
 	IsVanilla   bool   `json:"isVanilla"`
+	EnableWinRM bool   `json:"enableWinRM"`
 	HasDNSName  bool   `json:"hasDNSName"`
 }
 

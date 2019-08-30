@@ -1,4 +1,4 @@
-    
+
     "{{.Name}}VMSize": {
       "type": "string",
       {{GetAllowedVMSizes}}
@@ -32,6 +32,17 @@
       ],
       "metadata": {
         "description": "Flag to provision vanilla VM or install OE SDK."
+      }
+    },
+    "{{.Name}}EnableWinRM": {
+      "type": "string",
+      "defaultValue": "false",
+      "allowedValues": [
+        "false",
+        "true"
+      ],
+      "metadata": {
+        "description": "Flag to enable WinRM for ansible."
       }
     },
     "{{.Name}}HasDNSName": {
