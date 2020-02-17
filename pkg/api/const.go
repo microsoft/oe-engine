@@ -43,7 +43,7 @@ var DefaultWindowsImage = OSImage{
 var AllowedLocations = []string{
 	"eastus",
 	"westeurope",
-	"uksouth"
+	"uksouth",
 }
 
 // AllowedVMSizes provides supported VM sizes
