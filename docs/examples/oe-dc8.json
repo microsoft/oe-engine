@@ -1,0 +1,28 @@
+{
+  "properties": {
+    "vmProfiles": [
+      {
+        "name": "acclnx",
+        "osType": "Linux",
+        "osDiskType": "StandardSSD_LRS",
+	"vmSize": "Standard_DC8_v2",
+        "ports": [22],
+        "isVanilla": true
+      }
+    ],
+    "linuxProfile": {
+      "adminUsername": "azureuser",
+      "sshPublicKeys": [
+        {
+          "keyData": "ssh-rsa AAAA..."
+        }
+      ],
+      "osImage": {
+        "publisher": "Canonical",
+        "offer": "UbuntuServer",
+        "sku": "18_04-lts-gen2",
+        "version": "latest"
+      }
+    }
+  }
+}

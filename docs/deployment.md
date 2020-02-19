@@ -67,7 +67,7 @@ Set the default subscription for your account if it has multiple active subscrip
 ```sh
 az account set --subscription <subscription id>
 ```
-Create resource group. Currently SGX VMs are only supported in `eastus` and `westeurope` regions.
+Create resource group. Currently SGX VMs are only supported in `eastus`, `westeurope` and `uksouth` regions.
 ```sh
 az group create -l eastus -n <resource group name>
 ```
