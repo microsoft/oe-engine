@@ -40,8 +40,8 @@ node("nonSGX") {
             }
         }
     } catch (err) {
-        echo err.getMessage
         currentBuild.result = 'FAILURE'
+        throw err
     } finally {
         archiveArtifacts artifacts: 'gopath/src/github.com/Microsoft/oe-engine/test/agent_logs/**/*.log', fingerprint: true, allowEmptyArchive: true
     }
