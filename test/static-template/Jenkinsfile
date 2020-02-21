@@ -4,6 +4,8 @@ pipeline {
   agent {
     docker {
       image 'ubuntu18.04-dev'
+      registryUrl 'https://oejenkinscidockerregistry.azurecr.io'
+      registryCredentialsId 'oejenkinscidockerregistry'
       label 'nonSGX'
     }
   }
