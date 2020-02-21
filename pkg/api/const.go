@@ -50,6 +50,9 @@ var AllowedLocations = []string{
 var AllowedVMSizes = []string{
 	"Standard_DC2s",
 	"Standard_DC4s",
+	"Standard_DC1s_v2",
+	"Standard_DC2s_v2",
+	"Standard_DC4s_v2",
 	"Standard_DC8_v2",
 	"Standard_D2s_v3",
 	"Standard_D4s_v3",

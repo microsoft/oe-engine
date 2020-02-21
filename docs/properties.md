@@ -36,6 +36,9 @@ Specifies VM compute characteristics
 * Values:
     * `Standard_DC2s`
     * `Standard_DC4s`
+    * `Standard_DC1s_v2`
+    * `Standard_DC2s_v2`
+    * `Standard_DC4s_v2`
     * `Standard_DC8_v2`
 
 Refer to the [VM sizes in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes) for more details.
@@ -119,4 +122,4 @@ Alternatively, you can specify image source URL.
 * Path: `properties/{linux|windows}Profile/osImage/url`
 * Value: string
 
-Note that newer VMs, such as `Standard_DC8_v2` sizes, require a `gen2` image.
+Note that the _v2 version of the DC series VMs require a gen2 image of the OS. For example, in the case of Ubuntu, "18_04-lts-gen2".
