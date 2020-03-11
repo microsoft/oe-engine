@@ -6,6 +6,8 @@
 # Install required packages.
 #
 
+set -e
+
 source /opt/azure/acc/utils.sh
 
 cd /opt/azure/acc/
@@ -30,18 +32,27 @@ function setup_ubuntu() {
 
   case $version in
     "18.04")
-      sgx_driver_url="https://download.01.org/intel-sgx/latest/dcap-latest/linux/distro/ubuntuServer18.04/sgx_linux_x64_driver_1.21.bin"
       PACKAGES="$PACKAGES curl libcurl4 libprotobuf10"
       ;;
     "16.04")
-      sgx_driver_url="https://download.01.org/intel-sgx/latest/dcap-latest/linux/distro/ubuntuServer16.04/sgx_linux_x64_driver_1.21.bin"
       PACKAGES="$PACKAGES libcurl3 libprotobuf9v5"
       ;;
     "*")
       error_exit "Version $version is not supported"
       ;;
   esac
-  sgx_driver=$(basename $sgx_driver_url)
+
+  sgx_driver_folder_url="https://download.01.org/intel-sgx/latest/dcap-latest/linux/"
+  rm -f SHA256SUM_dcap*
+  if ! retrycmd_if_failure 10 10 120 wget -r -l1 --no-parent -nd -A "SHA256SUM_dcap*" "${sgx_driver_folder_url}"; then
+    error_exit "wget SHA256SUM_dcap* failed"
+  fi
+  matched_line="$(grep "distro/ubuntuServer$version/sgx_linux_x64_driver_.*bin" SHA256SUM_dcap*)"
+  read -ra tmp_array <<< "$matched_line"
+  sgx_driver_sha256sum_expected="${tmp_array[0]}"
+  sgx_driver_remote_path="${tmp_array[1]}"
+  sgx_driver_url="${sgx_driver_folder_url}/${sgx_driver_remote_path}"
+  sgx_driver=$(basename "$sgx_driver_url")
 
   release=$(lsb_release -cs)
 
@@ -80,12 +91,21 @@ function setup_ubuntu() {
   if [ $? -ne 0  ]; then
     error_exit "failed to download SGX driver"
   fi
+  read -ra tmp_array <<< "$(sha256sum "$sgx_driver")"
+  sgx_driver_sha256sum_real="${tmp_array[0]}"
+  if [ "$sgx_driver_sha256sum_real" != "$sgx_driver_sha256sum_expected" ]; then
+    # The checksum value is incorrect in download.01.org when the following line of code is written.
+    # Ignore the mismatch for now. Once the value is correctted, the following line will be changed
+    # to "error_exit ..."
+    echo "Downloaded SGX driver sha256sum $sgx_driver_sha256sum_real does not match the expected value $sgx_driver_sha256sum_expected"
+  fi
   chmod a+x ./${sgx_driver}
   ./${sgx_driver}
   if [ $? -ne 0  ]; then
     error_exit "failed to install SGX driver"
   fi
 
+  rm -f ${sgx_driver} SHA256SUM_dcap*
   # Add Intel packages
   PACKAGES="libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev"
 
@@ -114,8 +134,7 @@ esac
 
 
 # Check to see this is an openenclave supporting hardware environment
-/opt/openenclave/bin/oesgx | grep "does not support"
-if [ $? -eq 0 ] ; then
+if /opt/openenclave/bin/oesgx | grep "does not support"; then
   error_exit "This hardware does not support open enclave"
 fi
 
