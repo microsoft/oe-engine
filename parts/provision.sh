@@ -42,12 +42,11 @@ function setup_ubuntu() {
       ;;
   esac
 
-  sgx_driver_folder_url="https://download.01.org/intel-sgx/latest/dcap-latest/linux/"
-  rm -f SHA256SUM_dcap*
-  if ! retrycmd_if_failure 10 10 120 wget -r -l1 --no-parent -nd -A "SHA256SUM_dcap*" "${sgx_driver_folder_url}"; then
-    error_exit "wget SHA256SUM_dcap* failed"
-  fi
-  matched_line="$(grep "distro/ubuntuServer$version/sgx_linux_x64_driver_.*bin" SHA256SUM_dcap*)"
+  retrycmd_if_failure 10 10 120 curl -fsSL -O "https://download.01.org/intel-sgx/latest/version.xml" || exit $ERR_SGX_DRIVERS_INSTALL_TIMEOUT
+  dcap_version="$(grep dcap version.xml | grep -o -E "[.0-9]+")"
+  sgx_driver_folder_url="https://download.01.org/intel-sgx/sgx-dcap/$dcap_version/linux"
+  retrycmd_if_failure 10 10 120 curl -fsSL -O "$sgx_driver_folder_url/SHA256SUM_dcap_$dcap_version" || error_exit "wget SHA256SUM_dcap* failed"
+  matched_line="$(grep "distro/ubuntuServer$version/sgx_linux_x64_driver_.*bin" SHA256SUM_dcap_$dcap_version)"
   read -ra tmp_array <<< "$matched_line"
   sgx_driver_sha256sum_expected="${tmp_array[0]}"
   sgx_driver_remote_path="${tmp_array[1]}"
@@ -93,19 +92,14 @@ function setup_ubuntu() {
   fi
   read -ra tmp_array <<< "$(sha256sum "$sgx_driver")"
   sgx_driver_sha256sum_real="${tmp_array[0]}"
-  if [ "$sgx_driver_sha256sum_real" != "$sgx_driver_sha256sum_expected" ]; then
-    # The checksum value is incorrect in download.01.org when the following line of code is written.
-    # Ignore the mismatch for now. Once the value is correctted, the following line will be changed
-    # to "error_exit ..."
-    echo "Downloaded SGX driver sha256sum $sgx_driver_sha256sum_real does not match the expected value $sgx_driver_sha256sum_expected"
-  fi
+  [[ "$sgx_driver_sha256sum_real" == "$sgx_driver_sha256sum_expected" ]] || error_exit "Downloaded SGX driver sha256sum $sgx_driver_sha256sum_real does not match the expected value $sgx_driver_sha256sum_expected"
   chmod a+x ./${sgx_driver}
   ./${sgx_driver}
   if [ $? -ne 0  ]; then
     error_exit "failed to install SGX driver"
   fi
 
-  rm -f ${sgx_driver} SHA256SUM_dcap*
+  rm -f ${sgx_driver} SHA256SUM_dcap* version.xml
   # Add Intel packages
   PACKAGES="libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev"
 
