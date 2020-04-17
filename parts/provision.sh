@@ -24,6 +24,35 @@ function error_exit() {
   exit 1
 }
 
+function installSGXDriver() {
+  version=`grep DISTRIB_RELEASE /etc/*-release| cut -f 2 -d "="`
+  retrycmd_if_failure 10 10 120 curl -fsSL -O "https://download.01.org/intel-sgx/latest/version.xml" || exit $ERR_SGX_DRIVERS_INSTALL_TIMEOUT
+  dcap_version="$(grep dcap version.xml | grep -o -E "[.0-9]+")"
+  sgx_driver_folder_url="https://download.01.org/intel-sgx/sgx-dcap/$dcap_version/linux"
+  retrycmd_if_failure 10 10 120 curl -fsSL -O "$sgx_driver_folder_url/SHA256SUM_dcap_$dcap_version" || error_exit "wget SHA256SUM_dcap* failed"
+  matched_line="$(grep "distro/ubuntuServer$version/sgx_linux_x64_driver_.*bin" SHA256SUM_dcap_$dcap_version)"
+  read -ra tmp_array <<< "$matched_line"
+  sgx_driver_sha256sum_expected="${tmp_array[0]}"
+  sgx_driver_remote_path="${tmp_array[1]}"
+  sgx_driver_url="${sgx_driver_folder_url}/${sgx_driver_remote_path}"
+  sgx_driver=$(basename "$sgx_driver_url")
+
+  retrycmd_if_failure 10 10 120 curl -fsSL -O ${sgx_driver_url}
+  if [ $? -ne 0  ]; then
+    error_exit "failed to download SGX driver"
+  fi
+  read -ra tmp_array <<< "$(sha256sum "$sgx_driver")"
+  sgx_driver_sha256sum_real="${tmp_array[0]}"
+  [[ "$sgx_driver_sha256sum_real" == "$sgx_driver_sha256sum_expected" ]] || error_exit "Downloaded SGX driver sha256sum $sgx_driver_sha256sum_real does not match the expected value $sgx_driver_sha256sum_expected"
+  chmod a+x ./${sgx_driver}
+  ./${sgx_driver}
+  if [ $? -ne 0  ]; then
+    error_exit "failed to install SGX driver"
+  fi
+  
+  rm -f ${sgx_driver} SHA256SUM_dcap* version.xml
+}
+
 function setup_ubuntu() {
   version=`grep DISTRIB_RELEASE /etc/*-release| cut -f 2 -d "="`
 
@@ -41,17 +70,6 @@ function setup_ubuntu() {
       error_exit "Version $version is not supported"
       ;;
   esac
-
-  retrycmd_if_failure 10 10 120 curl -fsSL -O "https://download.01.org/intel-sgx/latest/version.xml" || exit $ERR_SGX_DRIVERS_INSTALL_TIMEOUT
-  dcap_version="$(grep dcap version.xml | grep -o -E "[.0-9]+")"
-  sgx_driver_folder_url="https://download.01.org/intel-sgx/sgx-dcap/$dcap_version/linux"
-  retrycmd_if_failure 10 10 120 curl -fsSL -O "$sgx_driver_folder_url/SHA256SUM_dcap_$dcap_version" || error_exit "wget SHA256SUM_dcap* failed"
-  matched_line="$(grep "distro/ubuntuServer$version/sgx_linux_x64_driver_.*bin" SHA256SUM_dcap_$dcap_version)"
-  read -ra tmp_array <<< "$matched_line"
-  sgx_driver_sha256sum_expected="${tmp_array[0]}"
-  sgx_driver_remote_path="${tmp_array[1]}"
-  sgx_driver_url="${sgx_driver_folder_url}/${sgx_driver_remote_path}"
-  sgx_driver=$(basename "$sgx_driver_url")
 
   release=$(lsb_release -cs)
 
@@ -85,21 +103,10 @@ function setup_ubuntu() {
   fi
 
   # Install SGX driver
-
-  retrycmd_if_failure 10 10 120 curl -fsSL -O ${sgx_driver_url}
-  if [ $? -ne 0  ]; then
-    error_exit "failed to download SGX driver"
-  fi
-  read -ra tmp_array <<< "$(sha256sum "$sgx_driver")"
-  sgx_driver_sha256sum_real="${tmp_array[0]}"
-  [[ "$sgx_driver_sha256sum_real" == "$sgx_driver_sha256sum_expected" ]] || error_exit "Downloaded SGX driver sha256sum $sgx_driver_sha256sum_real does not match the expected value $sgx_driver_sha256sum_expected"
-  chmod a+x ./${sgx_driver}
-  ./${sgx_driver}
-  if [ $? -ne 0  ]; then
-    error_exit "failed to install SGX driver"
+  if [[ ! -e "/dev/sgx" ]]; then
+    installSGXDriver
   fi
 
-  rm -f ${sgx_driver} SHA256SUM_dcap* version.xml
   # Add Intel packages
   PACKAGES="libsgx-enclave-common libsgx-enclave-common-dev libsgx-dcap-ql libsgx-dcap-ql-dev"
 
