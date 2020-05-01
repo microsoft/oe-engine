@@ -75,5 +75,5 @@ Deploy VMs
 ```sh
 az group deployment create --name <deployment name> --resource-group <resource group name>
   --template-file _output/azuredeploy.json
-  --parameters @_output/azuredeploy.parameters.json
+  --parameters _output/azuredeploy.parameters.json
 ```
